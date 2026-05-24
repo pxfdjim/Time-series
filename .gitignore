@@ -1,0 +1,24 @@
+# DeepSeek model files (too large for GitHub)
+DeepSeek/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Cache
+.cache/
+
+# Result files
+result/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
