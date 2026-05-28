@@ -8,11 +8,20 @@ from ts_benchmark.baselines.MindTS.layers.Embed import WarriorsEmbedding, DataEm
 from ts_benchmark.baselines.MindTS.layers.Transformer_EncDec import Encoder, EncoderLayer
 from ts_benchmark.baselines.MindTS.layers.SelfAttention_Family import FullAttention, AttentionLayer
 from einops import rearrange
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
+from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
 DEEPSEEK_PATH = "/18t/data/home/pxf/jim/race/MindTS/DeepSeek"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def _resolve_device(device_name, fallback):
+    if device_name is None:
+        return fallback
+    resolved = torch.device(device_name)
+    if resolved.type == "cuda" and not torch.cuda.is_available():
+        return torch.device("cpu")
+    return resolved
 
 
 class Transpose(nn.Module):
@@ -92,8 +101,14 @@ class MultiTransformerBlock(nn.Module):
 class MINDTSModel(nn.Module):
     def __init__(self, configs):
         super(MINDTSModel, self).__init__()
-        self.device = device    # Device (CPU or GPU)
-        self.configs = configs    
+        default_device = device
+        main_device_name = getattr(configs, "main_device", None)
+        llm_device_name = getattr(configs, "llm_device", None)
+        self.manual_device_split = main_device_name is not None or llm_device_name is not None
+        self.main_device = _resolve_device(main_device_name, default_device)
+        self.llm_device = _resolve_device(llm_device_name, self.main_device)
+        self.device = self.main_device    # Device for trainable time-series modules
+        self.configs = configs
         self.batch_size = configs.batch_size
         self.seq_len = configs.seq_len 
         self.pred_len = configs.pred_len
@@ -156,24 +171,74 @@ class MINDTSModel(nn.Module):
         self.deepseek_config.output_attentions = True
         self.deepseek_config.output_hidden_states = True
         self.tokenizer = AutoTokenizer.from_pretrained(DEEPSEEK_PATH, trust_remote_code=True)
-        self.model = AutoModelForCausalLM.from_pretrained(DEEPSEEK_PATH, trust_remote_code=True, config=self.deepseek_config)    
+        self.model = AutoModel.from_pretrained(
+            DEEPSEEK_PATH,
+            trust_remote_code=True,
+            config=self.deepseek_config,
+            attn_implementation="eager",
+        )
         self.transformer_block = TransformerBlock(self.d_model, self.num_heads, self.d_ff)
         self.multimodal_Transformer_Block = MultiTransformerBlock(self.d_model, self.num_heads, self.d_ff)
         self.prob_net = nn.Sequential(nn.PReLU(), nn.Linear(configs.d_model, 1), nn.Sigmoid())
+        for param in self.model.parameters():
+            param.requires_grad_(False)
+        if self.manual_device_split:
+            self.prepare_devices()
+
+    def prepare_devices(self):
+        for name, module in self.named_children():
+            if name == "model":
+                module.to(self.llm_device)
+            else:
+                module.to(self.main_device)
+        self.logit_scale.data = self.logit_scale.data.to(self.main_device)
+        if self.logit_scale.grad is not None:
+            self.logit_scale.grad = self.logit_scale.grad.to(self.main_device)
+        self.device = self.main_device
+        return self
+
+    def trainable_state_dict(self):
+        return {
+            key: value.detach().cpu().clone()
+            for key, value in self.state_dict().items()
+            if not key.startswith("model.")
+        }
+
+    def load_trainable_state_dict(self, state_dict):
+        if state_dict is None:
+            return
+        self.load_state_dict(state_dict, strict=False)
+        if self.manual_device_split:
+            self.prepare_devices()
+
+    def _check_token_ids(self, input_ids):
+        vocab_size = self.model.get_input_embeddings().num_embeddings
+        max_token_id = int(input_ids.max().item())
+        if max_token_id >= vocab_size:
+            raise ValueError(f"input id out of range: {max_token_id} >= {vocab_size}")
+
+    def _runtime_main_device(self, x_enc_time):
+        return self.main_device if self.manual_device_split else x_enc_time.device
+
+    def _runtime_llm_device(self):
+        if self.manual_device_split:
+            return self.llm_device
+        return next(self.model.parameters()).device
 
     def random_masking(self, xb, mask_ratio):
         bs_nvars, L, d_model = xb.shape
+        device = xb.device
         x = xb.clone()
         len_keep = int(L * (1 - mask_ratio))
-        noise = torch.rand(bs_nvars, L, device=self.device)
-        ids_shuffle = torch.argsort(noise, dim=1).to(self.device)
-        ids_restore = torch.argsort(ids_shuffle, dim=1).to(self.device)
+        noise = torch.rand(bs_nvars, L, device=device)
+        ids_shuffle = torch.argsort(noise, dim=1).to(device)
+        ids_restore = torch.argsort(ids_shuffle, dim=1).to(device)
         ids_keep = ids_shuffle[:, :len_keep]
         x_kept = torch.gather(x, dim=1, index=ids_keep.unsqueeze(-1).repeat(1, 1, d_model))
-        x_removed = torch.zeros(bs_nvars, L - len_keep, d_model, device=self.device)
+        x_removed = torch.zeros(bs_nvars, L - len_keep, d_model, device=device)
         x_ = torch.cat([x_kept, x_removed], dim=1)
         x_masked = torch.gather(x_, dim=1, index=ids_restore.unsqueeze(-1).repeat(1, 1, d_model))
-        mask = torch.ones([bs_nvars, L], device=self.device)
+        mask = torch.ones([bs_nvars, L], device=device)
         mask[:, :len_keep] = 0
         mask = torch.gather(mask, dim=1, index=ids_restore)
     
@@ -189,6 +254,9 @@ class MINDTSModel(nn.Module):
     
     
     def Multimodal_Time_Series(self, x_enc_time, x_enc_input_ids, x_enc_attention_mask):
+        main_device = self._runtime_main_device(x_enc_time)
+        llm_device = self._runtime_llm_device()
+        x_enc_time = x_enc_time.to(main_device)
         # -------------------------------------------------------------Input data normalization--------------------------------------------------------------------
         means = x_enc_time.mean(1, keepdim=True).detach()
         x_enc_time = x_enc_time - means
@@ -259,8 +327,9 @@ class MINDTSModel(nn.Module):
         # -------------------------------------------------------------prompt Reasoning---------------------------------------------------------------------------
         all_prompts = [prompt for batch in prompt_list for prompt in batch]
         prompt_tokens = self.tokenizer(all_prompts, max_length=128, padding="max_length", truncation=True, return_tensors="pt")
-        input_ids = prompt_tokens["input_ids"].to(self.device)
-        attention_mask = prompt_tokens["attention_mask"].to(self.device)
+        input_ids = prompt_tokens["input_ids"].to(llm_device)
+        attention_mask = prompt_tokens["attention_mask"].to(llm_device)
+        self._check_token_ids(input_ids)
 
         with torch.no_grad():
             outputs = self.model(
@@ -268,8 +337,8 @@ class MINDTSModel(nn.Module):
                 attention_mask=attention_mask,
                 output_hidden_states=True
             )
-            embeddings = outputs.hidden_states[-1]
-            embeddings = embeddings.detach() 
+            embeddings = outputs.hidden_states[-1].to(main_device)
+            embeddings = embeddings.detach()
 
         del input_ids, attention_mask, outputs
 
@@ -286,14 +355,18 @@ class MINDTSModel(nn.Module):
         prompt_feature = self.proj_prompt(prompt_feature)      
 
         # -------------------------------------------------------------text Reasoning------------------------------------------------------------------------------
+        text_input_ids = x_enc_input_ids.long().to(llm_device)
+        text_attention_mask = x_enc_attention_mask.long().to(llm_device)
+        self._check_token_ids(text_input_ids)
         with torch.no_grad():
             outputs = self.model(
-                input_ids=x_enc_input_ids.long(),
-                attention_mask=x_enc_attention_mask.long(),
+                input_ids=text_input_ids,
+                attention_mask=text_attention_mask,
                 output_hidden_states=True
             )
-            embeddings = outputs.hidden_states[-1]
+            embeddings = outputs.hidden_states[-1].to(main_device)
             embeddings = embeddings.detach()
+        del text_input_ids, text_attention_mask, outputs
 
         text_features = embeddings.to(torch.float32)
 

@@ -62,12 +62,15 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "lamda": 1.0,
     "enc_in_time": 1,
     "lamda1": 1.0,
-    "lamda2": 1.0
+    "lamda2": 1.0,
+    "main_device": None,
+    "llm_device": None
 }
 
 def clip_loss(logits_per_time, logits_per_text):
-    labels = torch.arange(logits_per_time.shape[1]).long().to(device)
-    total_loss = torch.tensor(0.0).to(device)
+    loss_device = logits_per_time.device
+    labels = torch.arange(logits_per_time.shape[1], device=loss_device).long()
+    total_loss = torch.tensor(0.0, device=loss_device)
     for i in range(logits_per_time.shape[0]):
         total_loss += (F.cross_entropy(logits_per_time[i], labels) + F.cross_entropy(logits_per_text[i], labels)) / 2
     return total_loss
@@ -122,6 +125,32 @@ class MindTS:
         self.seq_len = self.config.win_size
         self.lamda1 = self.config.lamda1
         self.lamda2 = self.config.lamda2
+
+    def _base_model(self):
+        return self.model.module if isinstance(self.model, nn.DataParallel) else self.model
+
+    def _get_main_device(self):
+        model = self._base_model()
+        return getattr(model, "main_device", self.device)
+
+    def _uses_manual_device_split(self):
+        return bool(getattr(self._base_model(), "manual_device_split", False))
+
+    def _prepare_model_for_device(self):
+        if self._uses_manual_device_split():
+            self._base_model().prepare_devices()
+            self.device = self._get_main_device()
+        else:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model.to(self.device)
+
+    def _load_best_checkpoint(self):
+        if isinstance(self.model, nn.DataParallel):
+            self.model.load_state_dict(self.early_stopping.check_point)
+        elif hasattr(self._base_model(), "load_trainable_state_dict"):
+            self._base_model().load_trainable_state_dict(self.early_stopping.check_point)
+        else:
+            self.model.load_state_dict(self.early_stopping.check_point)
 
     @staticmethod
     def required_hyper_params() -> dict:
@@ -178,13 +207,10 @@ class MindTS:
         config = self.config
         total_loss = []
         self.model.eval()
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         with torch.no_grad():
             for batch_x_time, batch_input_ids, batch_attention_mask, _ in valid_data_loader:
-                batch_x_time = batch_x_time.float().to(self.device)
-                batch_input_ids = batch_input_ids.float().to(self.device)
-                batch_attention_mask = batch_attention_mask.float().to(self.device)
+                batch_x_time = batch_x_time.float().to(self._get_main_device())
                 outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
                 f_dim = -1 if self.config.enc_in == 1 else 0
                 outputs = outputs[:, :, f_dim:]
@@ -214,7 +240,7 @@ class MindTS:
         self.model = MINDTSModel(self.config)
 
         device_ids = np.arange(torch.cuda.device_count()).tolist()
-        if len(device_ids) > 1 and self.config.parallel_strategy == "DP":
+        if len(device_ids) > 1 and self.config.parallel_strategy == "DP" and not self.model.manual_device_split:
             self.model = nn.DataParallel(self.model, device_ids=device_ids)
 
         config = self.config
@@ -253,10 +279,8 @@ class MindTS:
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.model.parameters(), lr=config.lr)
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
         self.early_stopping = EarlyStopping(patience=config.patience)
-        self.model.to(self.device)
+        self._prepare_model_for_device()
         total_params = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
@@ -290,7 +314,7 @@ class MindTS:
         self.scaler.fit(train_data_value.values)
 
         device_ids = np.arange(torch.cuda.device_count()).tolist()
-        if len(device_ids) > 1 and self.config.parallel_strategy == "DP":
+        if len(device_ids) > 1 and self.config.parallel_strategy == "DP" and not self.model.manual_device_split:
             self.model = nn.DataParallel(self.model, device_ids=device_ids)
 
         train_data_value = pd.DataFrame(
@@ -339,12 +363,13 @@ class MindTS:
 
         # Define the loss function and optimizer
         criterion = nn.MSELoss()
-        optimizer = optim.Adam(self.model.parameters(), lr=config.lr)
-
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        optimizer = optim.Adam(
+            [p for p in self.model.parameters() if p.requires_grad],
+            lr=config.lr,
+        )
 
         self.early_stopping = EarlyStopping(patience=config.patience)
-        self.model.to(self.device)
+        self._prepare_model_for_device()
         total_params = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
@@ -356,9 +381,7 @@ class MindTS:
                 iter_count += 1
                 train_steps = len(self.train_data_loader)
                 optimizer.zero_grad()
-                batch_x_time = batch_x_time.float().to(self.device)
-                batch_input_ids = batch_input_ids.float().to(self.device)
-                batch_attention_mask = batch_attention_mask.float().to(self.device)
+                batch_x_time = batch_x_time.float().to(self._get_main_device())
                 outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
                 f_dim = -1 if self.config.enc_in == 1 else 0
                 outputs = outputs[:, :, f_dim:]
@@ -394,7 +417,7 @@ class MindTS:
         test = pd.DataFrame(
             self.scaler.transform(test.values), columns=test.columns, index=test.index
         )
-        self.model.load_state_dict(self.early_stopping.check_point)
+        self._load_best_checkpoint()
 
         if self.model is None:
             raise ValueError("Model not trained. Call the fit() function first.")
@@ -409,7 +432,7 @@ class MindTS:
             mode="thre",
         )
 
-        self.model.to(self.device)
+        self._prepare_model_for_device()
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
 
@@ -438,7 +461,7 @@ class MindTS:
         test_text = pd.DataFrame(
             test_text.values, columns=test_text.columns, index=test_text.index
         )
-        self.model.load_state_dict(self.early_stopping.check_point)
+        self._load_best_checkpoint()
 
         if self.model is None:
             raise ValueError("Model not trained. Call the fit() function first.")
@@ -454,16 +477,14 @@ class MindTS:
             mode="thre",
         )
 
-        self.model.to(self.device)
+        self._prepare_model_for_device()
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
 
         attens_energy = []
         test_labels = []
         for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.thre_loader):
-            batch_x_time = batch_x_time.float().to(self.device)
-            batch_input_ids = batch_input_ids.float().to(self.device)
-            batch_attention_mask = batch_attention_mask.float().to(self.device)
+            batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
             outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
@@ -481,7 +502,7 @@ class MindTS:
         test = pd.DataFrame(
             self.scaler.transform(test.values), columns=test.columns, index=test.index
         )
-        self.model.load_state_dict(self.early_stopping.check_point)
+        self._load_best_checkpoint()
 
         if self.model is None:
             raise ValueError("Model not trained. Call the fit() function first.")
@@ -506,7 +527,7 @@ class MindTS:
 
         attens_energy = []
 
-        self.model.to(self.device)
+        self._prepare_model_for_device()
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
 
@@ -575,7 +596,7 @@ class MindTS:
         test_text = pd.DataFrame(
             test_text.values, columns=test_text.columns, index=test_text.index
         )
-        self.model.load_state_dict(self.early_stopping.check_point)
+        self._load_best_checkpoint()
 
         if self.model is None:
             raise ValueError("Model not trained. Call the fit() function first.")
@@ -602,15 +623,13 @@ class MindTS:
 
         attens_energy = []
 
-        self.model.to(self.device)
+        self._prepare_model_for_device()
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
 
         with torch.no_grad():
             for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.train_data_loader):
-                batch_x_time = batch_x_time.float().to(self.device)
-                batch_input_ids = batch_input_ids.float().to(self.device)
-                batch_attention_mask = batch_attention_mask.float().to(self.device)
+                batch_x_time = batch_x_time.float().to(self._get_main_device())
                 # reconstruction
                 outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
                 # criterion
@@ -625,9 +644,7 @@ class MindTS:
         attens_energy = []
         test_labels = []
         for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.test_data_loader):
-            batch_x_time = batch_x_time.float().to(self.device)
-            batch_input_ids = batch_input_ids.float().to(self.device)
-            batch_attention_mask = batch_attention_mask.float().to(self.device)
+            batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
             outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
@@ -643,9 +660,7 @@ class MindTS:
         attens_energy = []
         test_labels = []
         for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.thre_loader):
-            batch_x_time = batch_x_time.float().to(self.device)
-            batch_input_ids = batch_input_ids.float().to(self.device)
-            batch_attention_mask = batch_attention_mask.float().to(self.device)
+            batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
             outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
