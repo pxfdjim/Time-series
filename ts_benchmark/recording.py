@@ -7,6 +7,7 @@ import itertools
 import logging
 import os
 import os.path
+import json
 from io import StringIO
 from typing import List, Optional
 
@@ -21,8 +22,10 @@ from ts_benchmark.utils.compress import (
     get_compress_file_ext,
 )
 from ts_benchmark.utils.get_file_name import get_unique_file_suffix
+from ts_benchmark.utils.get_file_name import get_model_config_tag
 
 logger = logging.getLogger(__name__)
+TRAINING_LOG_FIELD = "training_log"
 
 
 def read_record_file(fn: str) -> pd.DataFrame:
@@ -78,6 +81,79 @@ def write_record_file(
     return file_path
 
 
+def _extract_training_log(result_df: pd.DataFrame) -> pd.DataFrame:
+    if TRAINING_LOG_FIELD not in result_df.columns:
+        return pd.DataFrame()
+
+    records = []
+    seen = set()
+    for _, row in result_df.iterrows():
+        raw_log = row.get(TRAINING_LOG_FIELD)
+        if not isinstance(raw_log, str) or not raw_log:
+            continue
+        key = (row.get("model_name"), row.get("model_params"), row.get("file_name"), raw_log)
+        if key in seen:
+            continue
+        seen.add(key)
+        try:
+            epoch_records = json.loads(raw_log)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(epoch_records, list):
+            continue
+        for epoch_record in epoch_records:
+            if not isinstance(epoch_record, dict):
+                continue
+            cur_record = {
+                "model_name": row.get("model_name"),
+                "model_params": row.get("model_params"),
+                "file_name": row.get("file_name"),
+            }
+            cur_record.update(epoch_record)
+            records.append(cur_record)
+    return pd.DataFrame(records)
+
+
+def _format_training_log_text(training_log_df: pd.DataFrame) -> str:
+    lines = ["MindTS training log", ""]
+    group_columns = ["model_name", "model_params", "file_name"]
+    metric_columns = [
+        column for column in training_log_df.columns if column not in group_columns
+    ]
+
+    for group_values, group_df in training_log_df.groupby(group_columns, dropna=False):
+        model_name, model_params, file_name = group_values
+        lines.extend(
+            [
+                f"model_name: {model_name}",
+                f"file_name: {file_name}",
+                f"model_params: {model_params}",
+                "",
+                group_df[metric_columns].to_string(index=False),
+                "",
+            ]
+        )
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _write_training_log_file(result_df: pd.DataFrame, result_path: str, record_filename: str) -> Optional[str]:
+    training_log_df = _extract_training_log(result_df)
+    if training_log_df.empty:
+        return None
+    base_filename = os.path.splitext(record_filename)[0]
+    training_log_path = os.path.join(result_path, f"{base_filename}.training_log.txt")
+    with open(training_log_path, "w", encoding="utf-8") as fh:
+        fh.write(_format_training_log_text(training_log_df))
+    return training_log_path
+
+
+def _get_record_descriptor(result_df: pd.DataFrame) -> str:
+    if "model_params" not in result_df.columns or result_df.empty:
+        return ""
+    return get_model_config_tag(result_df["model_params"].iloc[0])
+
+
 def load_record_data(
     record_files: List[str], drop_columns: Optional[List[str]] = None
 ) -> pd.DataFrame:
@@ -104,7 +180,7 @@ def load_record_data(
         try:
             cur_record = read_record_file(fn)
             if drop_columns:
-                cur_record = cur_record.drop(columns=drop_columns)
+                cur_record = cur_record.drop(columns=drop_columns, errors="ignore")
             ret.append(cur_record)
         except (FileNotFoundError, PermissionError, KeyError, ParserError):
             # TODO: it is ugly to identify log files by artifact columns...
@@ -123,6 +199,8 @@ def find_record_files(directory: str) -> List[str]:
     for root, dirs, files in os.walk(directory):
         for file in files:
             # TODO: this is a temporary solution, any good methods to identify a log file?
+            if file.endswith(".training_log.csv") or file.endswith(".training_log.txt"):
+                continue
             if file.endswith(".csv") or file.endswith(".tar.gz"):
                 record_files.append(os.path.join(root, file))
     return record_files
@@ -161,7 +239,9 @@ def save_log(
         result_path = os.path.join(ROOT_PATH, "result")
     os.makedirs(result_path, exist_ok=True)
 
-    record_filename = file_prefix + get_unique_file_suffix()
+    record_filename = file_prefix + get_unique_file_suffix(_get_record_descriptor(result_df))
     file_path = os.path.join(result_path, record_filename)
 
-    return write_record_file(result_df, file_path, compress_method)
+    _write_training_log_file(result_df, result_path, record_filename)
+    result_df_to_write = result_df.drop(columns=[TRAINING_LOG_FIELD], errors="ignore")
+    return write_record_file(result_df_to_write, file_path, compress_method)

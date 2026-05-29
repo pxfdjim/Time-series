@@ -20,6 +20,8 @@ from ts_benchmark.utils.data_processing import split_before
 from ts_benchmark.utils.random_utils import fix_random_seed
 import os
 
+TRAINING_LOG_FIELD = "training_log"
+
 
 class AnomalyDetect(Strategy):
     """
@@ -36,6 +38,10 @@ class AnomalyDetect(Strategy):
         self.model = None
         self.data_lens = None
 
+    def _get_training_log(self) -> str:
+        if self.model is None or not hasattr(self.model, "get_training_log"):
+            return ""
+        return self.model.get_training_log()
 
     def execute(self, series_name: str, model_factory: ModelFactory) -> Any:
         """
@@ -121,6 +127,7 @@ class AnomalyDetect(Strategy):
                     '',
                     '',
                     log_info,
+                    self._get_training_log(),
                 ]
 
                 single_series_results_list.append(single_series_results)
@@ -225,6 +232,7 @@ class AnomalyDetect(Strategy):
                     '',
                     '',
                     log_info,
+                    self._get_training_log(),
                 ]
 
                 single_series_results_list.append(single_series_results)
@@ -324,6 +332,7 @@ class AnomalyDetect(Strategy):
                     '',
                     '',
                     log_info,
+                    self._get_training_log(),
                 ]
 
                 single_series_results_list.append(single_series_results)
@@ -360,6 +369,7 @@ class AnomalyDetect(Strategy):
             FieldNames.ACTUAL_DATA,
             FieldNames.INFERENCE_DATA,
             FieldNames.LOG_INFO,
+            TRAINING_LOG_FIELD,
         ]
 
 

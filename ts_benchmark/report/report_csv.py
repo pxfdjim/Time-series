@@ -16,6 +16,7 @@ ARTIFACT_COLUMNS = [
     FieldNames.ACTUAL_DATA,
     FieldNames.INFERENCE_DATA,
     FieldNames.LOG_INFO,
+    "training_log",
 ]
 
 

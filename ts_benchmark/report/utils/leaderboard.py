@@ -42,7 +42,7 @@ def _calculate_single_metric_result(
 
     :param full_metric_df: The full record data.
     :param metric_name: The name of the target metric.
-    :param agg_type: Aggregation method, optional values include "mean", "median", "max".
+    :param agg_type: Aggregation method across files, optional values include "mean", "median", "max".
     :param nan_threshold: The metric for any algorithm will be set to NaN if the ratio
         of NaN values from that algorithm exceeds this threshold.
     :param fill_type: Fill method, optional values include "mean_value".
@@ -57,7 +57,7 @@ def _calculate_single_metric_result(
         values=metric_name,
         index="file_name",
         columns="model_and_params",
-        aggfunc=np.nanmean,
+        aggfunc=np.nanmax,
         dropna=False,
     )
     threshold_count = float(nan_threshold) * len(metric_df)

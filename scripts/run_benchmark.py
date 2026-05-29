@@ -11,7 +11,7 @@ import torch
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
-from ts_benchmark.utils.get_file_name import get_unique_file_suffix
+from ts_benchmark.utils.get_file_name import get_unique_file_suffix, get_model_config_tag
 from ts_benchmark.report import report
 from ts_benchmark.common.constant import CONFIG_PATH, THIRD_PARTY_PATH
 from ts_benchmark.pipeline import pipeline
@@ -335,7 +335,10 @@ if __name__ == "__main__":
 
     report_config["log_files_list"] = log_filenames
     if args.report_method == "csv":
-        filename = get_unique_file_suffix()
+        report_tag = ""
+        if model_config.get("models"):
+            report_tag = get_model_config_tag(model_config["models"][0].get("model_hyper_params", {}))
+        filename = get_unique_file_suffix(report_tag)
         leaderboard_file_name = "test_report" + filename
         report_config["leaderboard_file_name"] = leaderboard_file_name
     report(report_config, report_method=args.report_method)

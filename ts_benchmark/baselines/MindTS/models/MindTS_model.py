@@ -104,7 +104,14 @@ class MINDTSModel(nn.Module):
         default_device = device
         main_device_name = getattr(configs, "main_device", None)
         llm_device_name = getattr(configs, "llm_device", None)
-        self.manual_device_split = main_device_name is not None or llm_device_name is not None
+        self.manual_device_split = (
+            main_device_name is not None
+            or llm_device_name is not None
+            or (torch.cuda.is_available() and torch.cuda.device_count() > 1)
+        )
+        if self.manual_device_split and main_device_name is None and llm_device_name is None:
+            main_device_name = "cuda:1"
+            llm_device_name = "cuda:0"
         self.main_device = _resolve_device(main_device_name, default_device)
         self.llm_device = _resolve_device(llm_device_name, self.main_device)
         self.device = self.main_device    # Device for trainable time-series modules

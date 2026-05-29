@@ -3,13 +3,14 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import json
 from sklearn.preprocessing import StandardScaler
 from torch.optim import lr_scheduler
 import torch.nn.functional as F
 from ts_benchmark.baselines.MindTS.models.MindTS_model import MINDTSModel
 from ts_benchmark.baselines.utils import anomaly_detection_data_provider, anomaly_detection_multi_data_provider, anomaly_detection_timeMMD_data_provider
 from ts_benchmark.baselines.utils import train_val_split
-from ts_benchmark.baselines.MindTS.utils.tools import EarlyStopping, adjust_learning_rate
+from ts_benchmark.baselines.MindTS.utils.tools import adjust_learning_rate
 from torch import optim
 import time
 import gc
@@ -125,6 +126,8 @@ class MindTS:
         self.seq_len = self.config.win_size
         self.lamda1 = self.config.lamda1
         self.lamda2 = self.config.lamda2
+        self.training_logs = []
+        self.check_point = None
 
     def _base_model(self):
         return self.model.module if isinstance(self.model, nn.DataParallel) else self.model
@@ -145,12 +148,43 @@ class MindTS:
             self.model.to(self.device)
 
     def _load_best_checkpoint(self):
+        checkpoint = self.check_point
+        if checkpoint is None and hasattr(self, "early_stopping"):
+            checkpoint = self.early_stopping.check_point
+        if checkpoint is None:
+            return
         if isinstance(self.model, nn.DataParallel):
-            self.model.load_state_dict(self.early_stopping.check_point)
+            self.model.load_state_dict(checkpoint)
         elif hasattr(self._base_model(), "load_trainable_state_dict"):
-            self._base_model().load_trainable_state_dict(self.early_stopping.check_point)
+            self._base_model().load_trainable_state_dict(checkpoint)
         else:
-            self.model.load_state_dict(self.early_stopping.check_point)
+            self.model.load_state_dict(checkpoint)
+
+    def _save_current_checkpoint(self):
+        if hasattr(self._base_model(), "trainable_state_dict"):
+            self.check_point = self._base_model().trainable_state_dict()
+        else:
+            self.check_point = {
+                key: value.detach().cpu().clone()
+                for key, value in self.model.state_dict().items()
+            }
+
+    def _reset_training_logs(self):
+        self.training_logs = []
+
+    def _record_training_log(self, epoch, train_loss, valid_loss, learning_rate, epoch_time):
+        self.training_logs.append(
+            {
+                "epoch": int(epoch),
+                "train_loss": float(train_loss),
+                "valid_loss": float(valid_loss),
+                "learning_rate": float(learning_rate),
+                "epoch_time_sec": float(epoch_time),
+            }
+        )
+
+    def get_training_log(self):
+        return json.dumps(self.training_logs, sort_keys=True)
 
     @staticmethod
     def required_hyper_params() -> dict:
@@ -279,13 +313,16 @@ class MindTS:
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.model.parameters(), lr=config.lr)
 
-        self.early_stopping = EarlyStopping(patience=config.patience)
         self._prepare_model_for_device()
+        self._reset_training_logs()
         total_params = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
 
         for epoch in range(config.num_epochs):
+            epoch_start_time = time.time()
+            train_loss_values = []
+            epoch_lr = optimizer.param_groups[0]["lr"]
             self.model.train()
             for i, (input, target) in enumerate(self.train_data_loader):
                 optimizer.zero_grad()
@@ -293,14 +330,16 @@ class MindTS:
                 outputs = self.model(input)
                 outputs = outputs[:, :, :]
                 loss = criterion(outputs, input)
+                train_loss_values.append(loss.detach().cpu().item())
                 loss.backward()
                 optimizer.step()
             valid_loss = self.detect_validate(self.valid_data_loader, criterion)
-            self.early_stopping(valid_loss, self.model)
-            if self.early_stopping.early_stop:
-                break
+            train_loss = float(np.mean(train_loss_values)) if train_loss_values else np.nan
+            self._record_training_log(epoch + 1, train_loss, valid_loss, epoch_lr, time.time() - epoch_start_time)
+            print(f"\tepoch: {epoch + 1}, train_loss: {train_loss:.6f}, valid_loss: {valid_loss:.6f}")
 
             adjust_learning_rate(optimizer, epoch + 1, config)
+        self._save_current_checkpoint()
 
 
     def detect_multi_fit(self, train_data: pd.DataFrame, train_text: pd.DataFrame, train_label: pd.DataFrame):
@@ -368,13 +407,16 @@ class MindTS:
             lr=config.lr,
         )
 
-        self.early_stopping = EarlyStopping(patience=config.patience)
         self._prepare_model_for_device()
+        self._reset_training_logs()
         total_params = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
 
         for epoch in range(config.num_epochs):
+            epoch_start_time = time.time()
+            train_loss_values = []
+            epoch_lr = optimizer.param_groups[0]["lr"]
             iter_count = 0
             self.model.train()
             for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.train_data_loader):
@@ -396,6 +438,7 @@ class MindTS:
                 loss3 = Bottleneck_loss(total_mask, self.config.r, self.config.lamda)
 
                 loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3
+                train_loss_values.append(loss.detach().cpu().item())
 
                 if (i + 1) % 10 == 0:
                     print("\titers: {0}, epoch: {1}".format(i + 1, epoch + 1))
@@ -407,11 +450,12 @@ class MindTS:
                 loss.backward()
                 optimizer.step()
             valid_loss = self.detect_multi_validate(self.valid_data_loader, criterion)
-            self.early_stopping(valid_loss, self.model)
-            if self.early_stopping.early_stop:
-                break
+            train_loss = float(np.mean(train_loss_values)) if train_loss_values else np.nan
+            self._record_training_log(epoch + 1, train_loss, valid_loss, epoch_lr, time.time() - epoch_start_time)
+            print(f"\tepoch: {epoch + 1}, train_loss: {train_loss:.6f}, valid_loss: {valid_loss:.6f}")
 
-            adjust_learning_rate(optimizer, epoch + 1, config)      
+            adjust_learning_rate(optimizer, epoch + 1, config)
+        self._save_current_checkpoint()
 
     def detect_score(self, test: pd.DataFrame) -> np.ndarray:
         test = pd.DataFrame(
