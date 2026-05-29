@@ -26,6 +26,8 @@ from ts_benchmark.utils.get_file_name import get_model_config_tag
 
 logger = logging.getLogger(__name__)
 TRAINING_LOG_FIELD = "training_log"
+THRESHOLD_FIELD = "typical_anomaly_ratio"
+THRESHOLD_METRIC_FIELDS = ["affiliation_f", "VUS_PR", "VUS_ROC"]
 
 
 def read_record_file(fn: str) -> pd.DataFrame:
@@ -148,6 +150,102 @@ def _write_training_log_file(result_df: pd.DataFrame, result_path: str, record_f
     return training_log_path
 
 
+def _extract_threshold_metrics(result_df: pd.DataFrame) -> pd.DataFrame:
+    required_columns = [THRESHOLD_FIELD] + THRESHOLD_METRIC_FIELDS
+    if any(column not in result_df.columns for column in required_columns):
+        return pd.DataFrame()
+
+    group_columns = [
+        column
+        for column in ["model_name", "model_params", "file_name"]
+        if column in result_df.columns
+    ]
+    columns = group_columns + required_columns
+    threshold_df = result_df[columns].copy()
+    for column in required_columns:
+        threshold_df[column] = pd.to_numeric(threshold_df[column], errors="coerce")
+    return threshold_df.dropna(subset=[THRESHOLD_FIELD])
+
+
+def _format_threshold_metrics_text(threshold_df: pd.DataFrame) -> str:
+    lines = ["MindTS threshold metrics", ""]
+    group_columns = [
+        column
+        for column in ["model_name", "model_params", "file_name"]
+        if column in threshold_df.columns
+    ]
+    table_columns = [THRESHOLD_FIELD] + THRESHOLD_METRIC_FIELDS
+
+    if group_columns:
+        grouped = threshold_df.groupby(group_columns, dropna=False)
+    else:
+        grouped = [((), threshold_df)]
+
+    for group_values, group_df in grouped:
+        if group_columns:
+            if len(group_columns) == 1:
+                group_values = (group_values,)
+            for column, value in zip(group_columns, group_values):
+                lines.append(f"{column}: {value}")
+            lines.append("")
+
+        group_df = group_df.sort_values(THRESHOLD_FIELD)
+        display_df = group_df[table_columns].rename(
+            columns={
+                THRESHOLD_FIELD: "threshold",
+                "affiliation_f": "Aff-F",
+                "VUS_PR": "V-PR",
+                "VUS_ROC": "V-ROC",
+            }
+        )
+        lines.extend(
+            [
+                "Each threshold:",
+                display_df.to_string(index=False),
+                "",
+            ]
+        )
+
+        mean_values = group_df[THRESHOLD_METRIC_FIELDS].mean(skipna=True)
+        lines.extend(
+            [
+                "Mean across thresholds:",
+                f"Aff-F: {mean_values.get('affiliation_f')}",
+                f"V-PR: {mean_values.get('VUS_PR')}",
+                f"V-ROC: {mean_values.get('VUS_ROC')}",
+                "",
+            ]
+        )
+
+        aff_f = group_df["affiliation_f"]
+        if aff_f.notna().any():
+            best_idx = aff_f.idxmax()
+            best_row = group_df.loc[best_idx]
+            lines.extend(
+                [
+                    "Best threshold by Aff-F:",
+                    f"threshold: {best_row.get(THRESHOLD_FIELD)}",
+                    f"Aff-F: {best_row.get('affiliation_f')}",
+                    f"V-PR: {best_row.get('VUS_PR')}",
+                    f"V-ROC: {best_row.get('VUS_ROC')}",
+                    "",
+                ]
+            )
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _write_threshold_metrics_file(result_df: pd.DataFrame, result_path: str, record_filename: str) -> Optional[str]:
+    threshold_df = _extract_threshold_metrics(result_df)
+    if threshold_df.empty:
+        return None
+    base_filename = os.path.splitext(record_filename)[0]
+    threshold_path = os.path.join(result_path, f"{base_filename}.threshold_metrics.txt")
+    with open(threshold_path, "w", encoding="utf-8") as fh:
+        fh.write(_format_threshold_metrics_text(threshold_df))
+    return threshold_path
+
+
 def _get_record_descriptor(result_df: pd.DataFrame) -> str:
     if "model_params" not in result_df.columns or result_df.empty:
         return ""
@@ -199,7 +297,11 @@ def find_record_files(directory: str) -> List[str]:
     for root, dirs, files in os.walk(directory):
         for file in files:
             # TODO: this is a temporary solution, any good methods to identify a log file?
-            if file.endswith(".training_log.csv") or file.endswith(".training_log.txt"):
+            if (
+                file.endswith(".training_log.csv")
+                or file.endswith(".training_log.txt")
+                or file.endswith(".threshold_metrics.txt")
+            ):
                 continue
             if file.endswith(".csv") or file.endswith(".tar.gz"):
                 record_files.append(os.path.join(root, file))
@@ -207,7 +309,10 @@ def find_record_files(directory: str) -> List[str]:
 
 
 def save_log(
-    result_df: pd.DataFrame, save_path, file_prefix: str, compress_method: str = "gz"
+    result_df: pd.DataFrame,
+    save_path,
+    file_prefix: str,
+    compress_method: Optional[str] = None,
 ) -> str:
     """
     Save log data.
@@ -243,5 +348,6 @@ def save_log(
     file_path = os.path.join(result_path, record_filename)
 
     _write_training_log_file(result_df, result_path, record_filename)
+    _write_threshold_metrics_file(result_df, result_path, record_filename)
     result_df_to_write = result_df.drop(columns=[TRAINING_LOG_FIELD], errors="ignore")
     return write_record_file(result_df_to_write, file_path, compress_method)
