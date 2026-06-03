@@ -5,18 +5,13 @@ import time
 import numpy as np
 import pandas as pd
 import torch
+from statsmodels.tsa.seasonal import STL
 from torch.utils.data import Dataset, DataLoader
 
 from ts_benchmark.baselines.time_series_library.utils.timefeatures import (
     time_features,
 )
 from ts_benchmark.utils.data_processing import split_before
-from transformers import AutoTokenizer
-
-DEEPSEEK_PATH = "/18t/data/home/pxf/jim/race/MindTS/DeepSeek"
-tokenizer = AutoTokenizer.from_pretrained(DEEPSEEK_PATH)
-
-
 class SlidingWindowDataLoader:
     """
     SlidingWindDataLoader class.
@@ -300,14 +295,41 @@ class SegLoader(object):
                 self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
 
 
+def stl_decompose(data, period):
+    if period is None:
+        return None
+    period = int(period)
+    if period < 2:
+        raise ValueError("stl_period must be at least 2")
+
+    values = np.asarray(data, dtype=np.float32)
+    if values.ndim == 1:
+        values = values[:, None]
+    if values.shape[0] < 2 * period:
+        raise ValueError(
+            f"STL requires at least two periods: length={values.shape[0]}, stl_period={period}"
+        )
+
+    trend = np.zeros_like(values)
+    seasonal = np.zeros_like(values)
+    residual = np.zeros_like(values)
+    for channel in range(values.shape[1]):
+        result = STL(values[:, channel], period=period).fit()
+        trend[:, channel] = result.trend
+        seasonal[:, channel] = result.seasonal
+        residual[:, channel] = result.resid
+    return trend, seasonal, residual
+
+
 class MultiSegLoader(object):
-    def __init__(self, data, text, win_size, step, mode="train"):
+    def __init__(self, data, text, win_size, step, mode="train", stl_components=None):
         self.mode = mode
         self.step = step
         self.win_size = win_size
         self.data = data
         self.text = text
         self.test_labels = data
+        self.stl_components = stl_components
 
     def __len__(self):
         """
@@ -324,60 +346,28 @@ class MultiSegLoader(object):
 
     def __getitem__(self, index):
         index = index * self.step
-        if self.mode == "train":
-            train_data = np.float32(self.data[index:index + self.win_size])
-            train_label = np.float32(self.test_labels[0:self.win_size])
-
-            text_data = (self.text[index:index + self.win_size].iloc[:, 0]).to_list()
-            long_text = " ".join(text_data)
-            if tokenizer.pad_token is None:
-                tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-            tokens = tokenizer(long_text, max_length=1024, padding="max_length", truncation=True, return_tensors="pt")
-            input_ids = tokens["input_ids"].squeeze(0)
-            attention_mask = tokens["attention_mask"].squeeze(0)
-
-            return train_data, input_ids, attention_mask, train_label
-
-        elif (self.mode == 'val'):
-            val_data = np.float32(self.data[index:index + self.win_size])
-            val_label = np.float32(self.test_labels[0:self.win_size])
-
-            text_data = (self.text[index:index + self.win_size].iloc[:, 0]).to_list()
-            long_text = " ".join(text_data)
-            if tokenizer.pad_token is None:
-                tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-            tokens = tokenizer(long_text, max_length=1024, padding="max_length", truncation=True, return_tensors="pt")
-            input_ids = tokens["input_ids"].squeeze(0)
-            attention_mask = tokens["attention_mask"].squeeze(0)
-
-            return val_data, input_ids, attention_mask, val_label
-
-        elif (self.mode == 'test'):
-            test_data = np.float32(self.data[index:index + self.win_size])
-            test_label = np.float32(self.test_labels[0:self.win_size])
-
-            text_data = (self.text[index:index + self.win_size].iloc[:, 0]).to_list()
-            long_text = " ".join(text_data)
-            if tokenizer.pad_token is None:
-                tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-            tokens = tokenizer(long_text, max_length=1024, padding="max_length", truncation=True, return_tensors="pt")
-            input_ids = tokens["input_ids"].squeeze(0)
-            attention_mask = tokens["attention_mask"].squeeze(0)
-
-            return test_data, input_ids, attention_mask, test_label
-
+        start = index if self.mode in {"train", "val", "test"} else index // self.step * self.win_size
+        window = np.float32(self.data[start:start + self.win_size])
+        if self.mode in {"train", "val", "test"}:
+            label = np.float32(self.test_labels[0:self.win_size])
         else:
-            test_data = np.float32(self.data[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
-            test_label = np.float32(self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
-            text_data = (self.text[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size].iloc[:, 0]).to_list()
-            long_text = " ".join(text_data)
-            if tokenizer.pad_token is None:
-                tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-            tokens = tokenizer(long_text, max_length=1024, padding="max_length", truncation=True, return_tensors="pt")
-            input_ids = tokens["input_ids"].squeeze(0)
-            attention_mask = tokens["attention_mask"].squeeze(0)
+            label = np.float32(self.test_labels[start:start + self.win_size])
 
-            return test_data, input_ids, attention_mask, test_label
+        if self.stl_components is None:
+            trend = np.zeros_like(window)
+            seasonal = np.zeros_like(window)
+            residual = np.zeros_like(window)
+        else:
+            trend, seasonal, residual = (
+                np.float32(component[start:start + self.win_size])
+                for component in self.stl_components
+            )
+
+        # Text arguments stay in the public interface for compatibility, but
+        # exogenous text is no longer used by the model.
+        input_ids = torch.zeros(1, dtype=torch.long)
+        attention_mask = torch.ones(1, dtype=torch.long)
+        return window, input_ids, attention_mask, label, trend, seasonal, residual
         
 
 
@@ -457,9 +447,9 @@ def anomaly_detection_data_provider(data, batch_size, win_size=100, step=100, mo
     return data_loader
 
 
-def anomaly_detection_multi_data_provider(data, text, batch_size, win_size=100, step=100, mode='train'):
-    dataset = MultiSegLoader(data, text, win_size, 1, mode)
-    # dataset = MultiSegLoader(data, text, win_size, 1, tokenizer, mode)
+def anomaly_detection_multi_data_provider(data, text, batch_size, win_size=100, step=100, mode='train', stl_period=None):
+    stl_components = stl_decompose(data, stl_period)
+    dataset = MultiSegLoader(data, text, win_size, 1, mode, stl_components)
 
     shuffle = False
     if mode == 'train' or mode == 'val':

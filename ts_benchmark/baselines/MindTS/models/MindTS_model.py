@@ -48,6 +48,20 @@ class FlattenHead(nn.Module):
         return x
 
 
+class MovingAverage(nn.Module):
+    def __init__(self, kernel_size):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=1, padding=0)
+
+    def forward(self, x):
+        padding = (self.kernel_size - 1) // 2
+        front = x[:, 0:1, :].repeat(1, padding, 1)
+        end = x[:, -1:, :].repeat(1, padding, 1)
+        x = torch.cat([front, x, end], dim=1)
+        return self.avg(x.permute(0, 2, 1)).permute(0, 2, 1)
+
+
 class TransformerBlock(nn.Module):
     def __init__(self, embed_dim, num_heads, ff_hidden_dim, dropout=0.1):
         super(TransformerBlock, self).__init__()
@@ -110,8 +124,8 @@ class MINDTSModel(nn.Module):
             or (torch.cuda.is_available() and torch.cuda.device_count() > 1)
         )
         if self.manual_device_split and main_device_name is None and llm_device_name is None:
-            main_device_name = "cuda:1"
-            llm_device_name = "cuda:0"
+            main_device_name = "cuda:0"
+            llm_device_name = "cuda:1"
         self.main_device = _resolve_device(main_device_name, default_device)
         self.llm_device = _resolve_device(llm_device_name, self.main_device)
         self.device = self.main_device    # Device for trainable time-series modules
@@ -125,6 +139,11 @@ class MINDTSModel(nn.Module):
         self.d_model = configs.d_model
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
+        self.description = getattr(
+            configs,
+            "dataset_description",
+            "A generic time-series dataset.",
+        )
 
         # Embedding layers
         self.windows_data_embedding = DataEmbedding_inverted(configs.seq_len, configs.d_model, configs.embed, configs.freq, configs.dropout)
@@ -134,6 +153,14 @@ class MINDTSModel(nn.Module):
         self.proj_text = nn.Linear(1024 * configs.d_model, configs.d_model, bias=True)
         self.proj_prompt = nn.Linear(128 * configs.d_model, configs.d_model, bias=True)
         self.patch_embedding = WarriorsEmbedding(configs.d_model, self.patch_size, self.stride, self.stride, configs.dropout)
+        self.component_fusion = nn.Linear(3 * configs.d_model, configs.d_model, bias=True)
+        self.moving_avg = MovingAverage(configs.moving_avg)
+        self.map_trend = nn.Linear(configs.seq_len, configs.seq_len)
+        self.map_season = nn.Sequential(
+            nn.Linear(configs.seq_len, 4 * configs.seq_len),
+            nn.ReLU(),
+            nn.Linear(4 * configs.seq_len, configs.seq_len),
+        )
 
         # Time patch encoder with stacked attention layers
         self.time_patch_encoder = Encoder(
@@ -189,6 +216,7 @@ class MINDTSModel(nn.Module):
         self.prob_net = nn.Sequential(nn.PReLU(), nn.Linear(configs.d_model, 1), nn.Sigmoid())
         for param in self.model.parameters():
             param.requires_grad_(False)
+        self.register_buffer("role_prompt_embeddings", torch.empty(0), persistent=False)
         if self.manual_device_split:
             self.prepare_devices()
 
@@ -258,38 +286,59 @@ class MINDTSModel(nn.Module):
         corr = torch.fft.irfft(res, dim=-1)
         _, lags = torch.topk(corr, self.top_k, dim=-1)
         return lags
-    
-    
-    def Multimodal_Time_Series(self, x_enc_time, x_enc_input_ids, x_enc_attention_mask):
-        main_device = self._runtime_main_device(x_enc_time)
-        llm_device = self._runtime_llm_device()
-        x_enc_time = x_enc_time.to(main_device)
-        # -------------------------------------------------------------Input data normalization--------------------------------------------------------------------
-        means = x_enc_time.mean(1, keepdim=True).detach()
-        x_enc_time = x_enc_time - means
-        stdev = torch.sqrt(torch.var(x_enc_time, dim=1, keepdim=True, unbiased=False) + 1e-5)
-        x_enc_time /= stdev
-        B, T, N = x_enc_time.size()
 
-        # -------------------------------------------------------------Series patching and masking-----------------------------------------------------------------
-        x_enc_time_patch_normal, _ = self.patch_embedding(x_enc_time.permute(0, 2, 1))
-        x_enc_time_patch_mask, _, _, _ = self.random_masking(x_enc_time_patch_normal, self.mask_ratio)
+    def _normalize_component(self, x):
+        means = x.mean(1, keepdim=True).detach()
+        x = x - means
+        stdev = torch.sqrt(torch.var(x, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
+        return x / stdev
 
-        # -------------------------------------------------------------Time Encoder--------------------------------------------------------------------------------
-        time_features_patch_normal, attns = self.time_patch_encoder(x_enc_time_patch_normal)    #[B*C, N, D]
-        time_features_patch_mask, attns = self.time_patch_encoder(x_enc_time_patch_mask)    #[B*C, N, D]
+    def _decompose_local(self, x):
+        trend = self.moving_avg(x)
+        trend = self.map_trend(trend.transpose(1, 2)).transpose(1, 2)
+        season = x - trend
+        season = self.map_season(season.transpose(1, 2)).transpose(1, 2)
+        residual = x - trend - season
+        return trend, season, residual
 
-        # -------------------------------------------------------------prompt Generation --------------------------------------------------------------------------
+    def _get_role_prompt_embeddings(self, main_device):
+        if self.role_prompt_embeddings.numel() == 0:
+            dataset_context = self.description.strip()
+            role_prompts = [
+                f"Dataset context: {dataset_context} Reconstruct the time series using its trend component.",
+                f"Dataset context: {dataset_context} Reconstruct the time series using its seasonal component.",
+                f"Dataset context: {dataset_context} Reconstruct the time series using its residual component.",
+            ]
+            prompt_tokens = self.tokenizer(
+                role_prompts,
+                max_length=128,
+                padding="max_length",
+                truncation=True,
+                return_tensors="pt",
+            )
+            input_ids = prompt_tokens["input_ids"].to(self._runtime_llm_device())
+            attention_mask = prompt_tokens["attention_mask"].to(self._runtime_llm_device())
+            self._check_token_ids(input_ids)
+            with torch.no_grad():
+                outputs = self.model(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    output_hidden_states=True,
+                )
+                embeddings = outputs.hidden_states[-1].detach().to(main_device)
+            self.role_prompt_embeddings = embeddings
+        return self.prompt_proj_hidden(self.role_prompt_embeddings.to(main_device).float())
+
+    def _encode_intrinsic_prompts(self, x_enc_time, main_device):
         x_enc_time = x_enc_time.permute(0, 2, 1).contiguous()
         x_enc_time = rearrange(x_enc_time, 'b c l -> (b c) l')
-        x_enc_time = x_enc_time.unfold(1, self.patch_size, self.stride) # (B * N, Patch_num, Patch_size)
+        x_enc_time = x_enc_time.unfold(1, self.patch_size, self.stride)
 
         min_values = torch.min(x_enc_time, dim=2)[0]
         max_values = torch.max(x_enc_time, dim=2)[0]
         medians = torch.median(x_enc_time, dim=2).values
         lags = self.calcute_lags(x_enc_time)
         trends = x_enc_time.diff(dim=2)
-        self.description = 'MDT datasets include numerical stock data from Yahoo Finance and news information collected from various financial news websites such as NASDAQ, Bloomberg, and others.'
         prompt_list = []
         for b in range(x_enc_time.shape[0]):
             prompt = []
@@ -330,61 +379,123 @@ class MINDTSModel(nn.Module):
                 )
                 prompt.append(prompt_)
             prompt_list.append(prompt)
-        
-        # -------------------------------------------------------------prompt Reasoning---------------------------------------------------------------------------
-        all_prompts = [prompt for batch in prompt_list for prompt in batch]
-        prompt_tokens = self.tokenizer(all_prompts, max_length=128, padding="max_length", truncation=True, return_tensors="pt")
-        input_ids = prompt_tokens["input_ids"].to(llm_device)
-        attention_mask = prompt_tokens["attention_mask"].to(llm_device)
-        self._check_token_ids(input_ids)
 
+        all_prompts = [prompt for batch in prompt_list for prompt in batch]
+        prompt_tokens = self.tokenizer(
+            all_prompts,
+            max_length=128,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt",
+        )
+        input_ids = prompt_tokens["input_ids"].to(self._runtime_llm_device())
+        attention_mask = prompt_tokens["attention_mask"].to(self._runtime_llm_device())
+        self._check_token_ids(input_ids)
         with torch.no_grad():
             outputs = self.model(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
-                output_hidden_states=True
+                output_hidden_states=True,
             )
-            embeddings = outputs.hidden_states[-1].to(main_device)
-            embeddings = embeddings.detach()
+            embeddings = outputs.hidden_states[-1].detach().to(main_device)
 
-        del input_ids, attention_mask, outputs
-
-        total_prompts = len(all_prompts)
         batch_size_prompt = len(prompt_list[0])
-        all_embeddings = embeddings.view(-1, batch_size_prompt, embeddings.size(1), embeddings.size(2))
-        all_embeddings = all_embeddings.squeeze(2)
-
-        prompt_feature = all_embeddings.to(torch.float32)
-        del embeddings, all_embeddings
-
+        prompt_feature = embeddings.view(
+            -1,
+            batch_size_prompt,
+            embeddings.size(1),
+            embeddings.size(2),
+        ).float()
         prompt_feature = self.prompt_proj_hidden(prompt_feature)
-        prompt_feature = rearrange(prompt_feature, 'v n m d -> v n (m d)', n = self.patch_num, m = 128, d = self.d_model)
-        prompt_feature = self.proj_prompt(prompt_feature)      
+        prompt_feature = rearrange(
+            prompt_feature,
+            'v n m d -> v n (m d)',
+            n=self.patch_num,
+            m=128,
+            d=self.d_model,
+        )
+        return self.proj_prompt(prompt_feature)
 
-        # -------------------------------------------------------------text Reasoning------------------------------------------------------------------------------
-        text_input_ids = x_enc_input_ids.long().to(llm_device)
-        text_attention_mask = x_enc_attention_mask.long().to(llm_device)
-        self._check_token_ids(text_input_ids)
-        with torch.no_grad():
-            outputs = self.model(
-                input_ids=text_input_ids,
-                attention_mask=text_attention_mask,
-                output_hidden_states=True
-            )
-            embeddings = outputs.hidden_states[-1].to(main_device)
-            embeddings = embeddings.detach()
-        del text_input_ids, text_attention_mask, outputs
+    def _encode_component(self, component, role_prompt, batch_channels):
+        component = self._normalize_component(component)
+        component_patch, _ = self.patch_embedding(component.permute(0, 2, 1))
+        prompt = role_prompt.unsqueeze(0).expand(batch_channels, -1, -1)
+        component_with_prompt = torch.cat([prompt, component_patch], dim=1)
+        component_features, _ = self.time_windows_encoder(component_with_prompt)
+        return component_features[:, prompt.shape[1]:, :]
 
-        text_features = embeddings.to(torch.float32)
+    def _calculate_stl_loss(
+        self,
+        trend_local,
+        season_local,
+        residual_local,
+        trend_stl,
+        season_stl,
+        residual_stl,
+    ):
+        if trend_stl is None or season_stl is None or residual_stl is None:
+            return torch.zeros((), device=trend_local.device)
+        trend_target = trend_stl.to(trend_local.device)
+        season_target = season_stl.to(season_local.device)
+        residual_target = residual_stl.to(residual_local.device)
+        return (
+            F.mse_loss(trend_local, trend_target)
+            + F.mse_loss(season_local, season_target)
+            + F.mse_loss(residual_local, residual_target)
+        )
+    
+    
+    def Multimodal_Time_Series(
+        self,
+        x_enc_time,
+        x_enc_input_ids=None,
+        x_enc_attention_mask=None,
+        trend_stl=None,
+        season_stl=None,
+        residual_stl=None,
+    ):
+        main_device = self._runtime_main_device(x_enc_time)
+        x_enc_time = x_enc_time.to(main_device)
+        x_enc_time_raw = x_enc_time
+        # -------------------------------------------------------------Input data normalization--------------------------------------------------------------------
+        means = x_enc_time.mean(1, keepdim=True).detach()
+        x_enc_time = x_enc_time - means
+        stdev = torch.sqrt(torch.var(x_enc_time, dim=1, keepdim=True, unbiased=False) + 1e-5)
+        x_enc_time /= stdev
+        B, T, N = x_enc_time.size()
 
-        text_features = self.prompt_proj_hidden(text_features)
-        text_features = rearrange(text_features, 'b m h -> b (m h)', m = 1024, h = self.d_model)
-        text_features = text_features.unsqueeze(1)
-        text_features = self.proj_text(text_features)
-        text_features = text_features.repeat(self.channel_time, 1, 1) 
+        # -------------------------------------------------------------Series patching and masking-----------------------------------------------------------------
+        x_enc_time_patch_normal, _ = self.patch_embedding(x_enc_time.permute(0, 2, 1))
+        x_enc_time_patch_mask, _, _, _ = self.random_masking(x_enc_time_patch_normal, self.mask_ratio)
 
-        # -------------------------------------------------------------prompt and textCross-view Attention--------------------------------------------------------
-        llm_features = self.transformer_block(prompt_feature, text_features)
+        # -------------------------------------------------------------Time Encoder--------------------------------------------------------------------------------
+        time_features_patch_normal, attns = self.time_patch_encoder(x_enc_time_patch_normal)    #[B*C, N, D]
+        time_features_patch_mask, attns = self.time_patch_encoder(x_enc_time_patch_mask)    #[B*C, N, D]
+
+        # -------------------------------------------------------------Intrinsic prompt reasoning-------------------------------------------------------------------
+        prompt_feature = self._encode_intrinsic_prompts(x_enc_time, main_device)
+
+        # -------------------------------------------------------------TEMPO-style component semantics------------------------------------------------------------
+        trend_local, season_local, residual_local = self._decompose_local(x_enc_time_raw)
+        loss_stl = self._calculate_stl_loss(
+            trend_local,
+            season_local,
+            residual_local,
+            trend_stl,
+            season_stl,
+            residual_stl,
+        )
+        role_prompts = self._get_role_prompt_embeddings(main_device)
+        batch_channels = B * N
+        trend_features = self._encode_component(trend_local, role_prompts[0], batch_channels)
+        season_features = self._encode_component(season_local, role_prompts[1], batch_channels)
+        residual_features = self._encode_component(residual_local, role_prompts[2], batch_channels)
+        semantic_features = self.component_fusion(
+            torch.cat([trend_features, season_features, residual_features], dim=-1)
+        )
+
+        # -------------------------------------------------------------prompt and component Cross-view Attention---------------------------------------------------
+        llm_features = self.transformer_block(prompt_feature, semantic_features)
 
         # -------------------------------------------------------------time-text Similarity matrix----------------------------------------------------------------
         time_norm = F.normalize(time_features_patch_normal, p=2, dim=-1)
@@ -413,9 +524,23 @@ class MINDTSModel(nn.Module):
         # -------------------------------------------------------------Inverse normalization-----------------------------------------------------------------------
         output = output * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1))
         output = output + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1))
-        return output, logits_per_time, logits_per_text, total_mask
+        return output, logits_per_time, logits_per_text, total_mask, loss_stl
 
     
-    def forward(self, x_enc_time, x_enc_input_ids, x_enc_attention_mask):
-        outputs, logits_per_time, logits_per_text, total_mask = self.Multimodal_Time_Series(x_enc_time, x_enc_input_ids, x_enc_attention_mask)
-        return outputs, logits_per_time, logits_per_text, total_mask
+    def forward(
+        self,
+        x_enc_time,
+        x_enc_input_ids=None,
+        x_enc_attention_mask=None,
+        trend_stl=None,
+        season_stl=None,
+        residual_stl=None,
+    ):
+        return self.Multimodal_Time_Series(
+            x_enc_time,
+            x_enc_input_ids,
+            x_enc_attention_mask,
+            trend_stl,
+            season_stl,
+            residual_stl,
+        )

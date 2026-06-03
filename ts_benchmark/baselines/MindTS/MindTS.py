@@ -12,6 +12,7 @@ from ts_benchmark.baselines.utils import anomaly_detection_data_provider, anomal
 from ts_benchmark.baselines.utils import train_val_split
 from ts_benchmark.baselines.MindTS.utils.tools import adjust_learning_rate
 from torch import optim
+from tqdm.auto import tqdm
 import time
 import gc
 
@@ -64,6 +65,9 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "enc_in_time": 1,
     "lamda1": 1.0,
     "lamda2": 1.0,
+    "stl_period": None,
+    "stl_weight": 0.001,
+    "dataset_description": "A generic time-series dataset.",
     "main_device": None,
     "llm_device": None
 }
@@ -126,6 +130,7 @@ class MindTS:
         self.seq_len = self.config.win_size
         self.lamda1 = self.config.lamda1
         self.lamda2 = self.config.lamda2
+        self.stl_weight = self.config.stl_weight
         self.training_logs = []
         self.check_point = None
 
@@ -237,15 +242,33 @@ class MindTS:
         self.model.train()
         return total_loss
 
-    def detect_multi_validate(self, valid_data_loader, criterion):
+    def detect_multi_validate(self, valid_data_loader, criterion, epoch=None):
         config = self.config
         total_loss = []
         self.model.eval()
+        description = "Validate" if epoch is None else f"Validate epoch {epoch}/{config.num_epochs}"
 
         with torch.no_grad():
-            for batch_x_time, batch_input_ids, batch_attention_mask, _ in valid_data_loader:
+            valid_progress = tqdm(
+                valid_data_loader,
+                desc=description,
+                unit="batch",
+                leave=True,
+                dynamic_ncols=True,
+            )
+            for batch_x_time, batch_input_ids, batch_attention_mask, _, trend_stl, season_stl, residual_stl in valid_progress:
                 batch_x_time = batch_x_time.float().to(self._get_main_device())
-                outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+                trend_stl = trend_stl.float().to(self._get_main_device())
+                season_stl = season_stl.float().to(self._get_main_device())
+                residual_stl = residual_stl.float().to(self._get_main_device())
+                outputs, logits_per_time, logits_per_text, total_mask, loss_stl = self.model(
+                    batch_x_time,
+                    batch_input_ids,
+                    batch_attention_mask,
+                    trend_stl,
+                    season_stl,
+                    residual_stl,
+                )
                 f_dim = -1 if self.config.enc_in == 1 else 0
                 outputs = outputs[:, :, f_dim:]
 
@@ -261,8 +284,9 @@ class MindTS:
                 # Bottleneck loss
                 loss3 = Bottleneck_loss(total_mask, self.config.r, self.config.lamda).detach().cpu().numpy()
 
-                loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3
-                total_loss.append(loss)  
+                loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3 + self.stl_weight*loss_stl.detach().cpu().numpy()
+                total_loss.append(loss)
+                valid_progress.set_postfix(loss=f"{float(loss):.6f}")
 
         total_loss = np.mean(total_loss)
         self.model.train()
@@ -345,9 +369,12 @@ class MindTS:
     def detect_multi_fit(self, train_data: pd.DataFrame, train_text: pd.DataFrame, train_label: pd.DataFrame):
         self.detect_hyper_param_tune(train_data)
         setattr(self.config, "task_name", "anomaly_detection")
-        self.model = MINDTSModel(self.config)
-
         config = self.config
+        if config.stl_period is None:
+            raise ValueError("stl_period must be set for TEMPO-style STL supervision")
+        print("Initializing MindTS model and DeepSeek encoder...", flush=True)
+        self.model = MINDTSModel(self.config)
+        print("MindTS model initialized.", flush=True)
         train_data_value, valid_data = train_val_split(train_data, 0.8, None)
         train_data_text, valid_text = train_val_split(train_text, 0.8, None)
         self.scaler.fit(train_data_value.values)
@@ -380,6 +407,7 @@ class MindTS:
             index=valid_text.index,
         )   
 
+        print("Preparing validation STL windows...", flush=True)
         self.valid_data_loader = anomaly_detection_multi_data_provider(
             valid_data,
             valid_text,
@@ -387,8 +415,11 @@ class MindTS:
             win_size=config.seq_len,
             step=1,
             mode="val",
+            stl_period=config.stl_period,
         )
+        print(f"Validation loader ready: {len(self.valid_data_loader)} batches.", flush=True)
 
+        print("Preparing training STL windows...", flush=True)
         self.train_data_loader = anomaly_detection_multi_data_provider(
             train_data_value,
             train_data_text,
@@ -396,9 +427,9 @@ class MindTS:
             win_size=config.seq_len,
             step=1,
             mode="train",
+            stl_period=config.stl_period,
         )
-
-        time_now = time.time()
+        print(f"Training loader ready: {len(self.train_data_loader)} batches.", flush=True)
 
         # Define the loss function and optimizer
         criterion = nn.MSELoss()
@@ -412,19 +443,35 @@ class MindTS:
         total_params = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
+        print(f"Trainable parameters: {total_params:,}", flush=True)
 
         for epoch in range(config.num_epochs):
             epoch_start_time = time.time()
             train_loss_values = []
             epoch_lr = optimizer.param_groups[0]["lr"]
-            iter_count = 0
             self.model.train()
-            for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.train_data_loader):
-                iter_count += 1
-                train_steps = len(self.train_data_loader)
+            print(f"Epoch {epoch + 1}/{config.num_epochs} started.", flush=True)
+            train_progress = tqdm(
+                self.train_data_loader,
+                desc=f"Train epoch {epoch + 1}/{config.num_epochs}",
+                unit="batch",
+                leave=True,
+                dynamic_ncols=True,
+            )
+            for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, trend_stl, season_stl, residual_stl in train_progress:
                 optimizer.zero_grad()
                 batch_x_time = batch_x_time.float().to(self._get_main_device())
-                outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+                trend_stl = trend_stl.float().to(self._get_main_device())
+                season_stl = season_stl.float().to(self._get_main_device())
+                residual_stl = residual_stl.float().to(self._get_main_device())
+                outputs, logits_per_time, logits_per_text, total_mask, loss_stl = self.model(
+                    batch_x_time,
+                    batch_input_ids,
+                    batch_attention_mask,
+                    trend_stl,
+                    season_stl,
+                    residual_stl,
+                )
                 f_dim = -1 if self.config.enc_in == 1 else 0
                 outputs = outputs[:, :, f_dim:]
 
@@ -437,26 +484,21 @@ class MindTS:
                 # Bottleneck loss
                 loss3 = Bottleneck_loss(total_mask, self.config.r, self.config.lamda)
 
-                loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3
-                train_loss_values.append(loss.detach().cpu().item())
-
-                if (i + 1) % 10 == 0:
-                    print("\titers: {0}, epoch: {1}".format(i + 1, epoch + 1))
-                    speed = (time.time() - time_now) / iter_count
-                    left_time = speed * ((config.num_epochs - epoch) * train_steps - i)
-                    print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
-                    iter_count = 0
-                    time_now = time.time()
+                loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3 + self.stl_weight*loss_stl
+                loss_value = loss.detach().cpu().item()
+                train_loss_values.append(loss_value)
+                train_progress.set_postfix(loss=f"{loss_value:.6f}", lr=f"{epoch_lr:.2e}")
                 loss.backward()
                 optimizer.step()
-            valid_loss = self.detect_multi_validate(self.valid_data_loader, criterion)
+            valid_loss = self.detect_multi_validate(self.valid_data_loader, criterion, epoch + 1)
             train_loss = float(np.mean(train_loss_values)) if train_loss_values else np.nan
             self._record_training_log(epoch + 1, train_loss, valid_loss, epoch_lr, time.time() - epoch_start_time)
-            print(f"\tepoch: {epoch + 1}, train_loss: {train_loss:.6f}, valid_loss: {valid_loss:.6f}")
+            print(f"Epoch {epoch + 1}/{config.num_epochs} finished: train_loss={train_loss:.6f}, valid_loss={valid_loss:.6f}", flush=True)
 
             adjust_learning_rate(optimizer, epoch + 1, config)
         self._save_current_checkpoint()
 
+    @torch.no_grad()
     def detect_score(self, test: pd.DataFrame) -> np.ndarray:
         test = pd.DataFrame(
             self.scaler.transform(test.values), columns=test.columns, index=test.index
@@ -483,7 +525,13 @@ class MindTS:
         attens_energy = []
         test_labels = []
 
-        for i, (batch_x, batch_y) in enumerate(self.thre_loader):
+        for batch_x, batch_y in tqdm(
+            self.thre_loader,
+            desc="Score windows",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
             batch_x = batch_x.float().to(self.device)
             # reconstruction
             outputs = self.model(batch_x)
@@ -498,6 +546,7 @@ class MindTS:
 
         return test_energy, test_energy
 
+    @torch.no_grad()
     def detect_multi_score(self, test_data: pd.DataFrame, test_text: pd.DataFrame) -> np.ndarray:
         test_data = pd.DataFrame(
             self.scaler.transform(test_data.values), columns=test_data.columns, index=test_data.index
@@ -527,10 +576,16 @@ class MindTS:
 
         attens_energy = []
         test_labels = []
-        for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.thre_loader):
+        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+            self.thre_loader,
+            desc="Score windows",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
             score = score.detach().cpu().numpy()
@@ -542,6 +597,7 @@ class MindTS:
 
         return test_energy, test_energy
     
+    @torch.no_grad()
     def detect_label(self, test: pd.DataFrame) -> np.ndarray:
         test = pd.DataFrame(
             self.scaler.transform(test.values), columns=test.columns, index=test.index
@@ -575,15 +631,20 @@ class MindTS:
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
 
-        with torch.no_grad():
-            for i, (batch_x, batch_y) in enumerate(self.train_data_loader):
-                batch_x = batch_x.float().to(self.device)
-                # reconstruction
-                outputs = self.model(batch_x)
-                # criterion
-                score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
-                score = score.detach().cpu().numpy()
-                attens_energy.append(score)
+        for batch_x, batch_y in tqdm(
+            self.train_data_loader,
+            desc="Train threshold energy",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
+            batch_x = batch_x.float().to(self.device)
+            # reconstruction
+            outputs = self.model(batch_x)
+            # criterion
+            score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
+            score = score.detach().cpu().numpy()
+            attens_energy.append(score)
 
         attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
         train_energy = np.array(attens_energy)
@@ -592,7 +653,13 @@ class MindTS:
         attens_energy = []
         test_labels = []
 
-        for i, (batch_x, batch_y) in enumerate(self.test_data_loader):
+        for batch_x, batch_y in tqdm(
+            self.test_data_loader,
+            desc="Test energy",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
             batch_x = batch_x.float().to(self.device)
             # reconstruction
             outputs = self.model(batch_x)
@@ -609,7 +676,13 @@ class MindTS:
         attens_energy = []
         test_labels = []
 
-        for i, (batch_x, batch_y) in enumerate(self.thre_loader):
+        for batch_x, batch_y in tqdm(
+            self.thre_loader,
+            desc="Threshold energy",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
             batch_x = batch_x.float().to(self.device)
             # reconstruction
             outputs = self.model(batch_x)
@@ -632,6 +705,7 @@ class MindTS:
 
         return preds, test_energy
 
+    @torch.no_grad()
     def detect_multi_label(self, test_data: pd.DataFrame, test_text: pd.DataFrame) -> np.ndarray:
         test_data = pd.DataFrame(
             self.scaler.transform(test_data.values), columns=test_data.columns, index=test_data.index
@@ -671,15 +745,20 @@ class MindTS:
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
 
-        with torch.no_grad():
-            for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.train_data_loader):
-                batch_x_time = batch_x_time.float().to(self._get_main_device())
-                # reconstruction
-                outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
-                # criterion
-                score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
-                score = score.detach().cpu().numpy()
-                attens_energy.append(score)
+        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+            self.train_data_loader,
+            desc="Train threshold energy",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
+            batch_x_time = batch_x_time.float().to(self._get_main_device())
+            # reconstruction
+            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            # criterion
+            score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            score = score.detach().cpu().numpy()
+            attens_energy.append(score)
 
         attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
         train_energy = np.array(attens_energy)
@@ -687,10 +766,16 @@ class MindTS:
         # (2) find the threshold
         attens_energy = []
         test_labels = []
-        for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.test_data_loader):
+        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+            self.test_data_loader,
+            desc="Test energy",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
             score = score.detach().cpu().numpy()
@@ -703,10 +788,16 @@ class MindTS:
 
         attens_energy = []
         test_labels = []
-        for i, (batch_x_time, batch_input_ids, batch_attention_mask, batch_y) in enumerate(self.thre_loader):
+        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+            self.thre_loader,
+            desc="Threshold energy",
+            unit="batch",
+            leave=True,
+            dynamic_ncols=True,
+        ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
             score = score.detach().cpu().numpy()
