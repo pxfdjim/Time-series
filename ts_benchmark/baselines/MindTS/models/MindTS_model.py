@@ -139,6 +139,8 @@ class MINDTSModel(nn.Module):
         self.d_model = configs.d_model
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
+        self.shape_log_path = getattr(configs, "shape_log_path", None)
+        self._shape_log_events = set()
         self.description = getattr(
             configs,
             "dataset_description",
@@ -219,6 +221,22 @@ class MINDTSModel(nn.Module):
         self.register_buffer("role_prompt_embeddings", torch.empty(0), persistent=False)
         if self.manual_device_split:
             self.prepare_devices()
+
+    def _write_shape_log(self, event, lines, once=True):
+        if self.shape_log_path is None:
+            return
+        if once and event in self._shape_log_events:
+            return
+        self._shape_log_events.add(event)
+        with open(self.shape_log_path, "a", encoding="utf-8") as log_file:
+            log_file.write(f"\n[{event}]\n")
+            for line in lines:
+                log_file.write(f"{line}\n")
+
+    def _shape_of(self, value):
+        if hasattr(value, "shape"):
+            return tuple(value.shape)
+        return None
 
     def prepare_devices(self):
         for name, module in self.named_children():
@@ -495,7 +513,28 @@ class MINDTSModel(nn.Module):
         )
 
         # -------------------------------------------------------------prompt and component Cross-view Attention---------------------------------------------------
-        llm_features = self.transformer_block(prompt_feature, semantic_features)
+        llm_features = self.transformer_block(semantic_features, prompt_feature)
+        self._write_shape_log(
+            "cross_view_attention.first_batch",
+            [
+                (
+                    f"prompt_feature shape: {self._shape_of(prompt_feature)}; "
+                    "meaning: intrinsic prompt reasoning features from LLM prompts, [batch*channels, patches, d_model]"
+                ),
+                (
+                    f"semantic_features shape: {self._shape_of(semantic_features)}; "
+                    "meaning: fused trend/seasonal/residual component semantics, [batch*channels, patches, d_model]"
+                ),
+                (
+                    "attention direction after this change: "
+                    "semantic_features query prompt_feature as key/value; output keeps semantic_features as residual backbone"
+                ),
+                (
+                    f"llm_features shape: {self._shape_of(llm_features)}; "
+                    "meaning: component-guided semantic features enriched by intrinsic prompt information, [batch*channels, patches, d_model]"
+                ),
+            ],
+        )
 
         # -------------------------------------------------------------time-text Similarity matrix----------------------------------------------------------------
         time_norm = F.normalize(time_features_patch_normal, p=2, dim=-1)

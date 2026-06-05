@@ -8,6 +8,7 @@ from typing import List, Any
 import numpy as np
 import pandas as pd
 import torch
+import re
 
 from ts_benchmark.data.data_pool import DataPool
 from ts_benchmark.evaluation.evaluator import Evaluator
@@ -38,6 +39,82 @@ class AnomalyDetect(Strategy):
         self.model = None
         self.data_lens = None
 
+    def _configure_model_shape_logging(self, series_name: str):
+        if self.model is None:
+            return
+        if hasattr(self.model, "configure_shape_logging"):
+            self.model.configure_shape_logging(series_name)
+
+    def _write_shape_log(self, event: str, lines: List[str]):
+        if self.model is not None and getattr(self.model, "shape_log_path", None):
+            log_path = self.model.shape_log_path
+        else:
+            os.makedirs("result/shape_logs", exist_ok=True)
+            safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(event)).strip("_")
+            log_path = os.path.join("result/shape_logs", f"{safe_name}.shape.log")
+        with open(log_path, "a", encoding="utf-8") as log_file:
+            log_file.write(f"\n[{event}]\n")
+            for line in lines:
+                log_file.write(f"{line}\n")
+
+    def _array_preview(self, values, limit=10):
+        arr = np.asarray(values).reshape(-1)
+        return arr[:limit].tolist()
+
+    def _label_counts(self, values):
+        arr = np.asarray(values).reshape(-1)
+        if arr.size == 0:
+            return {}
+        unique, counts = np.unique(arr, return_counts=True)
+        return {str(k): int(v) for k, v in zip(unique, counts)}
+
+    def _log_metric_shapes(
+        self,
+        series_name,
+        ratio,
+        actual_label,
+        predict_label_before,
+        another_before,
+        predict_label_after,
+        another_after,
+        remaining_length,
+        remaining_length_another,
+    ):
+        self._write_shape_log(
+            f"metric_inputs.ratio_{ratio}",
+            [
+                f"dataset: {series_name}",
+                f"ratio: {ratio}",
+                (
+                    f"actual_label shape: {np.asarray(actual_label).shape}; "
+                    "meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp"
+                ),
+                (
+                    f"predict_label before padding shape: {np.asarray(predict_label_before).shape}; "
+                    "meaning: binary anomaly predictions produced by thresholding reconstruction energy"
+                ),
+                (
+                    f"another before padding shape: {np.asarray(another_before).shape}; "
+                    "meaning: continuous anomaly score/reconstruction energy used by score-style metrics"
+                ),
+                f"remaining_length for predict_label: {remaining_length}",
+                f"remaining_length for another: {remaining_length_another}",
+                (
+                    f"predict_label passed to evaluator shape: {np.asarray(predict_label_after).shape}; "
+                    "meaning: binary predictions after alignment/padding to actual_label length"
+                ),
+                (
+                    f"another passed to evaluator shape: {np.asarray(another_after).shape}; "
+                    "meaning: continuous anomaly scores after alignment/padding to actual_label length"
+                ),
+                f"actual_label value counts: {self._label_counts(actual_label)}",
+                f"predict_label value counts: {self._label_counts(predict_label_after)}",
+                f"actual_label first values: {self._array_preview(actual_label)}",
+                f"predict_label first values: {self._array_preview(predict_label_after)}",
+                f"another first values: {self._array_preview(another_after)}",
+            ],
+        )
+
     def _get_training_log(self) -> str:
         if self.model is None or not hasattr(self.model, "get_training_log"):
             return ""
@@ -56,6 +133,7 @@ class AnomalyDetect(Strategy):
         model = model_factory()
         try:
             self.model = model
+            self._configure_model_shape_logging(series_name)
             train_data, train_label, test_data, test_label = self.split_data(
                 series_name
             )
@@ -85,6 +163,8 @@ class AnomalyDetect(Strategy):
 
             single_series_results_list = []
             for ratio, predict_label in predict_labels.items():
+                predict_label_before = predict_label.copy()
+                another_before = another.copy()
                 remaining_length = len(actual_label) - len(predict_label)
                 remaining_length_another = len(actual_label) - len(another)
                 print(remaining_length)
@@ -100,10 +180,22 @@ class AnomalyDetect(Strategy):
                 if remaining_length_another > 0:
                     another = np.pad(
                         another,
-                        (0, remaining_length),
+                        (0, remaining_length_another),
                         mode="constant",
                         constant_values=0,
                     )
+
+                self._log_metric_shapes(
+                    series_name,
+                    ratio,
+                    actual_label,
+                    predict_label_before,
+                    another_before,
+                    predict_label,
+                    another,
+                    remaining_length,
+                    remaining_length_another,
+                )
 
                 single_series_results, log_info = self.evaluator.evaluate_with_log(
                     actual=actual_label.astype(float),
@@ -153,6 +245,7 @@ class AnomalyDetect(Strategy):
         model = model_factory()
         try:
             self.model = model
+            self._configure_model_shape_logging(series_name)
             train_data, train_text, train_label, test_data, test_text, test_label = self.split_multi_data(
                 series_name,
                 text_name
@@ -190,6 +283,8 @@ class AnomalyDetect(Strategy):
 
             single_series_results_list = []
             for ratio, predict_label in predict_labels.items():
+                predict_label_before = predict_label.copy()
+                another_before = another.copy()
                 remaining_length = len(actual_label) - len(predict_label)
                 remaining_length_another = len(actual_label) - len(another)
                 print(remaining_length)
@@ -205,10 +300,22 @@ class AnomalyDetect(Strategy):
                 if remaining_length_another > 0:
                     another = np.pad(
                         another,
-                        (0, remaining_length),
+                        (0, remaining_length_another),
                         mode="constant",
                         constant_values=0,
                     )
+
+                self._log_metric_shapes(
+                    series_name,
+                    ratio,
+                    actual_label,
+                    predict_label_before,
+                    another_before,
+                    predict_label,
+                    another,
+                    remaining_length,
+                    remaining_length_another,
+                )
 
                 single_series_results, log_info = self.evaluator.evaluate_with_log(
                     actual=actual_label.astype(float),
@@ -258,6 +365,7 @@ class AnomalyDetect(Strategy):
         model = model_factory()
         try:
             self.model = model
+            self._configure_model_shape_logging(series_name)
             train_data, train_text, train_label, test_data, test_text, test_label = self.split_multi_data(
                 series_name,
                 text_name
@@ -290,6 +398,8 @@ class AnomalyDetect(Strategy):
 
             single_series_results_list = []
             for ratio, predict_label in predict_labels.items():
+                predict_label_before = predict_label.copy()
+                another_before = another.copy()
                 remaining_length = len(actual_label) - len(predict_label)
                 remaining_length_another = len(actual_label) - len(another)
                 print(remaining_length)
@@ -305,10 +415,22 @@ class AnomalyDetect(Strategy):
                 if remaining_length_another > 0:
                     another = np.pad(
                         another,
-                        (0, remaining_length),
+                        (0, remaining_length_another),
                         mode="constant",
                         constant_values=0,
                     )
+
+                self._log_metric_shapes(
+                    series_name,
+                    ratio,
+                    actual_label,
+                    predict_label_before,
+                    another_before,
+                    predict_label,
+                    another,
+                    remaining_length,
+                    remaining_length_another,
+                )
 
                 single_series_results, log_info = self.evaluator.evaluate_with_log(
                     actual=actual_label.astype(float),

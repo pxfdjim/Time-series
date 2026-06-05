@@ -15,6 +15,8 @@ from torch import optim
 from tqdm.auto import tqdm
 import time
 import gc
+import os
+import re
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -133,6 +135,51 @@ class MindTS:
         self.stl_weight = self.config.stl_weight
         self.training_logs = []
         self.check_point = None
+        self.shape_log_path = None
+        self._shape_log_events = set()
+
+    def configure_shape_logging(self, series_name, log_dir="result/shape_logs"):
+        safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(series_name)).strip("_")
+        if not safe_name:
+            safe_name = "unknown_series"
+        os.makedirs(log_dir, exist_ok=True)
+        self.shape_log_path = os.path.join(log_dir, f"{safe_name}.shape.log")
+        setattr(self.config, "shape_log_path", self.shape_log_path)
+        setattr(self.config, "shape_log_dataset", series_name)
+        self._shape_log_events = set()
+        with open(self.shape_log_path, "w", encoding="utf-8") as log_file:
+            log_file.write(f"Shape log for dataset: {series_name}\n")
+            log_file.write("=" * 80 + "\n")
+
+    def _write_shape_log(self, event, lines, once=True):
+        if self.shape_log_path is None:
+            return
+        if once and event in self._shape_log_events:
+            return
+        self._shape_log_events.add(event)
+        with open(self.shape_log_path, "a", encoding="utf-8") as log_file:
+            log_file.write(f"\n[{event}]\n")
+            for line in lines:
+                log_file.write(f"{line}\n")
+
+    def _shape_of(self, value):
+        if hasattr(value, "shape"):
+            return tuple(value.shape)
+        return None
+
+    def _log_model_batch_shapes(self, event, inputs, outputs, scores=None):
+        lines = [
+            f"seq_len/window length: {self.config.seq_len}",
+            f"batch_size config: {self.config.batch_size}",
+        ]
+        for name, value, meaning in inputs:
+            lines.append(f"{name} shape: {self._shape_of(value)}; meaning: {meaning}")
+        for name, value, meaning in outputs:
+            lines.append(f"{name} shape: {self._shape_of(value)}; meaning: {meaning}")
+        if scores is not None:
+            for name, value, meaning in scores:
+                lines.append(f"{name} shape: {self._shape_of(value)}; meaning: {meaning}")
+        self._write_shape_log(event, lines)
 
     def _base_model(self):
         return self.model.module if isinstance(self.model, nn.DataParallel) else self.model
@@ -352,6 +399,23 @@ class MindTS:
                 optimizer.zero_grad()
                 input = input.float().to(self.device)
                 outputs = self.model(input)
+                self._log_model_batch_shapes(
+                    "detect_fit.train_first_batch",
+                    [
+                        (
+                            "input",
+                            input,
+                            "[batch, seq_len, channels]; normalized sliding-window time-series batch",
+                        ),
+                    ],
+                    [
+                        (
+                            "outputs",
+                            outputs,
+                            "[batch, seq_len, channels]; reconstructed time-series window",
+                        ),
+                    ],
+                )
                 outputs = outputs[:, :, :]
                 loss = criterion(outputs, input)
                 train_loss_values.append(loss.detach().cpu().item())
@@ -471,6 +535,53 @@ class MindTS:
                     trend_stl,
                     season_stl,
                     residual_stl,
+                )
+                self._log_model_batch_shapes(
+                    "detect_multi_fit.train_first_batch",
+                    [
+                        (
+                            "batch_x_time",
+                            batch_x_time,
+                            "[batch, seq_len, channels]; normalized sliding-window time-series batch",
+                        ),
+                        (
+                            "trend_stl",
+                            trend_stl,
+                            "[batch, seq_len, channels]; STL trend supervision aligned to each window",
+                        ),
+                        (
+                            "season_stl",
+                            season_stl,
+                            "[batch, seq_len, channels]; STL seasonal supervision aligned to each window",
+                        ),
+                        (
+                            "residual_stl",
+                            residual_stl,
+                            "[batch, seq_len, channels]; STL residual supervision aligned to each window",
+                        ),
+                    ],
+                    [
+                        (
+                            "outputs",
+                            outputs,
+                            "[batch, seq_len, channels]; reconstructed time-series window",
+                        ),
+                        (
+                            "logits_per_time",
+                            logits_per_time,
+                            "[batch*channels, patches, patches]; time-to-semantic similarity logits",
+                        ),
+                        (
+                            "logits_per_text",
+                            logits_per_text,
+                            "[batch*channels, patches, patches]; semantic-to-time similarity logits",
+                        ),
+                        (
+                            "total_mask",
+                            total_mask,
+                            "[batch*channels, patches, 1]; information condenser keep probability",
+                        ),
+                    ],
                 )
                 f_dim = -1 if self.config.enc_in == 1 else 0
                 outputs = outputs[:, :, f_dim:]
@@ -643,6 +754,35 @@ class MindTS:
             outputs = self.model(batch_x)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
+            self._log_model_batch_shapes(
+                "detect_label.train_threshold_first_batch",
+                [
+                    (
+                        "batch_x",
+                        batch_x,
+                        "[batch, seq_len, channels]; training windows used to estimate threshold energy",
+                    ),
+                    (
+                        "batch_y",
+                        batch_y,
+                        "[batch, seq_len, channels]; loader reconstruction target placeholder",
+                    ),
+                ],
+                [
+                    (
+                        "outputs",
+                        outputs,
+                        "[batch, seq_len, channels]; reconstructed training windows",
+                    ),
+                ],
+                [
+                    (
+                        "score",
+                        score,
+                        "[batch, seq_len]; per-time-step reconstruction error averaged over channels",
+                    ),
+                ],
+            )
             score = score.detach().cpu().numpy()
             attens_energy.append(score)
 
@@ -665,6 +805,35 @@ class MindTS:
             outputs = self.model(batch_x)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
+            self._log_model_batch_shapes(
+                "detect_label.test_first_batch",
+                [
+                    (
+                        "batch_x",
+                        batch_x,
+                        "[batch, seq_len, channels]; test windows used for combined threshold calibration",
+                    ),
+                    (
+                        "batch_y",
+                        batch_y,
+                        "[batch, seq_len, channels]; test window labels/targets from loader",
+                    ),
+                ],
+                [
+                    (
+                        "outputs",
+                        outputs,
+                        "[batch, seq_len, channels]; reconstructed test windows",
+                    ),
+                ],
+                [
+                    (
+                        "score",
+                        score,
+                        "[batch, seq_len]; per-time-step reconstruction error averaged over channels",
+                    ),
+                ],
+            )
             score = score.detach().cpu().numpy()
             attens_energy.append(score)
             test_labels.append(batch_y)
@@ -688,6 +857,35 @@ class MindTS:
             outputs = self.model(batch_x)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x, outputs), dim=-1)
+            self._log_model_batch_shapes(
+                "detect_label.threshold_first_batch",
+                [
+                    (
+                        "batch_x",
+                        batch_x,
+                        "[batch, seq_len, channels]; threshold-mode windows that produce final anomaly scores",
+                    ),
+                    (
+                        "batch_y",
+                        batch_y,
+                        "[batch, seq_len, channels]; threshold-mode labels/targets from loader",
+                    ),
+                ],
+                [
+                    (
+                        "outputs",
+                        outputs,
+                        "[batch, seq_len, channels]; reconstructed threshold-mode windows",
+                    ),
+                ],
+                [
+                    (
+                        "score",
+                        score,
+                        "[batch, seq_len]; per-time-step reconstruction error averaged over channels",
+                    ),
+                ],
+            )
             score = score.detach().cpu().numpy()
             attens_energy.append(score)
             test_labels.append(batch_y)
@@ -757,6 +955,50 @@ class MindTS:
             outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            self._log_model_batch_shapes(
+                "detect_multi_label.train_threshold_first_batch",
+                [
+                    (
+                        "batch_x_time",
+                        batch_x_time,
+                        "[batch, seq_len, channels]; training windows used to estimate threshold energy",
+                    ),
+                    (
+                        "batch_y",
+                        batch_y,
+                        "[batch, seq_len, channels]; loader reconstruction target placeholder",
+                    ),
+                ],
+                [
+                    (
+                        "outputs",
+                        outputs,
+                        "[batch, seq_len, channels]; reconstructed training windows",
+                    ),
+                    (
+                        "logits_per_time",
+                        logits_per_time,
+                        "[batch*channels, patches, patches]; time-to-semantic similarity logits",
+                    ),
+                    (
+                        "logits_per_text",
+                        logits_per_text,
+                        "[batch*channels, patches, patches]; semantic-to-time similarity logits",
+                    ),
+                    (
+                        "total_mask",
+                        total_mask,
+                        "[batch*channels, patches, 1]; information condenser keep probability",
+                    ),
+                ],
+                [
+                    (
+                        "score",
+                        score,
+                        "[batch, seq_len]; per-time-step reconstruction error averaged over channels",
+                    ),
+                ],
+            )
             score = score.detach().cpu().numpy()
             attens_energy.append(score)
 
@@ -778,6 +1020,50 @@ class MindTS:
             outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            self._log_model_batch_shapes(
+                "detect_multi_label.test_first_batch",
+                [
+                    (
+                        "batch_x_time",
+                        batch_x_time,
+                        "[batch, seq_len, channels]; test windows used for combined threshold calibration",
+                    ),
+                    (
+                        "batch_y",
+                        batch_y,
+                        "[batch, seq_len, channels]; test window labels/targets from loader",
+                    ),
+                ],
+                [
+                    (
+                        "outputs",
+                        outputs,
+                        "[batch, seq_len, channels]; reconstructed test windows",
+                    ),
+                    (
+                        "logits_per_time",
+                        logits_per_time,
+                        "[batch*channels, patches, patches]; time-to-semantic similarity logits",
+                    ),
+                    (
+                        "logits_per_text",
+                        logits_per_text,
+                        "[batch*channels, patches, patches]; semantic-to-time similarity logits",
+                    ),
+                    (
+                        "total_mask",
+                        total_mask,
+                        "[batch*channels, patches, 1]; information condenser keep probability",
+                    ),
+                ],
+                [
+                    (
+                        "score",
+                        score,
+                        "[batch, seq_len]; per-time-step reconstruction error averaged over channels",
+                    ),
+                ],
+            )
             score = score.detach().cpu().numpy()
             attens_energy.append(score)
             test_labels.append(batch_y)
@@ -800,6 +1086,50 @@ class MindTS:
             outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            self._log_model_batch_shapes(
+                "detect_multi_label.threshold_first_batch",
+                [
+                    (
+                        "batch_x_time",
+                        batch_x_time,
+                        "[batch, seq_len, channels]; threshold-mode windows that produce final anomaly scores",
+                    ),
+                    (
+                        "batch_y",
+                        batch_y,
+                        "[batch, seq_len, channels]; threshold-mode labels/targets from loader",
+                    ),
+                ],
+                [
+                    (
+                        "outputs",
+                        outputs,
+                        "[batch, seq_len, channels]; reconstructed threshold-mode windows",
+                    ),
+                    (
+                        "logits_per_time",
+                        logits_per_time,
+                        "[batch*channels, patches, patches]; time-to-semantic similarity logits",
+                    ),
+                    (
+                        "logits_per_text",
+                        logits_per_text,
+                        "[batch*channels, patches, patches]; semantic-to-time similarity logits",
+                    ),
+                    (
+                        "total_mask",
+                        total_mask,
+                        "[batch*channels, patches, 1]; information condenser keep probability",
+                    ),
+                ],
+                [
+                    (
+                        "score",
+                        score,
+                        "[batch, seq_len]; per-time-step reconstruction error averaged over channels",
+                    ),
+                ],
+            )
             score = score.detach().cpu().numpy()
             attens_energy.append(score)
             test_labels.append(batch_y)
