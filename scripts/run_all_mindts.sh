@@ -12,9 +12,9 @@ scripts=(
   # "scripts/univariate_detection/detect_label/KR_script/MindTS.sh"
   # "scripts/univariate_detection/detect_label/MDT_script/MindTS.sh"
   # "scripts/univariate_detection/detect_label/EWJ_script/MindTS.sh"
-  "scripts/univariate_detection/detect_label/Environment_script/MindTS.sh"
+  # "scripts/univariate_detection/detect_label/Environment_script/MindTS.sh"
   "scripts/multivariate_detection/detect_label/Energy_script/MindTS.sh"
-  "scripts/multivariate_detection/detect_label/Weather_script/MindTS.sh"
+  # "scripts/multivariate_detection/detect_label/Weather_script/MindTS.sh"
 )
 
 for script in "${scripts[@]}"; do

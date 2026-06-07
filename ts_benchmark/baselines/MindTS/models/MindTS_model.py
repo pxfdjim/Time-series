@@ -6,12 +6,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ts_benchmark.baselines.MindTS.layers.Embed import WarriorsEmbedding, DataEmbedding_inverted
 from ts_benchmark.baselines.MindTS.layers.Transformer_EncDec import Encoder, EncoderLayer
-from ts_benchmark.baselines.MindTS.layers.SelfAttention_Family import FullAttention, AttentionLayer
+from ts_benchmark.baselines.MindTS.layers.SelfAttention_Family import DSAttention, FullAttention, AttentionLayer
 from einops import rearrange
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
-DEEPSEEK_PATH = "/18t/data/home/pxf/jim/race/MindTS/DeepSeek"
+DEEPSEEK_PATH = "/home/pxf/Time_series/Mind/DeepSeek"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -60,6 +60,33 @@ class MovingAverage(nn.Module):
         end = x[:, -1:, :].repeat(1, padding, 1)
         x = torch.cat([front, x, end], dim=1)
         return self.avg(x.permute(0, 2, 1)).permute(0, 2, 1)
+
+
+class Projector(nn.Module):
+    def __init__(self, enc_in, seq_len, hidden_dims, hidden_layers, output_dim, kernel_size=3):
+        super(Projector, self).__init__()
+        padding = 1 if torch.__version__ >= "1.5.0" else 2
+        self.series_conv = nn.Conv1d(
+            in_channels=seq_len,
+            out_channels=1,
+            kernel_size=kernel_size,
+            padding=padding,
+            padding_mode="circular",
+            bias=False,
+        )
+
+        layers = [nn.Linear(2 * enc_in, hidden_dims[0]), nn.ReLU()]
+        for i in range(hidden_layers - 1):
+            layers += [nn.Linear(hidden_dims[i], hidden_dims[i + 1]), nn.ReLU()]
+        layers += [nn.Linear(hidden_dims[-1], output_dim, bias=False)]
+        self.backbone = nn.Sequential(*layers)
+
+    def forward(self, x, stats):
+        batch_size = x.shape[0]
+        x = self.series_conv(x)
+        x = torch.cat([x, stats], dim=1)
+        x = x.view(batch_size, -1)
+        return self.backbone(x)
 
 
 class TransformerBlock(nn.Module):
@@ -124,8 +151,8 @@ class MINDTSModel(nn.Module):
             or (torch.cuda.is_available() and torch.cuda.device_count() > 1)
         )
         if self.manual_device_split and main_device_name is None and llm_device_name is None:
-            main_device_name = "cuda:0"
-            llm_device_name = "cuda:1"
+            main_device_name = "cuda:1"
+            llm_device_name = "cuda:0"
         self.main_device = _resolve_device(main_device_name, default_device)
         self.llm_device = _resolve_device(llm_device_name, self.main_device)
         self.device = self.main_device    # Device for trainable time-series modules
@@ -139,6 +166,7 @@ class MINDTSModel(nn.Module):
         self.d_model = configs.d_model
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
+        self.use_de_stationary = getattr(configs, "use_de_stationary", True)
         self.shape_log_path = getattr(configs, "shape_log_path", None)
         self._shape_log_events = set()
         self.description = getattr(
@@ -164,13 +192,32 @@ class MINDTSModel(nn.Module):
             nn.Linear(4 * configs.seq_len, configs.seq_len),
         )
 
+        time_patch_attention = DSAttention if self.use_de_stationary else FullAttention
+        if self.use_de_stationary:
+            p_hidden_dims = getattr(configs, "p_hidden_dims", [128, 128])
+            p_hidden_layers = getattr(configs, "p_hidden_layers", len(p_hidden_dims))
+            self.tau_learner = Projector(
+                enc_in=self.patch_size,
+                seq_len=self.patch_num,
+                hidden_dims=p_hidden_dims,
+                hidden_layers=p_hidden_layers,
+                output_dim=1,
+            )
+            self.delta_learner = Projector(
+                enc_in=self.patch_size,
+                seq_len=self.patch_num,
+                hidden_dims=p_hidden_dims,
+                hidden_layers=p_hidden_layers,
+                output_dim=self.patch_num,
+            )
+
         # Time patch encoder with stacked attention layers
         self.time_patch_encoder = Encoder(
             [
                 EncoderLayer(
                     AttentionLayer(
-                        FullAttention(False, configs.factor, attention_dropout=configs.dropout,
-                                      output_attention=False), configs.d_model, configs.n_heads),
+                        time_patch_attention(False, configs.factor, attention_dropout=configs.dropout,
+                                             output_attention=False), configs.d_model, configs.n_heads),
                     configs.d_model,
                     configs.d_ff,
                     dropout=configs.dropout,
@@ -310,6 +357,16 @@ class MINDTSModel(nn.Module):
         x = x - means
         stdev = torch.sqrt(torch.var(x, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
         return x / stdev
+
+    def _de_stationary_factors(self, x):
+        x_patch = x.detach().permute(0, 2, 1).contiguous()
+        x_patch = x_patch.unfold(dimension=-1, size=self.patch_size, step=self.stride)
+        x_patch = rearrange(x_patch, "b c n p -> (b c) n p")
+        mean_patch = x_patch.mean(1, keepdim=True).detach()
+        std_patch = torch.sqrt(torch.var(x_patch, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
+        tau = self.tau_learner(x_patch, std_patch).exp()
+        delta = self.delta_learner(x_patch, mean_patch)
+        return tau, delta
 
     def _decompose_local(self, x):
         trend = self.moving_avg(x)
@@ -474,7 +531,7 @@ class MINDTSModel(nn.Module):
     ):
         main_device = self._runtime_main_device(x_enc_time)
         x_enc_time = x_enc_time.to(main_device)
-        x_enc_time_raw = x_enc_time
+        x_enc_time_raw = x_enc_time.clone().detach()
         # -------------------------------------------------------------Input data normalization--------------------------------------------------------------------
         means = x_enc_time.mean(1, keepdim=True).detach()
         x_enc_time = x_enc_time - means
@@ -485,10 +542,22 @@ class MINDTSModel(nn.Module):
         # -------------------------------------------------------------Series patching and masking-----------------------------------------------------------------
         x_enc_time_patch_normal, _ = self.patch_embedding(x_enc_time.permute(0, 2, 1))
         x_enc_time_patch_mask, _, _, _ = self.random_masking(x_enc_time_patch_normal, self.mask_ratio)
+        if self.use_de_stationary:
+            tau, delta = self._de_stationary_factors(x_enc_time_raw)
+        else:
+            tau, delta = None, None
 
         # -------------------------------------------------------------Time Encoder--------------------------------------------------------------------------------
-        time_features_patch_normal, attns = self.time_patch_encoder(x_enc_time_patch_normal)    #[B*C, N, D]
-        time_features_patch_mask, attns = self.time_patch_encoder(x_enc_time_patch_mask)    #[B*C, N, D]
+        time_features_patch_normal, attns = self.time_patch_encoder(
+            x_enc_time_patch_normal,
+            tau=tau,
+            delta=delta,
+        )    #[B*C, N, D]
+        time_features_patch_mask, attns = self.time_patch_encoder(
+            x_enc_time_patch_mask,
+            tau=tau,
+            delta=delta,
+        )    #[B*C, N, D]
 
         # -------------------------------------------------------------Intrinsic prompt reasoning-------------------------------------------------------------------
         prompt_feature = self._encode_intrinsic_prompts(x_enc_time, main_device)
@@ -513,7 +582,7 @@ class MINDTSModel(nn.Module):
         )
 
         # -------------------------------------------------------------prompt and component Cross-view Attention---------------------------------------------------
-        llm_features = self.transformer_block(semantic_features, prompt_feature)
+        llm_features = self.transformer_block(prompt_feature, semantic_features)
         self._write_shape_log(
             "cross_view_attention.first_batch",
             [

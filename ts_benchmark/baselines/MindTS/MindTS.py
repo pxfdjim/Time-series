@@ -135,6 +135,8 @@ class MindTS:
         self.stl_weight = self.config.stl_weight
         self.training_logs = []
         self.check_point = None
+        self.best_valid_loss = None
+        self.best_checkpoint_epoch = None
         self.shape_log_path = None
         self._shape_log_events = set()
 
@@ -221,8 +223,23 @@ class MindTS:
                 for key, value in self.model.state_dict().items()
             }
 
+    def _save_best_checkpoint_if_needed(self, valid_loss, epoch):
+        if not np.isfinite(valid_loss):
+            return
+        if self.best_valid_loss is None or valid_loss < self.best_valid_loss:
+            self.best_valid_loss = float(valid_loss)
+            self.best_checkpoint_epoch = int(epoch)
+            self._save_current_checkpoint()
+            print(
+                f"Best validation loss updated at epoch {epoch}: {valid_loss:.6f}. "
+                "Saving checkpoint."
+            )
+
     def _reset_training_logs(self):
         self.training_logs = []
+        self.check_point = None
+        self.best_valid_loss = None
+        self.best_checkpoint_epoch = None
 
     def _record_training_log(self, epoch, train_loss, valid_loss, learning_rate, epoch_time):
         self.training_logs.append(
@@ -425,9 +442,11 @@ class MindTS:
             train_loss = float(np.mean(train_loss_values)) if train_loss_values else np.nan
             self._record_training_log(epoch + 1, train_loss, valid_loss, epoch_lr, time.time() - epoch_start_time)
             print(f"\tepoch: {epoch + 1}, train_loss: {train_loss:.6f}, valid_loss: {valid_loss:.6f}")
+            self._save_best_checkpoint_if_needed(valid_loss, epoch + 1)
 
             adjust_learning_rate(optimizer, epoch + 1, config)
-        self._save_current_checkpoint()
+        if self.check_point is None:
+            self._save_current_checkpoint()
 
 
     def detect_multi_fit(self, train_data: pd.DataFrame, train_text: pd.DataFrame, train_label: pd.DataFrame):
@@ -605,9 +624,11 @@ class MindTS:
             train_loss = float(np.mean(train_loss_values)) if train_loss_values else np.nan
             self._record_training_log(epoch + 1, train_loss, valid_loss, epoch_lr, time.time() - epoch_start_time)
             print(f"Epoch {epoch + 1}/{config.num_epochs} finished: train_loss={train_loss:.6f}, valid_loss={valid_loss:.6f}", flush=True)
+            self._save_best_checkpoint_if_needed(valid_loss, epoch + 1)
 
             adjust_learning_rate(optimizer, epoch + 1, config)
-        self._save_current_checkpoint()
+        if self.check_point is None:
+            self._save_current_checkpoint()
 
     @torch.no_grad()
     def detect_score(self, test: pd.DataFrame) -> np.ndarray:
