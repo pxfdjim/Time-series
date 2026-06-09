@@ -71,7 +71,8 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "stl_weight": 0.001,
     "dataset_description": "A generic time-series dataset.",
     "main_device": None,
-    "llm_device": None
+    "llm_device": None,
+    "use_de_stationary_cross_view": False
 }
 
 def clip_loss(logits_per_time, logits_per_text):

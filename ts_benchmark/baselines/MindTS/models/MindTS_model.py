@@ -90,9 +90,18 @@ class Projector(nn.Module):
 
 
 class TransformerBlock(nn.Module):
-    def __init__(self, embed_dim, num_heads, ff_hidden_dim, dropout=0.1):
+    def __init__(self, embed_dim, num_heads, ff_hidden_dim, dropout=0.1,
+                 use_de_stationary=False, factor=1):
         super(TransformerBlock, self).__init__()
-        self.attention = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=True)
+        self.use_de_stationary = use_de_stationary
+        if self.use_de_stationary:
+            self.attention = AttentionLayer(
+                DSAttention(False, factor, attention_dropout=dropout, output_attention=False),
+                embed_dim,
+                num_heads,
+            )
+        else:
+            self.attention = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=True)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.norm2 = nn.LayerNorm(embed_dim)
         self.feed_forward = nn.Sequential(
@@ -102,8 +111,18 @@ class TransformerBlock(nn.Module):
         )
         self.dropout = nn.Dropout(dropout)
     
-    def forward(self, prompt, text_features):
-        attn_output, _ = self.attention(prompt, text_features, text_features)
+    def forward(self, prompt, text_features, tau=None, delta=None):
+        if self.use_de_stationary:
+            attn_output, _ = self.attention(
+                prompt,
+                text_features,
+                text_features,
+                attn_mask=None,
+                tau=tau,
+                delta=delta,
+            )
+        else:
+            attn_output, _ = self.attention(prompt, text_features, text_features)
         x = self.norm1(prompt + self.dropout(attn_output))
         ff_output = self.feed_forward(x)
         out = self.norm2(x + self.dropout(ff_output))
@@ -152,7 +171,7 @@ class MINDTSModel(nn.Module):
         )
         if self.manual_device_split and main_device_name is None and llm_device_name is None:
             main_device_name = "cuda:1"
-            llm_device_name = "cuda:0"
+            llm_device_name = "cuda:1"
         self.main_device = _resolve_device(main_device_name, default_device)
         self.llm_device = _resolve_device(llm_device_name, self.main_device)
         self.device = self.main_device    # Device for trainable time-series modules
@@ -167,6 +186,7 @@ class MINDTSModel(nn.Module):
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
         self.use_de_stationary = getattr(configs, "use_de_stationary", True)
+        self.use_de_stationary_cross_view = getattr(configs, "use_de_stationary_cross_view", False)
         self.shape_log_path = getattr(configs, "shape_log_path", None)
         self._shape_log_events = set()
         self.description = getattr(
@@ -193,7 +213,7 @@ class MINDTSModel(nn.Module):
         )
 
         time_patch_attention = DSAttention if self.use_de_stationary else FullAttention
-        if self.use_de_stationary:
+        if self.use_de_stationary or self.use_de_stationary_cross_view:
             p_hidden_dims = getattr(configs, "p_hidden_dims", [128, 128])
             p_hidden_layers = getattr(configs, "p_hidden_layers", len(p_hidden_dims))
             self.tau_learner = Projector(
@@ -260,7 +280,13 @@ class MINDTSModel(nn.Module):
             config=self.deepseek_config,
             attn_implementation="eager",
         )
-        self.transformer_block = TransformerBlock(self.d_model, self.num_heads, self.d_ff)
+        self.transformer_block = TransformerBlock(
+            self.d_model,
+            self.num_heads,
+            self.d_ff,
+            use_de_stationary=self.use_de_stationary_cross_view,
+            factor=configs.factor,
+        )
         self.multimodal_Transformer_Block = MultiTransformerBlock(self.d_model, self.num_heads, self.d_ff)
         self.prob_net = nn.Sequential(nn.PReLU(), nn.Linear(configs.d_model, 1), nn.Sigmoid())
         for param in self.model.parameters():
@@ -542,21 +568,25 @@ class MINDTSModel(nn.Module):
         # -------------------------------------------------------------Series patching and masking-----------------------------------------------------------------
         x_enc_time_patch_normal, _ = self.patch_embedding(x_enc_time.permute(0, 2, 1))
         x_enc_time_patch_mask, _, _, _ = self.random_masking(x_enc_time_patch_normal, self.mask_ratio)
-        if self.use_de_stationary:
+        if self.use_de_stationary or self.use_de_stationary_cross_view:
             tau, delta = self._de_stationary_factors(x_enc_time_raw)
         else:
             tau, delta = None, None
+        time_tau = tau if self.use_de_stationary else None
+        time_delta = delta if self.use_de_stationary else None
+        cross_tau = tau if self.use_de_stationary_cross_view else None
+        cross_delta = delta if self.use_de_stationary_cross_view else None
 
         # -------------------------------------------------------------Time Encoder--------------------------------------------------------------------------------
         time_features_patch_normal, attns = self.time_patch_encoder(
             x_enc_time_patch_normal,
-            tau=tau,
-            delta=delta,
+            tau=time_tau,
+            delta=time_delta,
         )    #[B*C, N, D]
         time_features_patch_mask, attns = self.time_patch_encoder(
             x_enc_time_patch_mask,
-            tau=tau,
-            delta=delta,
+            tau=time_tau,
+            delta=time_delta,
         )    #[B*C, N, D]
 
         # -------------------------------------------------------------Intrinsic prompt reasoning-------------------------------------------------------------------
@@ -582,7 +612,12 @@ class MINDTSModel(nn.Module):
         )
 
         # -------------------------------------------------------------prompt and component Cross-view Attention---------------------------------------------------
-        llm_features = self.transformer_block(prompt_feature, semantic_features)
+        llm_features = self.transformer_block(
+            prompt_feature,
+            semantic_features,
+            tau=cross_tau,
+            delta=cross_delta,
+        )
         self._write_shape_log(
             "cross_view_attention.first_batch",
             [
