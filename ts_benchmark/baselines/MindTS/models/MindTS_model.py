@@ -25,7 +25,7 @@ def _resolve_device(device_name, fallback):
 
 
 class Transpose(nn.Module):
-    def __init__(self, *dims, contiguous=False): 
+    def __init__(self, *dims, contiguous=False):
         super().__init__()
         self.dims, self.contiguous = dims, contiguous
     def forward(self, x):
@@ -110,25 +110,25 @@ class TransformerBlock(nn.Module):
             nn.Linear(ff_hidden_dim, embed_dim)
         )
         self.dropout = nn.Dropout(dropout)
-    
-    def forward(self, prompt, text_features, tau=None, delta=None):
+
+    def forward(self, prompt, semantic_features, tau=None, delta=None):
         if self.use_de_stationary:
             attn_output, _ = self.attention(
                 prompt,
-                text_features,
-                text_features,
+                semantic_features,
+                semantic_features,
                 attn_mask=None,
                 tau=tau,
                 delta=delta,
             )
         else:
-            attn_output, _ = self.attention(prompt, text_features, text_features)
+            attn_output, _ = self.attention(prompt, semantic_features, semantic_features)
         x = self.norm1(prompt + self.dropout(attn_output))
         ff_output = self.feed_forward(x)
         out = self.norm2(x + self.dropout(ff_output))
-        
+
         return out
-    
+
 
 class MultiTransformerBlock(nn.Module):
     def __init__(self, embed_dim, num_heads, ff_hidden_dim, dropout=0.1):
@@ -154,9 +154,9 @@ class MultiTransformerBlock(nn.Module):
         ff_output = self.ffn(x)
         ff_output = self.dropout(ff_output)
         output = self.norm2(x + ff_output)
-        
+
         return output
-    
+
 
 class MINDTSModel(nn.Module):
     def __init__(self, configs):
@@ -170,14 +170,14 @@ class MINDTSModel(nn.Module):
             or (torch.cuda.is_available() and torch.cuda.device_count() > 1)
         )
         if self.manual_device_split and main_device_name is None and llm_device_name is None:
-            main_device_name = "cuda:1"
+            main_device_name = "cuda:0"
             llm_device_name = "cuda:1"
         self.main_device = _resolve_device(main_device_name, default_device)
         self.llm_device = _resolve_device(llm_device_name, self.main_device)
         self.device = self.main_device    # Device for trainable time-series modules
         self.configs = configs
         self.batch_size = configs.batch_size
-        self.seq_len = configs.seq_len 
+        self.seq_len = configs.seq_len
         self.pred_len = configs.pred_len
         self.patch_size = configs.patch_size
         self.stride = configs.stride
@@ -185,8 +185,24 @@ class MINDTSModel(nn.Module):
         self.d_model = configs.d_model
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
-        self.use_de_stationary = getattr(configs, "use_de_stationary", True)
+        self.use_de_stationary = getattr(configs, "use_de_stationary", False)
         self.use_de_stationary_cross_view = getattr(configs, "use_de_stationary_cross_view", False)
+        self.use_information_condenser = getattr(configs, "use_information_condenser", False)
+        self.align_loss_type = getattr(configs, "align_loss_type", "contrastive")# "text_gaussian_nll"、"symmetric_gaussian_kl"、"none"
+        self.align_detach_target = getattr(configs, "align_detach_target", True)
+        self.align_logvar_min = getattr(configs, "align_logvar_min", -6.0)
+        self.align_logvar_max = getattr(configs, "align_logvar_max", 2.0)
+        allowed_align_losses = {
+            "contrastive",
+            "text_gaussian_nll",
+            "symmetric_gaussian_kl",
+            "none",
+        }
+        if self.align_loss_type not in allowed_align_losses:
+            raise ValueError(
+                f"Invalid align_loss_type={self.align_loss_type!r}. "
+                f"Supported values are {sorted(allowed_align_losses)}."
+            )
         self.shape_log_path = getattr(configs, "shape_log_path", None)
         self._shape_log_events = set()
         self.description = getattr(
@@ -288,7 +304,11 @@ class MINDTSModel(nn.Module):
             factor=configs.factor,
         )
         self.multimodal_Transformer_Block = MultiTransformerBlock(self.d_model, self.num_heads, self.d_ff)
-        self.prob_net = nn.Sequential(nn.PReLU(), nn.Linear(configs.d_model, 1), nn.Sigmoid())
+        if self.align_loss_type == "text_gaussian_nll":
+            self.align_mu_head = nn.Linear(configs.d_model, configs.d_model)
+            self.align_logvar_head = nn.Linear(configs.d_model, configs.d_model)
+        if self.use_information_condenser:
+            self.prob_net = nn.Sequential(nn.PReLU(), nn.Linear(configs.d_model, 1), nn.Sigmoid())
         for param in self.model.parameters():
             param.requires_grad_(False)
         self.register_buffer("role_prompt_embeddings", torch.empty(0), persistent=False)
@@ -367,10 +387,10 @@ class MINDTSModel(nn.Module):
         mask = torch.ones([bs_nvars, L], device=device)
         mask[:, :len_keep] = 0
         mask = torch.gather(mask, dim=1, index=ids_restore)
-    
+
         return x_masked, x_kept, mask, ids_restore
 
-    def calcute_lags(self, x_enc): 
+    def calcute_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.contiguous(), dim=-1)
         k_fft = torch.fft.rfft(x_enc.contiguous(), dim=-1)
         res = q_fft * torch.conj(k_fft)
@@ -393,6 +413,64 @@ class MINDTSModel(nn.Module):
         tau = self.tau_learner(x_patch, std_patch).exp()
         delta = self.delta_learner(x_patch, mean_patch)
         return tau, delta
+
+    def _contrastive_align_loss(self, logits_per_time, logits_per_text):
+        labels = torch.arange(logits_per_time.shape[1], device=logits_per_time.device).long()
+        total_loss = torch.zeros((), device=logits_per_time.device, dtype=logits_per_time.dtype)
+        for i in range(logits_per_time.shape[0]):
+            total_loss = total_loss + (
+                F.cross_entropy(logits_per_time[i], labels)
+                + F.cross_entropy(logits_per_text[i], labels)
+            ) / 2
+        return total_loss
+
+    def _text_gaussian_nll_align_loss(self, time_features, llm_features):
+        target = time_features.detach() if self.align_detach_target else time_features
+        mu_txt = self.align_mu_head(llm_features)
+        logvar_txt = self.align_logvar_head(llm_features).clamp(
+            self.align_logvar_min,
+            self.align_logvar_max,
+        )
+        inv_var = torch.exp(-logvar_txt)
+        nll = 0.5 * (logvar_txt + (target - mu_txt).pow(2) * inv_var)
+        return nll.mean()
+
+    def _symmetric_gaussian_kl_align_loss(self, time_features, llm_features):
+        eps = 1e-5
+        time_norm = F.layer_norm(time_features, (time_features.shape[-1],))
+        llm_norm = F.layer_norm(llm_features, (llm_features.shape[-1],))
+
+        mu_t = time_norm.mean(dim=1)
+        mu_x = llm_norm.mean(dim=1)
+        var_t = time_norm.var(dim=1, unbiased=False) + eps
+        var_x = llm_norm.var(dim=1, unbiased=False) + eps
+        logvar_t = torch.log(var_t).clamp(self.align_logvar_min, self.align_logvar_max)
+        logvar_x = torch.log(var_x).clamp(self.align_logvar_min, self.align_logvar_max)
+        var_t = torch.exp(logvar_t)
+        var_x = torch.exp(logvar_x)
+
+        kl_t_to_x = 0.5 * (
+            logvar_x
+            - logvar_t
+            + (var_t + (mu_t - mu_x).pow(2)) / var_x
+            - 1
+        )
+        kl_x_to_t = 0.5 * (
+            logvar_t
+            - logvar_x
+            + (var_x + (mu_x - mu_t).pow(2)) / var_t
+            - 1
+        )
+        return 0.5 * (kl_t_to_x + kl_x_to_t).mean()
+
+    def _alignment_loss(self, time_features, llm_features, logits_per_time, logits_per_text):
+        if self.align_loss_type == "contrastive":
+            return self._contrastive_align_loss(logits_per_time, logits_per_text)
+        if self.align_loss_type == "text_gaussian_nll":
+            return self._text_gaussian_nll_align_loss(time_features, llm_features)
+        if self.align_loss_type == "symmetric_gaussian_kl":
+            return self._symmetric_gaussian_kl_align_loss(time_features, llm_features)
+        return torch.zeros((), device=time_features.device, dtype=time_features.dtype)
 
     def _decompose_local(self, x):
         trend = self.moving_avg(x)
@@ -544,8 +622,8 @@ class MINDTSModel(nn.Module):
             + F.mse_loss(season_local, season_target)
             + F.mse_loss(residual_local, residual_target)
         )
-    
-    
+
+
     def Multimodal_Time_Series(
         self,
         x_enc_time,
@@ -631,7 +709,7 @@ class MINDTSModel(nn.Module):
                 ),
                 (
                     "attention direction after this change: "
-                    "semantic_features query prompt_feature as key/value; output keeps semantic_features as residual backbone"
+                    "prompt_feature query semantic_features as key/value; output keeps prompt_feature as residual backbone"
                 ),
                 (
                     f"llm_features shape: {self._shape_of(llm_features)}; "
@@ -646,17 +724,26 @@ class MINDTSModel(nn.Module):
         logit_scale = self.logit_scale.exp()
         logits_per_time = logit_scale * torch.bmm(time_norm, llm_norm.transpose(1, 2))
         logits_per_text = logits_per_time.transpose(1, 2)
+        align_loss = self._alignment_loss(
+            time_features_patch_normal,
+            llm_features,
+            logits_per_time,
+            logits_per_text,
+        )
 
         # -------------------------------------------------------------Information Condenser----------------------------------------------------------------------
-        total_mask = self.prob_net(llm_features)
-        if total_mask.shape[-1] == 1:
-            inv_probs = 1 - total_mask
-            total_mask_prob = torch.cat([inv_probs, total_mask], dim=-1)
+        if self.use_information_condenser:
+            total_mask = self.prob_net(llm_features)
+            if total_mask.shape[-1] == 1:
+                inv_probs = 1 - total_mask
+                total_mask_prob = torch.cat([inv_probs, total_mask], dim=-1)
+            else:
+                total_mask_prob = total_mask.softmax(dim=-1)
+            total_mask_reparameterize = torch.nn.functional.gumbel_softmax(torch.log(total_mask_prob + 1e-6), tau = 1, hard = True)[...,1]
+            total_mask_reparameterize = total_mask_reparameterize.unsqueeze(-1)
+            llm_features = total_mask_reparameterize * llm_features
         else:
-            total_mask_prob = total_mask.softmax(dim=-1)
-        total_mask_reparameterize = torch.nn.functional.gumbel_softmax(torch.log(total_mask_prob + 1e-6), tau = 1, hard = True)[...,1]
-        total_mask_reparameterize = total_mask_reparameterize.unsqueeze(-1)
-        llm_features = total_mask_reparameterize * llm_features      
+            total_mask = torch.ones_like(llm_features[..., :1])
 
         # -------------------------------------------------------------Reconstruction-----------------------------------------------------------------------------
         multi_features = self.multimodal_Transformer_Block(llm_features, time_features_patch_mask)
@@ -667,9 +754,9 @@ class MINDTSModel(nn.Module):
         # -------------------------------------------------------------Inverse normalization-----------------------------------------------------------------------
         output = output * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1))
         output = output + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1))
-        return output, logits_per_time, logits_per_text, total_mask, loss_stl
+        return output, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss
 
-    
+
     def forward(
         self,
         x_enc_time,

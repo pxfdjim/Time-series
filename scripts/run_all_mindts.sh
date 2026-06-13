@@ -5,16 +5,19 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 LOG_DIR="${ROOT_DIR}/result/run_all_mindts_logs/$(date '+%Y%m%d_%H%M%S')"
+MINDTS_SAVE_ROOT="${1:-${MINDTS_SAVE_ROOT:-label_no_condenser}}"
+export MINDTS_SAVE_ROOT
 mkdir -p "$LOG_DIR"
 echo "Logs: ${LOG_DIR}"
+echo "Save root: result/${MINDTS_SAVE_ROOT}"
 
 scripts=(
-  # "scripts/univariate_detection/detect_label/KR_script/MindTS.sh"
-  # "scripts/univariate_detection/detect_label/MDT_script/MindTS.sh"
-  # "scripts/univariate_detection/detect_label/EWJ_script/MindTS.sh"
+  "scripts/univariate_detection/detect_label/KR_script/MindTS.sh"
+  "scripts/univariate_detection/detect_label/MDT_script/MindTS.sh"
+  "scripts/univariate_detection/detect_label/EWJ_script/MindTS.sh"
   # "scripts/univariate_detection/detect_label/Environment_script/MindTS.sh"
-  "scripts/multivariate_detection/detect_label/Energy_script/MindTS.sh"
-  # "scripts/multivariate_detection/detect_label/Weather_script/MindTS.sh"
+  # "scripts/multivariate_detection/detect_label/Energy_script/MindTS.sh"
+  "scripts/multivariate_detection/detect_label/Weather_script/MindTS.sh"
 )
 
 for script in "${scripts[@]}"; do

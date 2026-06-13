@@ -72,7 +72,12 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "dataset_description": "A generic time-series dataset.",
     "main_device": None,
     "llm_device": None,
-    "use_de_stationary_cross_view": False
+    "use_de_stationary_cross_view": False,
+    "use_information_condenser": True,
+    "align_loss_type": "contrastive",
+    "align_detach_target": True,
+    "align_logvar_min": -6.0,
+    "align_logvar_max": 2.0,
 }
 
 def clip_loss(logits_per_time, logits_per_text):
@@ -90,9 +95,9 @@ def Bottleneck_loss(total_mask, r, lamda):
         compress_loss += (temp * torch.log(temp/(r + 1e-6) + 1e-6) + (1-temp) * torch.log((1-temp)/(1-r+1e-6) + 1e-6)).mean()
         shift1 = temp[1:,:]
         shift2 = temp[:-1,:]
-        connect_loss += torch.sum((shift1 - shift2).norm(p=2)) / shift1.flatten().shape[0]    
+        connect_loss += torch.sum((shift1 - shift2).norm(p=2)) / shift1.flatten().shape[0]
     connect_loss /= total_mask.shape[0]
-    compress_loss /= total_mask.shape[0] 
+    compress_loss /= total_mask.shape[0]
 
     mask_loss = compress_loss + lamda * connect_loss
     return mask_loss
@@ -117,11 +122,11 @@ class MINDTSConfig:
     @property
     def learning_rate(self):
         return self.lr
-    
+
     @property
     def model_name(self):
         return "MindTS"
-    
+
 
 class MindTS:
     def __init__(self, **kwargs):
@@ -256,6 +261,11 @@ class MindTS:
     def get_training_log(self):
         return json.dumps(self.training_logs, sort_keys=True)
 
+    def _bottleneck_loss(self, total_mask):
+        if not getattr(self.config, "use_information_condenser", True):
+            return torch.zeros((), device=total_mask.device, dtype=total_mask.dtype)
+        return Bottleneck_loss(total_mask, self.config.r, self.config.lamda)
+
     @staticmethod
     def required_hyper_params() -> dict:
         """
@@ -301,7 +311,7 @@ class MindTS:
 
                 loss = criterion(outputs, true).detach().cpu().numpy()
 
-                total_loss.append(loss)  
+                total_loss.append(loss)
 
         total_loss = np.mean(total_loss)
         self.model.train()
@@ -326,7 +336,7 @@ class MindTS:
                 trend_stl = trend_stl.float().to(self._get_main_device())
                 season_stl = season_stl.float().to(self._get_main_device())
                 residual_stl = residual_stl.float().to(self._get_main_device())
-                outputs, logits_per_time, logits_per_text, total_mask, loss_stl = self.model(
+                outputs, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
                     batch_x_time,
                     batch_input_ids,
                     batch_attention_mask,
@@ -344,10 +354,10 @@ class MindTS:
                 loss1 = criterion(outputs, true).detach().cpu().numpy()
 
                 # Comparison Loss
-                loss2 = clip_loss(logits_per_time, logits_per_text).detach().cpu().numpy()
-                    
+                loss2 = align_loss.detach().cpu().numpy()
+
                 # Bottleneck loss
-                loss3 = Bottleneck_loss(total_mask, self.config.r, self.config.lamda).detach().cpu().numpy()
+                loss3 = self._bottleneck_loss(total_mask).detach().cpu().numpy()
 
                 loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3 + self.stl_weight*loss_stl.detach().cpu().numpy()
                 total_loss.append(loss)
@@ -356,7 +366,7 @@ class MindTS:
         total_loss = np.mean(total_loss)
         self.model.train()
         return total_loss
-    
+
     def detect_fit(self, train_data: pd.DataFrame, train_label: pd.DataFrame):
         self.detect_hyper_param_tune(train_data)
         setattr(self.config, "task_name", "anomaly_detection")
@@ -489,7 +499,7 @@ class MindTS:
             valid_text,
             columns=valid_text.columns,
             index=valid_text.index,
-        )   
+        )
 
         print("Preparing validation STL windows...", flush=True)
         self.valid_data_loader = anomaly_detection_multi_data_provider(
@@ -548,7 +558,7 @@ class MindTS:
                 trend_stl = trend_stl.float().to(self._get_main_device())
                 season_stl = season_stl.float().to(self._get_main_device())
                 residual_stl = residual_stl.float().to(self._get_main_device())
-                outputs, logits_per_time, logits_per_text, total_mask, loss_stl = self.model(
+                outputs, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
                     batch_x_time,
                     batch_input_ids,
                     batch_attention_mask,
@@ -610,10 +620,10 @@ class MindTS:
                 loss1 = criterion(outputs, batch_x_time)
 
                 # Comparison Loss
-                loss2 = clip_loss(logits_per_time, logits_per_text)
+                loss2 = align_loss
 
                 # Bottleneck loss
-                loss3 = Bottleneck_loss(total_mask, self.config.r, self.config.lamda)
+                loss3 = self._bottleneck_loss(total_mask)
 
                 loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3 + self.stl_weight*loss_stl
                 loss_value = loss.detach().cpu().item()
@@ -718,7 +728,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
             score = score.detach().cpu().numpy()
@@ -729,7 +739,7 @@ class MindTS:
         test_energy = np.array(attens_energy)
 
         return test_energy, test_energy
-    
+
     @torch.no_grad()
     def detect_label(self, test: pd.DataFrame) -> np.ndarray:
         test = pd.DataFrame(
@@ -974,7 +984,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
             self._log_model_batch_shapes(
@@ -1039,7 +1049,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
             self._log_model_batch_shapes(
@@ -1105,7 +1115,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
             score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
             self._log_model_batch_shapes(
@@ -1168,7 +1178,7 @@ class MindTS:
             preds[ratio] = (test_energy > threshold).astype(int)
 
         return preds, test_energy
-    
+
     def __repr__(self) -> str:
         """
         Returns a string representation of the model name.
