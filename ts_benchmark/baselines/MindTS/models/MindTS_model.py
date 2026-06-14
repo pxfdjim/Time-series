@@ -1,5 +1,7 @@
 import torch
 import time
+import os
+import importlib.util
 import numpy as np
 import pandas as pd
 import torch.nn as nn
@@ -13,15 +15,43 @@ from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 DEEPSEEK_PATH = "DeepSeek"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+GPU_MEMORY_GIB = 1024 ** 3
 
 
 def _resolve_device(device_name, fallback):
     if device_name is None:
         return fallback
     resolved = torch.device(device_name)
-    if resolved.type == "cuda" and not torch.cuda.is_available():
-        return torch.device("cpu")
+    if resolved.type == "cuda":
+        if not torch.cuda.is_available():
+            return torch.device("cpu")
+        visible_gpu_count = torch.cuda.device_count()
+        if resolved.index is not None and resolved.index >= visible_gpu_count:
+            raise ValueError(
+                f"Requested device {resolved}, but only {visible_gpu_count} CUDA "
+                "device(s) are visible. Check --gpus or CUDA_VISIBLE_DEVICES."
+            )
     return resolved
+
+
+def _has_accelerate():
+    return importlib.util.find_spec("accelerate") is not None
+
+
+def _gpu_max_memory(visible_gpu_count, main_gpu_index=0):
+    if visible_gpu_count <= 0:
+        return None
+
+    main_fraction = float(os.environ.get("MINDTS_MAIN_GPU_LLM_FRACTION", "0.35"))
+    llm_fraction = float(os.environ.get("MINDTS_LLM_GPU_MEMORY_FRACTION", "0.90"))
+    max_memory = {}
+    for gpu_index in range(visible_gpu_count):
+        free_bytes, _ = torch.cuda.mem_get_info(gpu_index)
+        fraction = main_fraction if gpu_index == main_gpu_index else llm_fraction
+        memory_gib = max(1, int((free_bytes * fraction) // GPU_MEMORY_GIB))
+        max_memory[gpu_index] = f"{memory_gib}GiB"
+    max_memory["cpu"] = "64GiB"
+    return max_memory
 
 
 class Transpose(nn.Module):
@@ -164,16 +194,22 @@ class MINDTSModel(nn.Module):
         default_device = device
         main_device_name = getattr(configs, "main_device", None)
         llm_device_name = getattr(configs, "llm_device", None)
-        self.manual_device_split = (
-            main_device_name is not None
-            or llm_device_name is not None
-            or (torch.cuda.is_available() and torch.cuda.device_count() > 1)
-        )
-        if self.manual_device_split and main_device_name is None and llm_device_name is None:
+        explicit_device_split = main_device_name is not None or llm_device_name is not None
+        visible_gpu_count = torch.cuda.device_count() if torch.cuda.is_available() else 0
+        self.manual_device_split = explicit_device_split or visible_gpu_count > 1
+        if explicit_device_split:
+            if main_device_name is None:
+                main_device_name = "cuda:0" if visible_gpu_count else str(default_device)
+            if llm_device_name is None:
+                llm_device_name = main_device_name
+        elif visible_gpu_count > 1:
             main_device_name = "cuda:0"
             llm_device_name = "cuda:1"
         self.main_device = _resolve_device(main_device_name, default_device)
         self.llm_device = _resolve_device(llm_device_name, self.main_device)
+        self.visible_gpu_count = visible_gpu_count
+        self.llm_device_map = getattr(configs, "llm_device_map", "balanced_low_0")
+        self.llm_uses_device_map = False
         self.device = self.main_device    # Device for trainable time-series modules
         self.configs = configs
         self.batch_size = configs.batch_size
@@ -290,11 +326,48 @@ class MINDTSModel(nn.Module):
         self.deepseek_config.output_attentions = True
         self.deepseek_config.output_hidden_states = True
         self.tokenizer = AutoTokenizer.from_pretrained(DEEPSEEK_PATH, trust_remote_code=True)
+        model_load_kwargs = {
+            "trust_remote_code": True,
+            "config": self.deepseek_config,
+            "attn_implementation": "eager",
+        }
+        llm_device_map_mode = str(self.llm_device_map).lower()
+        use_automatic_llm_device_map = (
+            llm_device_map_mode not in {"none", "false", "off"}
+            and visible_gpu_count > 1
+            and not explicit_device_split
+        )
+        if use_automatic_llm_device_map:
+            if _has_accelerate():
+                main_gpu_index = self.main_device.index
+                if main_gpu_index is None:
+                    main_gpu_index = 0
+                self.llm_uses_device_map = True
+                model_load_kwargs.update(
+                    {
+                        "device_map": self.llm_device_map,
+                        "max_memory": _gpu_max_memory(
+                            visible_gpu_count,
+                            main_gpu_index=main_gpu_index,
+                        ),
+                        "low_cpu_mem_usage": True,
+                    }
+                )
+                print(
+                    f"Loading DeepSeek with HuggingFace device_map={self.llm_device_map!r} "
+                    f"across {visible_gpu_count} visible GPU(s).",
+                    flush=True,
+                )
+            else:
+                print(
+                    "accelerate is not installed; loading DeepSeek on a single "
+                    "LLM device. Install accelerate to enable automatic LLM "
+                    "layer sharding across multiple GPUs.",
+                    flush=True,
+                )
         self.model = AutoModel.from_pretrained(
             DEEPSEEK_PATH,
-            trust_remote_code=True,
-            config=self.deepseek_config,
-            attn_implementation="eager",
+            **model_load_kwargs,
         )
         self.transformer_block = TransformerBlock(
             self.d_model,
@@ -334,7 +407,8 @@ class MINDTSModel(nn.Module):
     def prepare_devices(self):
         for name, module in self.named_children():
             if name == "model":
-                module.to(self.llm_device)
+                if not self.llm_uses_device_map:
+                    module.to(self.llm_device)
             else:
                 module.to(self.main_device)
         self.logit_scale.data = self.logit_scale.data.to(self.main_device)
@@ -367,6 +441,8 @@ class MINDTSModel(nn.Module):
         return self.main_device if self.manual_device_split else x_enc_time.device
 
     def _runtime_llm_device(self):
+        if self.llm_uses_device_map:
+            return self.model.get_input_embeddings().weight.device
         if self.manual_device_split:
             return self.llm_device
         return next(self.model.parameters()).device
@@ -422,7 +498,7 @@ class MINDTSModel(nn.Module):
                 F.cross_entropy(logits_per_time[i], labels)
                 + F.cross_entropy(logits_per_text[i], labels)
             ) / 2
-        return total_loss
+        return total_loss / logits_per_time.shape[0]
 
     def _text_gaussian_nll_align_loss(self, time_features, llm_features):
         target = time_features.detach() if self.align_detach_target else time_features

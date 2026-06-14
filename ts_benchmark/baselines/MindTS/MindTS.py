@@ -72,6 +72,7 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "dataset_description": "A generic time-series dataset.",
     "main_device": None,
     "llm_device": None,
+    "llm_device_map": "balanced_low_0",
     "use_de_stationary_cross_view": False,
     "use_information_condenser": True,
     "align_loss_type": "contrastive",
@@ -83,10 +84,10 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
 def clip_loss(logits_per_time, logits_per_text):
     loss_device = logits_per_time.device
     labels = torch.arange(logits_per_time.shape[1], device=loss_device).long()
-    total_loss = torch.tensor(0.0, device=loss_device)
+    total_loss = torch.zeros((), device=loss_device, dtype=logits_per_time.dtype)
     for i in range(logits_per_time.shape[0]):
         total_loss += (F.cross_entropy(logits_per_time[i], labels) + F.cross_entropy(logits_per_text[i], labels)) / 2
-    return total_loss
+    return total_loss / logits_per_time.shape[0]
 
 def Bottleneck_loss(total_mask, r, lamda):
     compress_loss, connect_loss = 0., 0.
