@@ -11,7 +11,7 @@ from einops import rearrange
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
-DEEPSEEK_PATH = "/home/pxf/Time_series/Mind/DeepSeek"
+DEEPSEEK_PATH = "DeepSeek"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 

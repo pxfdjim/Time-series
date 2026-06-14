@@ -41,6 +41,9 @@ def build_model_config(args: argparse.Namespace, config_data: Dict) -> Dict:
     Builds the model config from commandline arguments and configuration dict
     """
     model_config = config_data.get("model_config", None)
+    hyper_param_overrides = json.loads(
+        os.environ.get("MINDTS_MODEL_HYPER_PARAM_OVERRIDES", "{}")
+    )
 
     if args.adapter is not None:
         args.adapter = [None if item == "None" else item for item in args.adapter]
@@ -63,13 +66,17 @@ def build_model_config(args: argparse.Namespace, config_data: Dict) -> Dict:
     for adapter, model_name, model_hyper_params in zip(
         args.adapter, args.model_name, args.model_hyper_params
     ):
+        hyper_params = (
+            json.loads(model_hyper_params)
+            if model_hyper_params is not None
+            else {}
+        )
+        hyper_params.update(hyper_param_overrides)
         model_config["models"].append(
             {
                 "adapter": adapter,
                 "model_name": model_name,
-                "model_hyper_params": json.loads(model_hyper_params)
-                if model_hyper_params is not None
-                else {},
+                "model_hyper_params": hyper_params,
             }
         )
 
