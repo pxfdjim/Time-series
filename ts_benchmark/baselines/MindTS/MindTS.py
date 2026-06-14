@@ -73,6 +73,7 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "main_device": None,
     "llm_device": None,
     "llm_device_map": "balanced_low_0",
+    "llm_prompt_batch_size": 32,
     "use_de_stationary_cross_view": False,
     "use_information_condenser": True,
     "align_loss_type": "contrastive",

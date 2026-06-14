@@ -210,6 +210,11 @@ class MINDTSModel(nn.Module):
         self.visible_gpu_count = visible_gpu_count
         self.llm_device_map = getattr(configs, "llm_device_map", "balanced_low_0")
         self.llm_uses_device_map = False
+        self.llm_prompt_batch_size = int(getattr(configs, "llm_prompt_batch_size", 32))
+        self.llm_empty_cache_between_chunks = os.environ.get(
+            "MINDTS_LLM_EMPTY_CACHE_BETWEEN_CHUNKS",
+            "false",
+        ).lower() == "true"
         self.device = self.main_device    # Device for trainable time-series modules
         self.configs = configs
         self.batch_size = configs.batch_size
@@ -447,6 +452,33 @@ class MINDTSModel(nn.Module):
             return self.llm_device
         return next(self.model.parameters()).device
 
+    def _encode_prompts_with_llm(self, prompts, main_device, max_length=128):
+        chunk_size = max(1, self.llm_prompt_batch_size)
+        embeddings = []
+        for start in range(0, len(prompts), chunk_size):
+            prompt_chunk = prompts[start:start + chunk_size]
+            prompt_tokens = self.tokenizer(
+                prompt_chunk,
+                max_length=max_length,
+                padding="max_length",
+                truncation=True,
+                return_tensors="pt",
+            )
+            input_ids = prompt_tokens["input_ids"].to(self._runtime_llm_device())
+            attention_mask = prompt_tokens["attention_mask"].to(self._runtime_llm_device())
+            self._check_token_ids(input_ids)
+            with torch.no_grad():
+                outputs = self.model(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    output_hidden_states=True,
+                )
+                embeddings.append(outputs.hidden_states[-1].detach().to(main_device))
+            del input_ids, attention_mask, prompt_tokens, outputs
+            if self.llm_empty_cache_between_chunks and torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        return torch.cat(embeddings, dim=0)
+
     def random_masking(self, xb, mask_ratio):
         bs_nvars, L, d_model = xb.shape
         device = xb.device
@@ -564,24 +596,11 @@ class MINDTSModel(nn.Module):
                 f"Dataset context: {dataset_context} Reconstruct the time series using its seasonal component.",
                 f"Dataset context: {dataset_context} Reconstruct the time series using its residual component.",
             ]
-            prompt_tokens = self.tokenizer(
+            self.role_prompt_embeddings = self._encode_prompts_with_llm(
                 role_prompts,
+                main_device,
                 max_length=128,
-                padding="max_length",
-                truncation=True,
-                return_tensors="pt",
             )
-            input_ids = prompt_tokens["input_ids"].to(self._runtime_llm_device())
-            attention_mask = prompt_tokens["attention_mask"].to(self._runtime_llm_device())
-            self._check_token_ids(input_ids)
-            with torch.no_grad():
-                outputs = self.model(
-                    input_ids=input_ids,
-                    attention_mask=attention_mask,
-                    output_hidden_states=True,
-                )
-                embeddings = outputs.hidden_states[-1].detach().to(main_device)
-            self.role_prompt_embeddings = embeddings
         return self.prompt_proj_hidden(self.role_prompt_embeddings.to(main_device).float())
 
     def _encode_intrinsic_prompts(self, x_enc_time, main_device):
@@ -636,23 +655,11 @@ class MINDTSModel(nn.Module):
             prompt_list.append(prompt)
 
         all_prompts = [prompt for batch in prompt_list for prompt in batch]
-        prompt_tokens = self.tokenizer(
+        embeddings = self._encode_prompts_with_llm(
             all_prompts,
+            main_device,
             max_length=128,
-            padding="max_length",
-            truncation=True,
-            return_tensors="pt",
         )
-        input_ids = prompt_tokens["input_ids"].to(self._runtime_llm_device())
-        attention_mask = prompt_tokens["attention_mask"].to(self._runtime_llm_device())
-        self._check_token_ids(input_ids)
-        with torch.no_grad():
-            outputs = self.model(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                output_hidden_states=True,
-            )
-            embeddings = outputs.hidden_states[-1].detach().to(main_device)
 
         batch_size_prompt = len(prompt_list[0])
         prompt_feature = embeddings.view(
