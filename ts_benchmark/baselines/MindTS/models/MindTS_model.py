@@ -233,6 +233,9 @@ class MINDTSModel(nn.Module):
         self.align_detach_target = getattr(configs, "align_detach_target", True)
         self.align_logvar_min = getattr(configs, "align_logvar_min", -6.0)
         self.align_logvar_max = getattr(configs, "align_logvar_max", 2.0)
+        self.recon_loss_type = getattr(configs, "recon_loss_type", "mse")
+        self.recon_logvar_min = getattr(configs, "recon_logvar_min", -6.0)
+        self.recon_logvar_max = getattr(configs, "recon_logvar_max", 2.0)
         allowed_align_losses = {
             "contrastive",
             "text_gaussian_nll",
@@ -255,6 +258,7 @@ class MINDTSModel(nn.Module):
         # Embedding layers
         self.windows_data_embedding = DataEmbedding_inverted(configs.seq_len, configs.d_model, configs.embed, configs.freq, configs.dropout)
         self.proj_patch = nn.Linear(self.patch_num * configs.d_model, configs.seq_len, bias=True)
+        self.proj_patch_logvar = nn.Linear(self.patch_num * configs.d_model, configs.seq_len, bias=True)
         self.prompt_proj_hidden = nn.Linear(1536, configs.d_model, bias=True)
         self.text_proj_hidden = nn.Linear(1536, configs.d_model, bias=True)
         self.proj_text = nn.Linear(1024 * configs.d_model, configs.d_model, bias=True)
@@ -830,14 +834,20 @@ class MINDTSModel(nn.Module):
 
         # -------------------------------------------------------------Reconstruction-----------------------------------------------------------------------------
         multi_features = self.multimodal_Transformer_Block(llm_features, time_features_patch_mask)
-        output = rearrange(multi_features, '(b c) n d -> (b c) (n d)', c = self.channel_time, n = self.patch_num, d = self.d_model)
-        output = self.proj_patch(output)
-        output = rearrange(output, '(b c) t -> b t c', t = self.seq_len, c = self.channel_time)
+        flat_features = rearrange(multi_features, '(b c) n d -> (b c) (n d)', c = self.channel_time, n = self.patch_num, d = self.d_model)
+        output_mu = self.proj_patch(flat_features)
+        output_logvar = self.proj_patch_logvar(flat_features)
+        output_mu = rearrange(output_mu, '(b c) t -> b t c', t = self.seq_len, c = self.channel_time)
+        output_logvar = rearrange(output_logvar, '(b c) t -> b t c', t = self.seq_len, c = self.channel_time)
 
         # -------------------------------------------------------------Inverse normalization-----------------------------------------------------------------------
-        output = output * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1))
-        output = output + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1))
-        return output, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss
+        stdev_repeated = stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1)
+        means_repeated = means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len + self.seq_len, 1)
+        output_mu = output_mu * stdev_repeated
+        output_mu = output_mu + means_repeated
+        output_logvar = output_logvar + 2 * torch.log(stdev_repeated + 1e-6)
+        output_logvar = torch.clamp(output_logvar, self.recon_logvar_min, self.recon_logvar_max)
+        return output_mu, output_logvar, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss
 
 
     def forward(

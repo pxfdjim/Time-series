@@ -80,6 +80,9 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "align_detach_target": True,
     "align_logvar_min": -6.0,
     "align_logvar_max": 2.0,
+    "recon_loss_type": "mse",
+    "recon_logvar_min": -6.0,
+    "recon_logvar_max": 2.0,
 }
 
 def clip_loss(logits_per_time, logits_per_text):
@@ -89,6 +92,34 @@ def clip_loss(logits_per_time, logits_per_text):
     for i in range(logits_per_time.shape[0]):
         total_loss += (F.cross_entropy(logits_per_time[i], labels) + F.cross_entropy(logits_per_text[i], labels)) / 2
     return total_loss / logits_per_time.shape[0]
+
+def gaussian_nll_reconstruction_loss(target, mu, logvar, logvar_min=-6.0, logvar_max=2.0):
+    logvar = torch.clamp(logvar, logvar_min, logvar_max)
+    inv_var = torch.exp(-logvar)
+    nll = 0.5 * (logvar + (target - mu).pow(2) * inv_var)
+    return nll.mean()
+
+def reconstruction_loss(target, mu, logvar, config, criterion):
+    if config.recon_loss_type == "mse":
+        return criterion(mu, target)
+    if config.recon_loss_type == "gaussian_nll":
+        return gaussian_nll_reconstruction_loss(
+            target,
+            mu,
+            logvar,
+            config.recon_logvar_min,
+            config.recon_logvar_max,
+        )
+    raise ValueError(f"Unknown recon_loss_type: {config.recon_loss_type}")
+
+def reconstruction_anomaly_score(target, mu, logvar, config):
+    if config.recon_loss_type == "mse":
+        return torch.mean((target - mu) ** 2, dim=-1)
+    if config.recon_loss_type == "gaussian_nll":
+        logvar = torch.clamp(logvar, config.recon_logvar_min, config.recon_logvar_max)
+        score = logvar + (target - mu).pow(2) * torch.exp(-logvar)
+        return torch.mean(score, dim=-1)
+    raise ValueError(f"Unknown recon_loss_type: {config.recon_loss_type}")
 
 def Bottleneck_loss(total_mask, r, lamda):
     compress_loss, connect_loss = 0., 0.
@@ -338,7 +369,7 @@ class MindTS:
                 trend_stl = trend_stl.float().to(self._get_main_device())
                 season_stl = season_stl.float().to(self._get_main_device())
                 residual_stl = residual_stl.float().to(self._get_main_device())
-                outputs, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
+                outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
                     batch_x_time,
                     batch_input_ids,
                     batch_attention_mask,
@@ -347,13 +378,17 @@ class MindTS:
                     residual_stl,
                 )
                 f_dim = -1 if self.config.enc_in == 1 else 0
-                outputs = outputs[:, :, f_dim:]
-
-                outputs = outputs.detach().cpu()
-                true = batch_x_time.detach().cpu()
+                outputs_mu = outputs_mu[:, :, f_dim:]
+                outputs_logvar = outputs_logvar[:, :, f_dim:]
 
                 # Reconstruction loss
-                loss1 = criterion(outputs, true).detach().cpu().numpy()
+                loss1 = reconstruction_loss(
+                    batch_x_time,
+                    outputs_mu,
+                    outputs_logvar,
+                    self.config,
+                    criterion,
+                ).detach().cpu().numpy()
 
                 # Comparison Loss
                 loss2 = align_loss.detach().cpu().numpy()
@@ -560,7 +595,7 @@ class MindTS:
                 trend_stl = trend_stl.float().to(self._get_main_device())
                 season_stl = season_stl.float().to(self._get_main_device())
                 residual_stl = residual_stl.float().to(self._get_main_device())
-                outputs, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
+                outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
                     batch_x_time,
                     batch_input_ids,
                     batch_attention_mask,
@@ -594,9 +629,14 @@ class MindTS:
                     ],
                     [
                         (
-                            "outputs",
-                            outputs,
-                            "[batch, seq_len, channels]; reconstructed time-series window",
+                            "outputs_mu",
+                            outputs_mu,
+                            "[batch, seq_len, channels]; reconstructed mean time-series window",
+                        ),
+                        (
+                            "outputs_logvar",
+                            outputs_logvar,
+                            "[batch, seq_len, channels]; reconstructed log variance",
                         ),
                         (
                             "logits_per_time",
@@ -616,10 +656,17 @@ class MindTS:
                     ],
                 )
                 f_dim = -1 if self.config.enc_in == 1 else 0
-                outputs = outputs[:, :, f_dim:]
+                outputs_mu = outputs_mu[:, :, f_dim:]
+                outputs_logvar = outputs_logvar[:, :, f_dim:]
 
                 # Reconstruction loss
-                loss1 = criterion(outputs, batch_x_time)
+                loss1 = reconstruction_loss(
+                    batch_x_time,
+                    outputs_mu,
+                    outputs_logvar,
+                    self.config,
+                    criterion,
+                )
 
                 # Comparison Loss
                 loss2 = align_loss
@@ -730,9 +777,9 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
-            score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             score = score.detach().cpu().numpy()
             attens_energy.append(score)
             test_labels.append(batch_y)
@@ -986,9 +1033,9 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
-            score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             self._log_model_batch_shapes(
                 "detect_multi_label.train_threshold_first_batch",
                 [
@@ -1005,9 +1052,14 @@ class MindTS:
                 ],
                 [
                     (
-                        "outputs",
-                        outputs,
-                        "[batch, seq_len, channels]; reconstructed training windows",
+                        "outputs_mu",
+                        outputs_mu,
+                        "[batch, seq_len, channels]; reconstructed mean training windows",
+                    ),
+                    (
+                        "outputs_logvar",
+                        outputs_logvar,
+                        "[batch, seq_len, channels]; reconstructed log variance",
                     ),
                     (
                         "logits_per_time",
@@ -1051,9 +1103,9 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
-            score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             self._log_model_batch_shapes(
                 "detect_multi_label.test_first_batch",
                 [
@@ -1070,9 +1122,14 @@ class MindTS:
                 ],
                 [
                     (
-                        "outputs",
-                        outputs,
-                        "[batch, seq_len, channels]; reconstructed test windows",
+                        "outputs_mu",
+                        outputs_mu,
+                        "[batch, seq_len, channels]; reconstructed mean test windows",
+                    ),
+                    (
+                        "outputs_logvar",
+                        outputs_logvar,
+                        "[batch, seq_len, channels]; reconstructed log variance",
                     ),
                     (
                         "logits_per_time",
@@ -1117,9 +1174,9 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
             # criterion
-            score = torch.mean(self.anomaly_criterion(batch_x_time, outputs), dim=-1)
+            score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             self._log_model_batch_shapes(
                 "detect_multi_label.threshold_first_batch",
                 [
@@ -1136,9 +1193,14 @@ class MindTS:
                 ],
                 [
                     (
-                        "outputs",
-                        outputs,
-                        "[batch, seq_len, channels]; reconstructed threshold-mode windows",
+                        "outputs_mu",
+                        outputs_mu,
+                        "[batch, seq_len, channels]; reconstructed mean threshold-mode windows",
+                    ),
+                    (
+                        "outputs_logvar",
+                        outputs_logvar,
+                        "[batch, seq_len, channels]; reconstructed log variance",
                     ),
                     (
                         "logits_per_time",
