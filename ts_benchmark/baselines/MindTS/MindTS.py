@@ -83,6 +83,9 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "recon_loss_type": "mse",
     "recon_logvar_min": -6.0,
     "recon_logvar_max": 2.0,
+    "use_frequency_branch": False,
+    "frequency_keep_modes": 4,
+    "time_freq_align_weight": 0.2,
 }
 
 def clip_loss(logits_per_time, logits_per_text):

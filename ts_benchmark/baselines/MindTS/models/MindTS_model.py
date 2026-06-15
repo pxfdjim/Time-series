@@ -236,6 +236,12 @@ class MINDTSModel(nn.Module):
         self.recon_loss_type = getattr(configs, "recon_loss_type", "mse")
         self.recon_logvar_min = getattr(configs, "recon_logvar_min", -6.0)
         self.recon_logvar_max = getattr(configs, "recon_logvar_max", 2.0)
+        use_frequency_branch = getattr(configs, "use_frequency_branch", False)
+        if isinstance(use_frequency_branch, str):
+            use_frequency_branch = use_frequency_branch.lower() == "true"
+        self.use_frequency_branch = bool(use_frequency_branch)
+        self.frequency_keep_modes = max(0, int(getattr(configs, "frequency_keep_modes", 4)))
+        self.time_freq_align_weight = float(getattr(configs, "time_freq_align_weight", 0.2))
         allowed_align_losses = {
             "contrastive",
             "text_gaussian_nll",
@@ -307,6 +313,35 @@ class MINDTSModel(nn.Module):
             ],
             norm_layer=nn.Sequential(Transpose(1,2), nn.BatchNorm1d(configs.d_model), Transpose(1,2))
         )
+        if self.use_frequency_branch:
+            self.freq_patch_encoder = Encoder(
+                [
+                    EncoderLayer(
+                        AttentionLayer(
+                            time_patch_attention(
+                                False,
+                                configs.factor,
+                                attention_dropout=configs.dropout,
+                                output_attention=False,
+                            ),
+                            configs.d_model,
+                            configs.n_heads,
+                        ),
+                        configs.d_model,
+                        configs.d_ff,
+                        dropout=configs.dropout,
+                        activation=configs.activation,
+                    ) for l in range(configs.e_layers)
+                ],
+                norm_layer=nn.Sequential(Transpose(1, 2), nn.BatchNorm1d(configs.d_model), Transpose(1, 2)),
+            )
+            self.freq_to_time = nn.Linear(configs.d_model, configs.d_model)
+            self.time_freq_gate = nn.Sequential(
+                nn.Linear(2 * configs.d_model, configs.d_model),
+                nn.Sigmoid(),
+            )
+            nn.init.constant_(self.time_freq_gate[0].bias, -2.0)
+            self.time_freq_norm = nn.LayerNorm(configs.d_model)
         self.time_windows_encoder = Encoder(
             [
                 EncoderLayer(
@@ -501,6 +536,31 @@ class MINDTSModel(nn.Module):
         mask = torch.gather(mask, dim=1, index=ids_restore)
 
         return x_masked, x_kept, mask, ids_restore
+
+    def _apply_patch_mask(self, x, mask):
+        return x.masked_fill(mask.unsqueeze(-1).bool(), 0.0)
+
+    def _lowpass_frequency_signal(self, x):
+        x_freq = torch.fft.rfft(x, dim=1)
+        keep_modes = min(self.frequency_keep_modes + 1, x_freq.shape[1])
+        filtered = torch.zeros_like(x_freq)
+        filtered[:, :keep_modes, :] = x_freq[:, :keep_modes, :]
+        return torch.fft.irfft(filtered, n=x.shape[1], dim=1)
+
+    def _time_frequency_align_loss(self, time_features, freq_features):
+        time_norm = F.normalize(time_features, p=2, dim=-1)
+        freq_norm = F.normalize(freq_features, p=2, dim=-1)
+        logits_per_time = self.logit_scale.exp() * torch.bmm(
+            time_norm,
+            freq_norm.transpose(1, 2),
+        )
+        logits_per_freq = logits_per_time.transpose(1, 2)
+        return self._contrastive_align_loss(logits_per_time, logits_per_freq)
+
+    def _fuse_time_frequency(self, time_features, freq_features):
+        freq_projected = self.freq_to_time(freq_features)
+        gate = self.time_freq_gate(torch.cat([time_features, freq_features], dim=-1))
+        return self.time_freq_norm(time_features + gate * freq_projected)
 
     def calcute_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.contiguous(), dim=-1)
@@ -732,7 +792,11 @@ class MINDTSModel(nn.Module):
 
         # -------------------------------------------------------------Series patching and masking-----------------------------------------------------------------
         x_enc_time_patch_normal, _ = self.patch_embedding(x_enc_time.permute(0, 2, 1))
-        x_enc_time_patch_mask, _, _, _ = self.random_masking(x_enc_time_patch_normal, self.mask_ratio)
+        x_enc_time_patch_mask, _, patch_mask, _ = self.random_masking(x_enc_time_patch_normal, self.mask_ratio)
+        if self.use_frequency_branch:
+            x_enc_freq = self._lowpass_frequency_signal(x_enc_time)
+            x_enc_freq_patch_normal, _ = self.patch_embedding(x_enc_freq.permute(0, 2, 1))
+            x_enc_freq_patch_mask = self._apply_patch_mask(x_enc_freq_patch_normal, patch_mask)
         if self.use_de_stationary or self.use_de_stationary_cross_view:
             tau, delta = self._de_stationary_factors(x_enc_time_raw)
         else:
@@ -753,6 +817,45 @@ class MINDTSModel(nn.Module):
             tau=time_tau,
             delta=time_delta,
         )    #[B*C, N, D]
+        if self.use_frequency_branch:
+            freq_features_patch_normal, _ = self.freq_patch_encoder(
+                x_enc_freq_patch_normal,
+                tau=time_tau,
+                delta=time_delta,
+            )
+            freq_features_patch_mask, _ = self.freq_patch_encoder(
+                x_enc_freq_patch_mask,
+                tau=time_tau,
+                delta=time_delta,
+            )
+            reconstruction_patch_features = self._fuse_time_frequency(
+                time_features_patch_mask,
+                freq_features_patch_mask,
+            )
+            self._write_shape_log(
+                "frequency_branch.first_batch",
+                [
+                    (
+                        f"x_enc_freq shape: {self._shape_of(x_enc_freq)}; "
+                        "meaning: low-pass reconstructed normalized time-series, [batch, seq_len, channels]"
+                    ),
+                    (
+                        f"freq_features_patch_normal shape: {self._shape_of(freq_features_patch_normal)}; "
+                        "meaning: frequency-view encoded unmasked patches, [batch*channels, patches, d_model]"
+                    ),
+                    (
+                        f"freq_features_patch_mask shape: {self._shape_of(freq_features_patch_mask)}; "
+                        "meaning: frequency-view encoded patches with the same mask positions as the time branch"
+                    ),
+                    (
+                        f"reconstruction_patch_features shape: {self._shape_of(reconstruction_patch_features)}; "
+                        "meaning: gated residual fusion of time and frequency features for reconstruction"
+                    ),
+                ],
+            )
+        else:
+            freq_features_patch_normal = None
+            reconstruction_patch_features = time_features_patch_mask
 
         # -------------------------------------------------------------Intrinsic prompt reasoning-------------------------------------------------------------------
         prompt_feature = self._encode_intrinsic_prompts(x_enc_time, main_device)
@@ -817,6 +920,11 @@ class MINDTSModel(nn.Module):
             logits_per_time,
             logits_per_text,
         )
+        if self.use_frequency_branch and self.time_freq_align_weight != 0:
+            align_loss = align_loss + self.time_freq_align_weight * self._time_frequency_align_loss(
+                time_features_patch_normal,
+                freq_features_patch_normal,
+            )
 
         # -------------------------------------------------------------Information Condenser----------------------------------------------------------------------
         if self.use_information_condenser:
@@ -833,7 +941,7 @@ class MINDTSModel(nn.Module):
             total_mask = torch.ones_like(llm_features[..., :1])
 
         # -------------------------------------------------------------Reconstruction-----------------------------------------------------------------------------
-        multi_features = self.multimodal_Transformer_Block(llm_features, time_features_patch_mask)
+        multi_features = self.multimodal_Transformer_Block(llm_features, reconstruction_patch_features)
         flat_features = rearrange(multi_features, '(b c) n d -> (b c) (n d)', c = self.channel_time, n = self.patch_num, d = self.d_model)
         output_mu = self.proj_patch(flat_features)
         output_logvar = self.proj_patch_logvar(flat_features)
