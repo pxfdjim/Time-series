@@ -1,0 +1,4 @@
+strategy_args,metric_name,"MindTS;{""align_loss_type"": ""text_gaussian_nll"", ""batch_size"": 16, ""d_ff"": 512, ""d_model"": 256, ""dataset_description"": ""EWJ is a financial stock series. Numerical data come from Yahoo Finance; related financial news comes from NASDAQ, Bloomberg, and other financial news websites."", ""e_layers"": 1, ""enc_in_time"": 1, ""horizon"": 0, ""mask_ratio"": 0.3, ""norm"": true, ""num_epochs"": 5, ""parallel_strategy"": null, ""patch_size"": 6, ""r"": 0.5, ""recon_logvar_max"": 2.0, ""recon_logvar_min"": -6.0, ""recon_loss_type"": ""gaussian_nll"", ""seq_len"": 48, ""stl_period"": 5, ""stride"": 6, ""use_information_condenser"": false}"
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",affiliation_f,0.6030968851640337
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_ROC,0.5706679173815076
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_PR,0.2455975992812517

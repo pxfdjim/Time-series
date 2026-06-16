@@ -1,0 +1,4 @@
+strategy_args,metric_name,"MindTS;{""align_loss_type"": ""contrastive"", ""batch_size"": 32, ""d_ff"": 8, ""d_model"": 256, ""dataset_description"": ""Energy contains weekly U.S. gasoline price statistics in dollars per gallon and energy reports collected from the U.S. Energy Information Administration."", ""e_layers"": 1, ""enc_in_time"": 9, ""horizon"": 0, ""mask_ratio"": 0.4, ""norm"": true, ""num_epochs"": 5, ""parallel_strategy"": null, ""patch_size"": 6, ""r"": 0.2, ""recon_logvar_max"": 2.0, ""recon_logvar_min"": -6.0, ""recon_loss_type"": ""mse"", ""seq_len"": 24, ""stl_period"": 52, ""stride"": 6, ""use_information_condenser"": true}"
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",affiliation_f,0.6310155722844288
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_ROC,0.6716132778180299
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_PR,0.4110339227733067

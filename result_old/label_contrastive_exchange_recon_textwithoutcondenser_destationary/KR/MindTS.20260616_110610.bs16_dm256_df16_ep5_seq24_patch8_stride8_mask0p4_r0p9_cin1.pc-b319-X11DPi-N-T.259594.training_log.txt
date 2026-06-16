@@ -1,0 +1,12 @@
+MindTS training log
+
+model_name: MindTS
+file_name: KR.csv
+model_params: {"align_loss_type": "contrastive", "batch_size": 16, "d_ff": 16, "d_model": 256, "dataset_description": "KR is a financial stock series. Numerical data come from Yahoo Finance; related financial news comes from NASDAQ, Bloomberg, and other financial news websites.", "e_layers": 1, "enc_in_time": 1, "frequency_keep_modes": 4, "horizon": 0, "mask_ratio": 0.4, "norm": true, "num_epochs": 5, "parallel_strategy": null, "patch_size": 8, "r": 0.9, "recon_logvar_max": 2.0, "recon_logvar_min": -6.0, "recon_loss_type": "mse", "seq_len": 24, "stl_period": 5, "stride": 8, "time_freq_align_weight": 0.2, "use_frequency_branch": false, "use_information_condenser": false}
+
+ epoch  epoch_time_sec  learning_rate  train_loss  valid_loss
+     1       92.348050       0.000100    1.456826    1.490933
+     2       91.685665       0.000100    0.881796    1.201915
+     3       91.952196       0.000050    0.572858    1.123720
+     4       91.374636       0.000025    0.421637    1.086154
+     5       91.434365       0.000013    0.347194    1.102615

@@ -1,0 +1,729 @@
+Shape log for dataset: EWJ.csv
+================================================================================
+
+[cross_view_attention.first_batch]
+prompt_feature shape: (16, 8, 256); meaning: intrinsic prompt reasoning features from LLM prompts, [batch*channels, patches, d_model]
+semantic_features shape: (16, 8, 256); meaning: fused trend/seasonal/residual component semantics, [batch*channels, patches, d_model]
+attention direction after this change: prompt_feature query semantic_features as key/value; output keeps prompt_feature as residual backbone
+llm_features shape: (16, 8, 256); meaning: component-guided semantic features enriched by intrinsic prompt information, [batch*channels, patches, d_model]
+
+[detect_multi_fit.train_first_batch]
+seq_len/window length: 48
+batch_size config: 16
+batch_x_time shape: (16, 48, 1); meaning: [batch, seq_len, channels]; normalized sliding-window time-series batch
+trend_stl shape: (16, 48, 1); meaning: [batch, seq_len, channels]; STL trend supervision aligned to each window
+season_stl shape: (16, 48, 1); meaning: [batch, seq_len, channels]; STL seasonal supervision aligned to each window
+residual_stl shape: (16, 48, 1); meaning: [batch, seq_len, channels]; STL residual supervision aligned to each window
+outputs_mu shape: (16, 48, 1); meaning: [batch, seq_len, channels]; reconstructed mean time-series window
+outputs_logvar shape: (16, 48, 1); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (16, 8, 8); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (16, 8, 8); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (16, 8, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+
+[detect_multi_label.train_threshold_first_batch]
+seq_len/window length: 48
+batch_size config: 16
+batch_x_time shape: (16, 48, 1); meaning: [batch, seq_len, channels]; training windows used to estimate threshold energy
+batch_y shape: (16, 48, 1); meaning: [batch, seq_len, channels]; loader reconstruction target placeholder
+outputs_mu shape: (16, 48, 1); meaning: [batch, seq_len, channels]; reconstructed mean training windows
+outputs_logvar shape: (16, 48, 1); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (16, 8, 8); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (16, 8, 8); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (16, 8, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (16, 48); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[detect_multi_label.test_first_batch]
+seq_len/window length: 48
+batch_size config: 16
+batch_x_time shape: (16, 48, 1); meaning: [batch, seq_len, channels]; test windows used for combined threshold calibration
+batch_y shape: (16, 48, 1); meaning: [batch, seq_len, channels]; test window labels/targets from loader
+outputs_mu shape: (16, 48, 1); meaning: [batch, seq_len, channels]; reconstructed mean test windows
+outputs_logvar shape: (16, 48, 1); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (16, 8, 8); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (16, 8, 8); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (16, 8, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (16, 48); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[detect_multi_label.threshold_first_batch]
+seq_len/window length: 48
+batch_size config: 16
+batch_x_time shape: (11, 48, 1); meaning: [batch, seq_len, channels]; threshold-mode windows that produce final anomaly scores
+batch_y shape: (11, 48, 1); meaning: [batch, seq_len, channels]; threshold-mode labels/targets from loader
+outputs_mu shape: (11, 48, 1); meaning: [batch, seq_len, channels]; reconstructed mean threshold-mode windows
+outputs_logvar shape: (11, 48, 1); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (11, 8, 8); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (11, 8, 8); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (11, 8, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (11, 48); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[metric_inputs.ratio_1]
+dataset: EWJ.csv
+ratio: 1
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (528,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 4
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 528, '1': 4}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_2]
+dataset: EWJ.csv
+ratio: 2
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 520, '1': 12}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_3]
+dataset: EWJ.csv
+ratio: 3
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 513, '1': 19}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_4]
+dataset: EWJ.csv
+ratio: 4
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 502, '1': 30}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_5]
+dataset: EWJ.csv
+ratio: 5
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 495, '1': 37}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_6]
+dataset: EWJ.csv
+ratio: 6
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 486, '1': 46}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_7]
+dataset: EWJ.csv
+ratio: 7
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 481, '1': 51}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_8]
+dataset: EWJ.csv
+ratio: 8
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 472, '1': 60}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_10]
+dataset: EWJ.csv
+ratio: 10
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 463, '1': 69}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_11]
+dataset: EWJ.csv
+ratio: 11
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 460, '1': 72}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_12]
+dataset: EWJ.csv
+ratio: 12
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 455, '1': 77}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_13]
+dataset: EWJ.csv
+ratio: 13
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 449, '1': 83}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_14]
+dataset: EWJ.csv
+ratio: 14
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 443, '1': 89}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_15]
+dataset: EWJ.csv
+ratio: 15
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 435, '1': 97}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_16]
+dataset: EWJ.csv
+ratio: 16
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 429, '1': 103}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_17]
+dataset: EWJ.csv
+ratio: 17
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 424, '1': 108}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_18]
+dataset: EWJ.csv
+ratio: 18
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 417, '1': 115}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_19]
+dataset: EWJ.csv
+ratio: 19
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 412, '1': 120}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_20]
+dataset: EWJ.csv
+ratio: 20
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 408, '1': 124}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_21]
+dataset: EWJ.csv
+ratio: 21
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 405, '1': 127}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_22]
+dataset: EWJ.csv
+ratio: 22
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 394, '1': 138}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_23]
+dataset: EWJ.csv
+ratio: 23
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 390, '1': 142}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_24]
+dataset: EWJ.csv
+ratio: 24
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 381, '1': 151}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_25]
+dataset: EWJ.csv
+ratio: 25
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 373, '1': 159}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_26]
+dataset: EWJ.csv
+ratio: 26
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 369, '1': 163}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_27]
+dataset: EWJ.csv
+ratio: 27
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 368, '1': 164}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_28]
+dataset: EWJ.csv
+ratio: 28
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 359, '1': 173}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_29]
+dataset: EWJ.csv
+ratio: 29
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 355, '1': 177}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_30]
+dataset: EWJ.csv
+ratio: 30
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 349, '1': 183}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_35]
+dataset: EWJ.csv
+ratio: 35
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 321, '1': 211}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 0, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_40]
+dataset: EWJ.csv
+ratio: 40
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 299, '1': 233}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_41]
+dataset: EWJ.csv
+ratio: 41
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 294, '1': 238}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_42]
+dataset: EWJ.csv
+ratio: 42
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 288, '1': 244}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_43]
+dataset: EWJ.csv
+ratio: 43
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 282, '1': 250}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_44]
+dataset: EWJ.csv
+ratio: 44
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 271, '1': 261}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_45]
+dataset: EWJ.csv
+ratio: 45
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 266, '1': 266}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_46]
+dataset: EWJ.csv
+ratio: 46
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 259, '1': 273}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_47]
+dataset: EWJ.csv
+ratio: 47
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 256, '1': 276}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_48]
+dataset: EWJ.csv
+ratio: 48
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 249, '1': 283}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_49]
+dataset: EWJ.csv
+ratio: 49
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 243, '1': 289}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_50]
+dataset: EWJ.csv
+ratio: 50
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 241, '1': 291}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]
+
+[metric_inputs.ratio_51]
+dataset: EWJ.csv
+ratio: 51
+actual_label shape: (532,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (528,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (532,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 4
+remaining_length for another: 0
+predict_label passed to evaluator shape: (532,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (532,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 479, '1': 53}
+predict_label value counts: {'0': 237, '1': 295}
+actual_label first values: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+another first values: [0.025800030678510666, 0.059102173894643784, 0.003399037988856435, 0.4104985296726227, 0.15935194492340088, 0.19694513082504272, 0.05895329266786575, 0.16637130081653595, 0.04045247659087181, 0.367504358291626]

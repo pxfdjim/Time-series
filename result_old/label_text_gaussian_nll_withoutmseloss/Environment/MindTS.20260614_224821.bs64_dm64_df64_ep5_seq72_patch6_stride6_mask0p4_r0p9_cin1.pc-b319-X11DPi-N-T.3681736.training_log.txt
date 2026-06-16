@@ -1,0 +1,12 @@
+MindTS training log
+
+model_name: MindTS
+file_name: Environment.csv
+model_params: {"align_loss_type": "text_gaussian_nll", "batch_size": 64, "d_ff": 64, "d_model": 64, "dataset_description": "Environment contains daily Air Quality Index data and related reports collected from the U.S. Environmental Protection Agency and NBC.", "e_layers": 1, "enc_in_time": 1, "horizon": 0, "mask_ratio": 0.4, "norm": true, "num_epochs": 5, "parallel_strategy": null, "patch_size": 6, "r": 0.9, "recon_logvar_max": 2.0, "recon_logvar_min": -6.0, "recon_loss_type": "gaussian_nll", "seq_len": 72, "stl_period": 7, "stride": 6, "use_information_condenser": false}
+
+ epoch  epoch_time_sec  learning_rate  train_loss  valid_loss
+     1      948.636009       0.000100    0.659389    0.030760
+     2     1009.619436       0.000100    0.337795   -0.286766
+     3      736.652574       0.000050    0.109288   -0.438877
+     4      688.707562       0.000025    0.006220   -0.510025
+     5      687.989545       0.000013   -0.041917   -0.546814

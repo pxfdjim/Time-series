@@ -1,0 +1,1437 @@
+Shape log for dataset: Weather.csv
+================================================================================
+
+[cross_view_attention.first_batch]
+prompt_feature shape: (256, 4, 64); meaning: intrinsic prompt reasoning features from LLM prompts, [batch*channels, patches, d_model]
+semantic_features shape: (256, 4, 64); meaning: fused trend/seasonal/residual component semantics, [batch*channels, patches, d_model]
+attention direction after this change: prompt_feature query semantic_features as key/value; output keeps prompt_feature as residual backbone
+llm_features shape: (256, 4, 64); meaning: component-guided semantic features enriched by intrinsic prompt information, [batch*channels, patches, d_model]
+
+[detect_multi_fit.train_first_batch]
+seq_len/window length: 24
+batch_size config: 64
+batch_x_time shape: (64, 24, 4); meaning: [batch, seq_len, channels]; normalized sliding-window time-series batch
+trend_stl shape: (64, 24, 4); meaning: [batch, seq_len, channels]; STL trend supervision aligned to each window
+season_stl shape: (64, 24, 4); meaning: [batch, seq_len, channels]; STL seasonal supervision aligned to each window
+residual_stl shape: (64, 24, 4); meaning: [batch, seq_len, channels]; STL residual supervision aligned to each window
+outputs_mu shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed mean time-series window
+outputs_logvar shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (256, 4, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+
+[detect_multi_label.train_threshold_first_batch]
+seq_len/window length: 24
+batch_size config: 64
+batch_x_time shape: (64, 24, 4); meaning: [batch, seq_len, channels]; training windows used to estimate threshold energy
+batch_y shape: (64, 24, 4); meaning: [batch, seq_len, channels]; loader reconstruction target placeholder
+outputs_mu shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed mean training windows
+outputs_logvar shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (256, 4, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (64, 24); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[detect_multi_label.test_first_batch]
+seq_len/window length: 24
+batch_size config: 64
+batch_x_time shape: (64, 24, 4); meaning: [batch, seq_len, channels]; test windows used for combined threshold calibration
+batch_y shape: (64, 24, 4); meaning: [batch, seq_len, channels]; test window labels/targets from loader
+outputs_mu shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed mean test windows
+outputs_logvar shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (256, 4, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (64, 24); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[detect_multi_label.threshold_first_batch]
+seq_len/window length: 24
+batch_size config: 64
+batch_x_time shape: (64, 24, 4); meaning: [batch, seq_len, channels]; threshold-mode windows that produce final anomaly scores
+batch_y shape: (64, 24, 4); meaning: [batch, seq_len, channels]; threshold-mode labels/targets from loader
+outputs_mu shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed mean threshold-mode windows
+outputs_logvar shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (256, 4, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (64, 24); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[metric_inputs.ratio_1]
+dataset: Weather.csv
+ratio: 1
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2448,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 20
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2449, '1': 19}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_2]
+dataset: Weather.csv
+ratio: 2
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2424, '1': 44}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_3]
+dataset: Weather.csv
+ratio: 3
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2395, '1': 73}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_4]
+dataset: Weather.csv
+ratio: 4
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2373, '1': 95}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_5]
+dataset: Weather.csv
+ratio: 5
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2348, '1': 120}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_6]
+dataset: Weather.csv
+ratio: 6
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2325, '1': 143}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_7]
+dataset: Weather.csv
+ratio: 7
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2295, '1': 173}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_8]
+dataset: Weather.csv
+ratio: 8
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2273, '1': 195}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_10]
+dataset: Weather.csv
+ratio: 10
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2227, '1': 241}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_11]
+dataset: Weather.csv
+ratio: 11
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2206, '1': 262}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_12]
+dataset: Weather.csv
+ratio: 12
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2183, '1': 285}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_13]
+dataset: Weather.csv
+ratio: 13
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2159, '1': 309}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_14]
+dataset: Weather.csv
+ratio: 14
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2144, '1': 324}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_15]
+dataset: Weather.csv
+ratio: 15
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2121, '1': 347}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_16]
+dataset: Weather.csv
+ratio: 16
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2085, '1': 383}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_17]
+dataset: Weather.csv
+ratio: 17
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2057, '1': 411}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_18]
+dataset: Weather.csv
+ratio: 18
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2033, '1': 435}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_19]
+dataset: Weather.csv
+ratio: 19
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2019, '1': 449}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_20]
+dataset: Weather.csv
+ratio: 20
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1987, '1': 481}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_21]
+dataset: Weather.csv
+ratio: 21
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1976, '1': 492}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_22]
+dataset: Weather.csv
+ratio: 22
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1961, '1': 507}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_23]
+dataset: Weather.csv
+ratio: 23
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1931, '1': 537}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_24]
+dataset: Weather.csv
+ratio: 24
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1910, '1': 558}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_25]
+dataset: Weather.csv
+ratio: 25
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1882, '1': 586}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_26]
+dataset: Weather.csv
+ratio: 26
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1855, '1': 613}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_27]
+dataset: Weather.csv
+ratio: 27
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1822, '1': 646}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_28]
+dataset: Weather.csv
+ratio: 28
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1797, '1': 671}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_29]
+dataset: Weather.csv
+ratio: 29
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1774, '1': 694}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_30]
+dataset: Weather.csv
+ratio: 30
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1755, '1': 713}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_35]
+dataset: Weather.csv
+ratio: 35
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1639, '1': 829}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_40]
+dataset: Weather.csv
+ratio: 40
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1531, '1': 937}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_41]
+dataset: Weather.csv
+ratio: 41
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1508, '1': 960}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_42]
+dataset: Weather.csv
+ratio: 42
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1481, '1': 987}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_43]
+dataset: Weather.csv
+ratio: 43
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1457, '1': 1011}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_44]
+dataset: Weather.csv
+ratio: 44
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1443, '1': 1025}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_45]
+dataset: Weather.csv
+ratio: 45
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1419, '1': 1049}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_46]
+dataset: Weather.csv
+ratio: 46
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1395, '1': 1073}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_47]
+dataset: Weather.csv
+ratio: 47
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1369, '1': 1099}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_48]
+dataset: Weather.csv
+ratio: 48
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1339, '1': 1129}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_49]
+dataset: Weather.csv
+ratio: 49
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1323, '1': 1145}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_50]
+dataset: Weather.csv
+ratio: 50
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1299, '1': 1169}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[metric_inputs.ratio_51]
+dataset: Weather.csv
+ratio: 51
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1274, '1': 1194}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.0707211047410965, 0.13183829188346863, 0.06738552451133728, 0.056222494691610336, 0.02888791635632515, 0.01188118290156126, 0.023952458053827286, 0.017141414806246758, 0.03173987194895744, 0.020064683631062508]
+
+[detect_multi_label.train_threshold_first_batch]
+seq_len/window length: 24
+batch_size config: 64
+batch_x_time shape: (64, 24, 4); meaning: [batch, seq_len, channels]; training windows used to estimate threshold energy
+batch_y shape: (64, 24, 4); meaning: [batch, seq_len, channels]; loader reconstruction target placeholder
+outputs_mu shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed mean training windows
+outputs_logvar shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (256, 4, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (64, 24); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[detect_multi_label.test_first_batch]
+seq_len/window length: 24
+batch_size config: 64
+batch_x_time shape: (64, 24, 4); meaning: [batch, seq_len, channels]; test windows used for combined threshold calibration
+batch_y shape: (64, 24, 4); meaning: [batch, seq_len, channels]; test window labels/targets from loader
+outputs_mu shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed mean test windows
+outputs_logvar shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (256, 4, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (64, 24); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[detect_multi_label.threshold_first_batch]
+seq_len/window length: 24
+batch_size config: 64
+batch_x_time shape: (64, 24, 4); meaning: [batch, seq_len, channels]; threshold-mode windows that produce final anomaly scores
+batch_y shape: (64, 24, 4); meaning: [batch, seq_len, channels]; threshold-mode labels/targets from loader
+outputs_mu shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed mean threshold-mode windows
+outputs_logvar shape: (64, 24, 4); meaning: [batch, seq_len, channels]; reconstructed log variance
+logits_per_time shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; time-to-semantic similarity logits
+logits_per_text shape: (256, 4, 4); meaning: [batch*channels, patches, patches]; semantic-to-time similarity logits
+total_mask shape: (256, 4, 1); meaning: [batch*channels, patches, 1]; information condenser keep probability
+score shape: (64, 24); meaning: [batch, seq_len]; per-time-step reconstruction error averaged over channels
+
+[metric_inputs.ratio_1]
+dataset: Weather.csv
+ratio: 1
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2448,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 20
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2438, '1': 30}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_2]
+dataset: Weather.csv
+ratio: 2
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2407, '1': 61}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_3]
+dataset: Weather.csv
+ratio: 3
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2390, '1': 78}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_4]
+dataset: Weather.csv
+ratio: 4
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2368, '1': 100}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_5]
+dataset: Weather.csv
+ratio: 5
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2342, '1': 126}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_6]
+dataset: Weather.csv
+ratio: 6
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2315, '1': 153}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_7]
+dataset: Weather.csv
+ratio: 7
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2291, '1': 177}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_8]
+dataset: Weather.csv
+ratio: 8
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2266, '1': 202}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_10]
+dataset: Weather.csv
+ratio: 10
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2218, '1': 250}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_11]
+dataset: Weather.csv
+ratio: 11
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2203, '1': 265}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_12]
+dataset: Weather.csv
+ratio: 12
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2174, '1': 294}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_13]
+dataset: Weather.csv
+ratio: 13
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2149, '1': 319}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_14]
+dataset: Weather.csv
+ratio: 14
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2124, '1': 344}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_15]
+dataset: Weather.csv
+ratio: 15
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2104, '1': 364}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_16]
+dataset: Weather.csv
+ratio: 16
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2083, '1': 385}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_17]
+dataset: Weather.csv
+ratio: 17
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2061, '1': 407}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_18]
+dataset: Weather.csv
+ratio: 18
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2039, '1': 429}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_19]
+dataset: Weather.csv
+ratio: 19
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 2002, '1': 466}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_20]
+dataset: Weather.csv
+ratio: 20
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1974, '1': 494}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_21]
+dataset: Weather.csv
+ratio: 21
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1949, '1': 519}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_22]
+dataset: Weather.csv
+ratio: 22
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1928, '1': 540}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_23]
+dataset: Weather.csv
+ratio: 23
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1906, '1': 562}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_24]
+dataset: Weather.csv
+ratio: 24
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1874, '1': 594}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_25]
+dataset: Weather.csv
+ratio: 25
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1851, '1': 617}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_26]
+dataset: Weather.csv
+ratio: 26
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1823, '1': 645}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_27]
+dataset: Weather.csv
+ratio: 27
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1792, '1': 676}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_28]
+dataset: Weather.csv
+ratio: 28
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1774, '1': 694}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_29]
+dataset: Weather.csv
+ratio: 29
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1751, '1': 717}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_30]
+dataset: Weather.csv
+ratio: 30
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1732, '1': 736}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_35]
+dataset: Weather.csv
+ratio: 35
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1616, '1': 852}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_40]
+dataset: Weather.csv
+ratio: 40
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1487, '1': 981}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_41]
+dataset: Weather.csv
+ratio: 41
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1465, '1': 1003}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_42]
+dataset: Weather.csv
+ratio: 42
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1443, '1': 1025}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_43]
+dataset: Weather.csv
+ratio: 43
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1423, '1': 1045}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_44]
+dataset: Weather.csv
+ratio: 44
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1406, '1': 1062}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_45]
+dataset: Weather.csv
+ratio: 45
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1379, '1': 1089}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_46]
+dataset: Weather.csv
+ratio: 46
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1345, '1': 1123}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_47]
+dataset: Weather.csv
+ratio: 47
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1328, '1': 1140}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_48]
+dataset: Weather.csv
+ratio: 48
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1307, '1': 1161}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_49]
+dataset: Weather.csv
+ratio: 49
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1286, '1': 1182}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_50]
+dataset: Weather.csv
+ratio: 50
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1265, '1': 1203}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]
+
+[metric_inputs.ratio_51]
+dataset: Weather.csv
+ratio: 51
+actual_label shape: (2468,); meaning: flattened ground-truth anomaly labels from test_label, one value per original timestamp
+predict_label before padding shape: (2448,); meaning: binary anomaly predictions produced by thresholding reconstruction energy
+another before padding shape: (2468,); meaning: continuous anomaly score/reconstruction energy used by score-style metrics
+remaining_length for predict_label: 20
+remaining_length for another: 0
+predict_label passed to evaluator shape: (2468,); meaning: binary predictions after alignment/padding to actual_label length
+another passed to evaluator shape: (2468,); meaning: continuous anomaly scores after alignment/padding to actual_label length
+actual_label value counts: {'0': 2046, '1': 422}
+predict_label value counts: {'0': 1249, '1': 1219}
+actual_label first values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+predict_label first values: [1, 1, 0, 1, 0, 0, 0, 0, 0, 0]
+another first values: [0.06584800779819489, 0.10649874806404114, 0.001614282955415547, 0.05628771334886551, 0.04328746721148491, 0.0003506327047944069, 0.03610613942146301, 0.01002719346433878, 0.024804245680570602, 0.0064122979529201984]

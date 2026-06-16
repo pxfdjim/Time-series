@@ -1,0 +1,77 @@
+2026-06-14 20:01:42 [INFO] ts_benchmark.data.data_source(164): Start loading 1 series in parallel
+2026-06-14 20:01:42 [INFO] ts_benchmark.data.data_source(192): Data loading finished.
+2026-06-14 20:01:42 [INFO] ts_benchmark.data.suites.global_storage(39): Data server starting...
+2026-06-14 20:01:42 [INFO] ts_benchmark.data.suites.global_storage(40): Start sending data to the global storage.
+2026-06-14 20:01:42 [INFO] ts_benchmark.data.suites.global_storage(45): Notifying all workers to sync data from the global storage.
+2026-06-14 20:01:42 [INFO] ts_benchmark.data.suites.global_storage(48): Data server started.
+2026-06-14 20:01:42 [INFO] ts_benchmark.models.model_loader(98): Trying to load model ts_benchmark.baselines.MindTS.MindTS
+2026-06-14 20:01:45 [INFO] matplotlib.font_manager(1021): Failed to extract font properties from /usr/share/fonts/truetype/noto/NotoColorEmoji.ttf: In FT2Font: Can not load face (unknown file format; error code 0x2)
+2026-06-14 20:01:45 [INFO] matplotlib.font_manager(1547): generated new fontManager
+2026-06-14 20:01:45 [WARNING] root(135): Unknown options: seed 
+scheduling MindTS: 0it [00:00, ?it/s]Initializing MindTS model and DeepSeek encoder...
+scheduling MindTS: 1it [00:04,  4.68s/it]scheduling MindTS: 1it [00:04,  4.68s/it]
+collecting MindTS:   0%|          | 0/1 [00:00<?, ?it/s]collecting MindTS: 100%|██████████| 1/1 [00:00<00:00, 29537.35it/s]collecting MindTS: 100%|██████████| 1/1 [00:00<00:00, 4782.56it/s] 
+2026-06-14 20:01:50 [INFO] ts_benchmark.recording(331): The error series is: Energy.csv
+Traceback (most recent call last):
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/utils/_http.py", line 409, in hf_raise_for_status
+    response.raise_for_status()
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://huggingface.co/DeepSeek/resolve/main/config.json
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/utils/hub.py", line 403, in cached_file
+    resolved_file = hf_hub_download(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/file_download.py", line 1008, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/file_download.py", line 1115, in _hf_hub_download_to_cache_dir
+    _raise_on_head_call_error(head_call_error, force_download, local_files_only)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/file_download.py", line 1643, in _raise_on_head_call_error
+    raise head_call_error
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/file_download.py", line 1531, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/file_download.py", line 1448, in get_hf_file_metadata
+    r = _request_wrapper(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/file_download.py", line 286, in _request_wrapper
+    response = _request_wrapper(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/file_download.py", line 310, in _request_wrapper
+    hf_raise_for_status(response)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/huggingface_hub/utils/_http.py", line 459, in hf_raise_for_status
+    raise _format(RepositoryNotFoundError, message, response) from e
+huggingface_hub.errors.RepositoryNotFoundError: 401 Client Error. (Request ID: Root=1-6a2e982d-540cd76743c78dde483190e3;2545017f-a695-4e9a-baef-f88e3dbbd963)
+
+Repository Not Found for url: https://huggingface.co/DeepSeek/resolve/main/config.json.
+Please make sure you specified the correct `repo_id` and `repo_type`.
+If you are trying to access a private or gated repo, make sure you are authenticated. For more details, see https://huggingface.co/docs/huggingface_hub/authentication
+Invalid username or password.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/evaluation/strategy/anomaly_detect.py", line 262, in multi_execute
+    self.model.detect_multi_fit(train_data, train_text, train_label)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/MindTS.py", line 471, in detect_multi_fit
+    self.model = MINDTSModel(self.config)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 324, in __init__
+    self.deepseek_config = AutoConfig.from_pretrained(DEEPSEEK_PATH)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/models/auto/configuration_auto.py", line 1017, in from_pretrained
+    config_dict, unused_kwargs = PretrainedConfig.get_config_dict(pretrained_model_name_or_path, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/configuration_utils.py", line 574, in get_config_dict
+    config_dict, kwargs = cls._get_config_dict(pretrained_model_name_or_path, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/configuration_utils.py", line 633, in _get_config_dict
+    resolved_config_file = cached_file(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/utils/hub.py", line 426, in cached_file
+    raise EnvironmentError(
+OSError: DeepSeek is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `huggingface-cli login` or by passing `token=<your_token>`
+
+DeepSeek is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `huggingface-cli login` or by passing `token=<your_token>`
+2026-06-14 20:01:50 [INFO] ts_benchmark.recording(277): loading log file /home/zhangzs/pxf/Time-series/result/label_contrastive_mean_batch/Energy/MindTS.20260614_200150.bs32_dm256_df8_ep5_seq24_patch6_stride6_mask0p4_r0p2_cin9.pc-b319-X11DPi-N-T.3636012.csv
+2026-06-14 20:01:50 [INFO] ts_benchmark.report.utils.leaderboard(161): There are 3 NaN values in the leaderboard due to a higher-than-threshold NaN ratio in the corresponding model+algorithm pairs.

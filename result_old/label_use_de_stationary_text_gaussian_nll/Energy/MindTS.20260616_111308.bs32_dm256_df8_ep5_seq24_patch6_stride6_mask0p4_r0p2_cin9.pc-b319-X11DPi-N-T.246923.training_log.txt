@@ -1,0 +1,12 @@
+MindTS training log
+
+model_name: MindTS
+file_name: Energy.csv
+model_params: {"align_loss_type": "text_gaussian_nll", "batch_size": 32, "d_ff": 8, "d_model": 256, "dataset_description": "Energy contains weekly U.S. gasoline price statistics in dollars per gallon and energy reports collected from the U.S. Energy Information Administration.", "e_layers": 1, "enc_in_time": 9, "frequency_keep_modes": 4, "horizon": 0, "mask_ratio": 0.4, "norm": true, "num_epochs": 5, "parallel_strategy": null, "patch_size": 6, "r": 0.2, "recon_logvar_max": 2.0, "recon_logvar_min": -6.0, "recon_loss_type": "mse", "seq_len": 24, "stl_period": 52, "stride": 6, "time_freq_align_weight": 0.2, "use_frequency_branch": false, "use_information_condenser": false}
+
+ epoch  epoch_time_sec  learning_rate  train_loss  valid_loss
+     1      585.811465       0.000100    0.583483    0.417924
+     2      420.943099       0.000100    0.443538    0.222043
+     3      330.275878       0.000050    0.288333    0.131983
+     4      304.999606       0.000025    0.244495    0.107789
+     5      541.408568       0.000013    0.230284    0.100045

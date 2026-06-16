@@ -1,0 +1,12 @@
+MindTS training log
+
+model_name: MindTS
+file_name: Weather.csv
+model_params: {"align_loss_type": "text_gaussian_nll", "batch_size": 64, "d_ff": 8, "d_model": 64, "dataset_description": "Weather contains temperature and humidity statistics and reports collected from government websites.", "e_layers": 1, "enc_in_time": 4, "frequency_keep_modes": 4, "horizon": 0, "mask_ratio": 0.4, "norm": true, "num_epochs": 5, "parallel_strategy": null, "patch_size": 6, "r": 0.8, "recon_logvar_max": 2.0, "recon_logvar_min": -6.0, "recon_loss_type": "mse", "seq_len": 24, "stl_period": 3, "stride": 6, "time_freq_align_weight": 0.2, "use_frequency_branch": false, "use_information_condenser": false}
+
+ epoch  epoch_time_sec  learning_rate  train_loss  valid_loss
+     1     1652.686441       0.000100    0.729301    0.480462
+     2      756.315445       0.000100    0.455497    0.329859
+     3      969.647101       0.000050    0.366552    0.275230
+     4     1586.005495       0.000025    0.334224    0.250217
+     5     1661.690696       0.000013    0.321390    0.238948

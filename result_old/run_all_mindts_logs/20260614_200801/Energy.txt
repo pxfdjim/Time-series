@@ -1,0 +1,60 @@
+2026-06-14 20:08:04 [INFO] ts_benchmark.data.data_source(164): Start loading 1 series in parallel
+2026-06-14 20:08:04 [INFO] ts_benchmark.data.data_source(192): Data loading finished.
+2026-06-14 20:08:04 [INFO] ts_benchmark.data.suites.global_storage(39): Data server starting...
+2026-06-14 20:08:04 [INFO] ts_benchmark.data.suites.global_storage(40): Start sending data to the global storage.
+2026-06-14 20:08:04 [INFO] ts_benchmark.data.suites.global_storage(45): Notifying all workers to sync data from the global storage.
+2026-06-14 20:08:04 [INFO] ts_benchmark.data.suites.global_storage(48): Data server started.
+2026-06-14 20:08:04 [INFO] ts_benchmark.models.model_loader(98): Trying to load model ts_benchmark.baselines.MindTS.MindTS
+2026-06-14 20:08:05 [WARNING] root(135): Unknown options: seed 
+scheduling MindTS: 0it [00:00, ?it/s]Initializing MindTS model and DeepSeek encoder...
+Loading DeepSeek with HuggingFace device_map='balanced_low_0' across 2 visible GPU(s).
+MindTS model initialized.
+Preparing validation STL windows...
+Validation loader ready: 8 batches.
+Preparing training STL windows...
+Training loader ready: 32 batches.
+Trainable parameters: 77,858,569
+Epoch 1/5 started.
+
+Train epoch 1/5:   0%|          | 0/32 [00:00<?, ?batch/s][ATrain epoch 1/5:   0%|          | 0/32 [00:02<?, ?batch/s]
+scheduling MindTS: 1it [00:05,  5.85s/it]scheduling MindTS: 1it [00:05,  5.85s/it]
+collecting MindTS:   0%|          | 0/1 [00:00<?, ?it/s]collecting MindTS: 100%|██████████| 1/1 [00:00<00:00, 51150.05it/s]collecting MindTS: 100%|██████████| 1/1 [00:00<00:00, 5785.25it/s] 
+2026-06-14 20:08:11 [INFO] ts_benchmark.recording(331): The error series is: Energy.csv
+Traceback (most recent call last):
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/evaluation/strategy/anomaly_detect.py", line 262, in multi_execute
+    self.model.detect_multi_fit(train_data, train_text, train_label)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/MindTS.py", line 562, in detect_multi_fit
+    outputs, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 845, in forward
+    return self.Multimodal_Time_Series(
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 747, in Multimodal_Time_Series
+    prompt_feature = self._encode_intrinsic_prompts(x_enc_time, main_device)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 650, in _encode_intrinsic_prompts
+    outputs = self.model(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 895, in forward
+    layer_outputs = decoder_layer(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 638, in forward
+    hidden_states = self.mlp(hidden_states)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 223, in forward
+    return self.down_proj(self.act_fn(self.gate_proj(hidden_state)) * self.up_proj(hidden_state))
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 4.92 GiB. GPU 1 has a total capacity of 23.64 GiB of which 2.45 GiB is free. Including non-PyTorch memory, this process has 21.18 GiB memory in use. Of the allocated memory 17.47 GiB is allocated by PyTorch, and 3.27 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+CUDA out of memory. Tried to allocate 4.92 GiB. GPU 1 has a total capacity of 23.64 GiB of which 2.45 GiB is free. Including non-PyTorch memory, this process has 21.18 GiB memory in use. Of the allocated memory 17.47 GiB is allocated by PyTorch, and 3.27 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+2026-06-14 20:08:11 [INFO] ts_benchmark.recording(277): loading log file /home/zhangzs/pxf/Time-series/result/label_contrastive_mean_batch/Energy/MindTS.20260614_200811.bs32_dm256_df8_ep5_seq24_patch6_stride6_mask0p4_r0p2_cin9.pc-b319-X11DPi-N-T.3640100.csv
+2026-06-14 20:08:11 [INFO] ts_benchmark.report.utils.leaderboard(161): There are 3 NaN values in the leaderboard due to a higher-than-threshold NaN ratio in the corresponding model+algorithm pairs.

@@ -1,0 +1,4 @@
+strategy_args,metric_name,"MindTS;{""align_loss_type"": ""text_gaussian_nll"", ""batch_size"": 16, ""d_ff"": 16, ""d_model"": 256, ""dataset_description"": ""KR is a financial stock series. Numerical data come from Yahoo Finance; related financial news comes from NASDAQ, Bloomberg, and other financial news websites."", ""e_layers"": 1, ""enc_in_time"": 1, ""horizon"": 0, ""mask_ratio"": 0.4, ""norm"": true, ""num_epochs"": 5, ""parallel_strategy"": null, ""patch_size"": 8, ""r"": 0.9, ""recon_logvar_max"": 2.0, ""recon_logvar_min"": -6.0, ""recon_loss_type"": ""gaussian_nll"", ""seq_len"": 24, ""stl_period"": 5, ""stride"": 8, ""use_information_condenser"": false}"
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",affiliation_f,0.7408298868381051
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_ROC,0.707943581979575
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_PR,0.3394003499078064

@@ -1,0 +1,7 @@
+2026-06-14 21:15:00 [INFO] ts_benchmark.data.data_source(164): Start loading 1 series in parallel
+2026-06-14 21:15:00 [INFO] ts_benchmark.data.data_source(192): Data loading finished.
+2026-06-14 21:15:00 [INFO] ts_benchmark.data.suites.global_storage(39): Data server starting...
+2026-06-14 21:15:00 [INFO] ts_benchmark.data.suites.global_storage(40): Start sending data to the global storage.
+2026-06-14 21:15:00 [INFO] ts_benchmark.data.suites.global_storage(45): Notifying all workers to sync data from the global storage.
+2026-06-14 21:15:00 [INFO] ts_benchmark.data.suites.global_storage(48): Data server started.
+2026-06-14 21:15:00 [INFO] ts_benchmark.models.model_loader(98): Trying to load model ts_benchmark.baselines.MindTS.MindTS

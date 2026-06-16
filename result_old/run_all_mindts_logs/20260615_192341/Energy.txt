@@ -1,0 +1,164 @@
+2026-06-15 19:23:44 [INFO] ts_benchmark.data.data_source(164): Start loading 1 series in parallel
+2026-06-15 19:23:44 [INFO] ts_benchmark.data.data_source(192): Data loading finished.
+2026-06-15 19:23:44 [INFO] ts_benchmark.data.suites.global_storage(39): Data server starting...
+2026-06-15 19:23:44 [INFO] ts_benchmark.data.suites.global_storage(40): Start sending data to the global storage.
+2026-06-15 19:23:44 [INFO] ts_benchmark.data.suites.global_storage(45): Notifying all workers to sync data from the global storage.
+2026-06-15 19:23:44 [INFO] ts_benchmark.data.suites.global_storage(48): Data server started.
+2026-06-15 19:23:44 [INFO] ts_benchmark.models.model_loader(98): Trying to load model ts_benchmark.baselines.MindTS.MindTS
+2026-06-15 19:23:46 [WARNING] root(135): Unknown options: seed 
+scheduling MindTS: 0it [00:00, ?it/s]Initializing MindTS model and DeepSeek encoder...
+Loading DeepSeek with HuggingFace device_map='balanced_low_0' across 2 visible GPU(s).
+MindTS model initialized.
+Preparing validation STL windows...
+Validation loader ready: 8 batches.
+Preparing training STL windows...
+Training loader ready: 32 batches.
+Trainable parameters: 78,350,123
+Epoch 1/5 started.
+
+Train epoch 1/5:   0%|          | 0/32 [00:00<?, ?batch/s][A
+Train epoch 1/5:   0%|          | 0/32 [00:15<?, ?batch/s, loss=1.939553, lr=1.00e-04][A
+Train epoch 1/5:   3%|▎         | 1/32 [00:15<08:06, 15.69s/batch, loss=1.939553, lr=1.00e-04][A
+Train epoch 1/5:   3%|▎         | 1/32 [00:30<08:06, 15.69s/batch, loss=3.586459, lr=1.00e-04][A
+Train epoch 1/5:   6%|▋         | 2/32 [00:30<07:41, 15.37s/batch, loss=3.586459, lr=1.00e-04][A
+Train epoch 1/5:   6%|▋         | 2/32 [00:45<07:41, 15.37s/batch, loss=3.029206, lr=1.00e-04][A
+Train epoch 1/5:   9%|▉         | 3/32 [00:46<07:23, 15.30s/batch, loss=3.029206, lr=1.00e-04][A
+Train epoch 1/5:   9%|▉         | 3/32 [01:00<07:23, 15.30s/batch, loss=2.442237, lr=1.00e-04][A
+Train epoch 1/5:  12%|█▎        | 4/32 [01:01<07:04, 15.16s/batch, loss=2.442237, lr=1.00e-04][A
+Train epoch 1/5:  12%|█▎        | 4/32 [01:15<07:04, 15.16s/batch, loss=1.932174, lr=1.00e-04][A
+Train epoch 1/5:  16%|█▌        | 5/32 [01:16<06:50, 15.20s/batch, loss=1.932174, lr=1.00e-04][A
+Train epoch 1/5:  16%|█▌        | 5/32 [01:31<06:50, 15.20s/batch, loss=1.673358, lr=1.00e-04][A
+Train epoch 1/5:  19%|█▉        | 6/32 [01:31<06:37, 15.30s/batch, loss=1.673358, lr=1.00e-04][A
+Train epoch 1/5:  19%|█▉        | 6/32 [01:46<06:37, 15.30s/batch, loss=1.542837, lr=1.00e-04][A
+Train epoch 1/5:  22%|██▏       | 7/32 [01:47<06:22, 15.32s/batch, loss=1.542837, lr=1.00e-04][A
+Train epoch 1/5:  22%|██▏       | 7/32 [02:02<06:22, 15.32s/batch, loss=1.439451, lr=1.00e-04][A
+Train epoch 1/5:  25%|██▌       | 8/32 [02:02<06:08, 15.33s/batch, loss=1.439451, lr=1.00e-04][A
+Train epoch 1/5:  25%|██▌       | 8/32 [02:17<06:08, 15.33s/batch, loss=1.461924, lr=1.00e-04][A
+Train epoch 1/5:  28%|██▊       | 9/32 [02:18<05:54, 15.40s/batch, loss=1.461924, lr=1.00e-04][A
+Train epoch 1/5:  28%|██▊       | 9/32 [02:33<05:54, 15.40s/batch, loss=1.512139, lr=1.00e-04][A
+Train epoch 1/5:  31%|███▏      | 10/32 [02:33<05:38, 15.39s/batch, loss=1.512139, lr=1.00e-04][A
+Train epoch 1/5:  31%|███▏      | 10/32 [02:48<05:38, 15.39s/batch, loss=1.487393, lr=1.00e-04][A
+Train epoch 1/5:  34%|███▍      | 11/32 [02:48<05:22, 15.36s/batch, loss=1.487393, lr=1.00e-04][A
+Train epoch 1/5:  34%|███▍      | 11/32 [03:03<05:22, 15.36s/batch, loss=1.484494, lr=1.00e-04][A
+Train epoch 1/5:  38%|███▊      | 12/32 [03:04<05:07, 15.36s/batch, loss=1.484494, lr=1.00e-04][A
+Train epoch 1/5:  38%|███▊      | 12/32 [03:19<05:07, 15.36s/batch, loss=1.492283, lr=1.00e-04][A
+Train epoch 1/5:  41%|████      | 13/32 [03:19<04:52, 15.38s/batch, loss=1.492283, lr=1.00e-04][A
+Train epoch 1/5:  41%|████      | 13/32 [03:34<04:52, 15.38s/batch, loss=1.501398, lr=1.00e-04][A
+Train epoch 1/5:  44%|████▍     | 14/32 [03:34<04:37, 15.39s/batch, loss=1.501398, lr=1.00e-04][A
+Train epoch 1/5:  44%|████▍     | 14/32 [03:49<04:37, 15.39s/batch, loss=1.422319, lr=1.00e-04][A
+Train epoch 1/5:  47%|████▋     | 15/32 [03:50<04:21, 15.38s/batch, loss=1.422319, lr=1.00e-04][A
+Train epoch 1/5:  47%|████▋     | 15/32 [04:04<04:21, 15.38s/batch, loss=1.381292, lr=1.00e-04][A
+Train epoch 1/5:  50%|█████     | 16/32 [04:05<04:03, 15.24s/batch, loss=1.381292, lr=1.00e-04][A
+Train epoch 1/5:  50%|█████     | 16/32 [04:20<04:03, 15.24s/batch, loss=1.345595, lr=1.00e-04][A
+Train epoch 1/5:  53%|█████▎    | 17/32 [04:20<03:49, 15.27s/batch, loss=1.345595, lr=1.00e-04][A
+Train epoch 1/5:  53%|█████▎    | 17/32 [04:35<03:49, 15.27s/batch, loss=1.297920, lr=1.00e-04][A
+Train epoch 1/5:  56%|█████▋    | 18/32 [04:35<03:34, 15.29s/batch, loss=1.297920, lr=1.00e-04][A
+Train epoch 1/5:  56%|█████▋    | 18/32 [04:50<03:34, 15.29s/batch, loss=1.297966, lr=1.00e-04][A
+Train epoch 1/5:  59%|█████▉    | 19/32 [04:51<03:18, 15.27s/batch, loss=1.297966, lr=1.00e-04][A
+Train epoch 1/5:  59%|█████▉    | 19/32 [05:05<03:18, 15.27s/batch, loss=1.251659, lr=1.00e-04][A
+Train epoch 1/5:  62%|██████▎   | 20/32 [05:06<03:02, 15.24s/batch, loss=1.251659, lr=1.00e-04][A
+Train epoch 1/5:  62%|██████▎   | 20/32 [05:21<03:02, 15.24s/batch, loss=1.233179, lr=1.00e-04][A
+Train epoch 1/5:  66%|██████▌   | 21/32 [05:21<02:48, 15.30s/batch, loss=1.233179, lr=1.00e-04][A
+Train epoch 1/5:  66%|██████▌   | 21/32 [05:36<02:48, 15.30s/batch, loss=1.203843, lr=1.00e-04][A
+Train epoch 1/5:  69%|██████▉   | 22/32 [05:37<02:33, 15.31s/batch, loss=1.203843, lr=1.00e-04][A
+Train epoch 1/5:  69%|██████▉   | 22/32 [05:51<02:33, 15.31s/batch, loss=1.178013, lr=1.00e-04][A
+Train epoch 1/5:  72%|███████▏  | 23/32 [05:52<02:17, 15.27s/batch, loss=1.178013, lr=1.00e-04][A
+Train epoch 1/5:  72%|███████▏  | 23/32 [06:07<02:17, 15.27s/batch, loss=1.183693, lr=1.00e-04][A
+Train epoch 1/5:  75%|███████▌  | 24/32 [06:07<02:02, 15.26s/batch, loss=1.183693, lr=1.00e-04][A
+Train epoch 1/5:  75%|███████▌  | 24/32 [06:22<02:02, 15.26s/batch, loss=1.178112, lr=1.00e-04][A
+Train epoch 1/5:  78%|███████▊  | 25/32 [06:22<01:47, 15.35s/batch, loss=1.178112, lr=1.00e-04][A
+Train epoch 1/5:  78%|███████▊  | 25/32 [06:38<01:47, 15.35s/batch, loss=1.162715, lr=1.00e-04][A
+Train epoch 1/5:  81%|████████▏ | 26/32 [06:38<01:32, 15.40s/batch, loss=1.162715, lr=1.00e-04][A
+Train epoch 1/5:  81%|████████▏ | 26/32 [06:53<01:32, 15.40s/batch, loss=1.143682, lr=1.00e-04][A
+Train epoch 1/5:  84%|████████▍ | 27/32 [06:54<01:17, 15.47s/batch, loss=1.143682, lr=1.00e-04][A
+Train epoch 1/5:  84%|████████▍ | 27/32 [07:09<01:17, 15.47s/batch, loss=1.113373, lr=1.00e-04][A
+Train epoch 1/5:  88%|████████▊ | 28/32 [07:09<01:01, 15.47s/batch, loss=1.113373, lr=1.00e-04][A
+Train epoch 1/5:  88%|████████▊ | 28/32 [07:24<01:01, 15.47s/batch, loss=1.099262, lr=1.00e-04][A
+Train epoch 1/5:  91%|█████████ | 29/32 [07:24<00:46, 15.36s/batch, loss=1.099262, lr=1.00e-04][A
+Train epoch 1/5:  91%|█████████ | 29/32 [07:40<00:46, 15.36s/batch, loss=1.063554, lr=1.00e-04][A
+Train epoch 1/5:  94%|█████████▍| 30/32 [07:40<00:30, 15.47s/batch, loss=1.063554, lr=1.00e-04][A
+Train epoch 1/5:  94%|█████████▍| 30/32 [07:55<00:30, 15.47s/batch, loss=1.028713, lr=1.00e-04][A
+Train epoch 1/5:  97%|█████████▋| 31/32 [07:55<00:15, 15.40s/batch, loss=1.028713, lr=1.00e-04][A
+Train epoch 1/5:  97%|█████████▋| 31/32 [08:06<00:15, 15.40s/batch, loss=1.032661, lr=1.00e-04][A
+Train epoch 1/5: 100%|██████████| 32/32 [08:06<00:00, 13.98s/batch, loss=1.032661, lr=1.00e-04][ATrain epoch 1/5: 100%|██████████| 32/32 [08:06<00:00, 15.20s/batch, loss=1.032661, lr=1.00e-04]
+
+Validate epoch 1/5:   0%|          | 0/8 [00:00<?, ?batch/s][A
+Validate epoch 1/5:   0%|          | 0/8 [00:15<?, ?batch/s, loss=0.889360][A
+Validate epoch 1/5:  12%|█▎        | 1/8 [00:15<01:45, 15.12s/batch, loss=0.889360][A
+Validate epoch 1/5:  12%|█▎        | 1/8 [00:30<01:45, 15.12s/batch, loss=0.898028][A
+Validate epoch 1/5:  25%|██▌       | 2/8 [00:30<01:31, 15.20s/batch, loss=0.898028][A
+Validate epoch 1/5:  25%|██▌       | 2/8 [00:45<01:31, 15.20s/batch, loss=0.903404][A
+Validate epoch 1/5:  38%|███▊      | 3/8 [00:45<01:15, 15.20s/batch, loss=0.903404][A
+Validate epoch 1/5:  38%|███▊      | 3/8 [01:01<01:15, 15.20s/batch, loss=0.880696][A
+Validate epoch 1/5:  50%|█████     | 4/8 [01:01<01:01, 15.32s/batch, loss=0.880696][A
+Validate epoch 1/5:  50%|█████     | 4/8 [01:14<01:01, 15.32s/batch, loss=0.876534][A
+Validate epoch 1/5:  62%|██████▎   | 5/8 [01:14<00:43, 14.53s/batch, loss=0.876534][A
+Validate epoch 1/5:  62%|██████▎   | 5/8 [01:26<00:43, 14.53s/batch, loss=0.885109][A
+Validate epoch 1/5:  75%|███████▌  | 6/8 [01:26<00:27, 13.86s/batch, loss=0.885109][A
+Validate epoch 1/5:  75%|███████▌  | 6/8 [01:39<00:27, 13.86s/batch, loss=0.910506][A
+Validate epoch 1/5:  88%|████████▊ | 7/8 [01:39<00:13, 13.45s/batch, loss=0.910506][A
+Validate epoch 1/5:  88%|████████▊ | 7/8 [01:44<00:13, 13.45s/batch, loss=0.870271][A
+Validate epoch 1/5: 100%|██████████| 8/8 [01:44<00:00, 10.89s/batch, loss=0.870271][AValidate epoch 1/5: 100%|██████████| 8/8 [01:44<00:00, 13.10s/batch, loss=0.870271]Epoch 1/5 finished: train_loss=1.504452, valid_loss=0.889239
+Best validation loss updated at epoch 1: 0.889239. Saving checkpoint.
+Updating learning rate to 0.0001
+Epoch 2/5 started.
+
+
+Train epoch 2/5:   0%|          | 0/32 [00:00<?, ?batch/s][A
+Train epoch 2/5:   0%|          | 0/32 [00:12<?, ?batch/s, loss=0.974223, lr=1.00e-04][A
+Train epoch 2/5:   3%|▎         | 1/32 [00:13<06:50, 13.25s/batch, loss=0.974223, lr=1.00e-04][A
+Train epoch 2/5:   3%|▎         | 1/32 [00:26<06:50, 13.25s/batch, loss=0.980960, lr=1.00e-04][A
+Train epoch 2/5:   6%|▋         | 2/32 [00:26<06:42, 13.41s/batch, loss=0.980960, lr=1.00e-04][A
+Train epoch 2/5:   6%|▋         | 2/32 [00:39<06:42, 13.41s/batch, loss=0.956446, lr=1.00e-04][A
+Train epoch 2/5:   9%|▉         | 3/32 [00:39<06:25, 13.30s/batch, loss=0.956446, lr=1.00e-04][A
+Train epoch 2/5:   9%|▉         | 3/32 [00:52<06:25, 13.30s/batch, loss=0.949328, lr=1.00e-04][A
+Train epoch 2/5:  12%|█▎        | 4/32 [00:53<06:11, 13.27s/batch, loss=0.949328, lr=1.00e-04][A
+Train epoch 2/5:  12%|█▎        | 4/32 [01:05<06:11, 13.27s/batch, loss=0.909525, lr=1.00e-04][A
+Train epoch 2/5:  16%|█▌        | 5/32 [01:06<05:56, 13.20s/batch, loss=0.909525, lr=1.00e-04][A
+Train epoch 2/5:  16%|█▌        | 5/32 [01:18<05:56, 13.20s/batch, loss=0.886666, lr=1.00e-04][A
+Train epoch 2/5:  19%|█▉        | 6/32 [01:18<05:39, 13.05s/batch, loss=0.886666, lr=1.00e-04][A
+Train epoch 2/5:  19%|█▉        | 6/32 [01:31<05:39, 13.05s/batch, loss=0.868400, lr=1.00e-04][A
+Train epoch 2/5:  22%|██▏       | 7/32 [01:32<05:26, 13.06s/batch, loss=0.868400, lr=1.00e-04][A
+Train epoch 2/5:  22%|██▏       | 7/32 [01:42<05:26, 13.06s/batch, loss=0.855862, lr=1.00e-04][A
+Train epoch 2/5:  25%|██▌       | 8/32 [01:42<04:54, 12.29s/batch, loss=0.855862, lr=1.00e-04][A
+Train epoch 2/5:  25%|██▌       | 8/32 [01:52<04:54, 12.29s/batch, loss=0.822591, lr=1.00e-04][A
+Train epoch 2/5:  28%|██▊       | 9/32 [01:53<04:29, 11.70s/batch, loss=0.822591, lr=1.00e-04][A
+Train epoch 2/5:  28%|██▊       | 9/32 [02:03<04:29, 11.70s/batch, loss=0.794429, lr=1.00e-04][A
+Train epoch 2/5:  31%|███▏      | 10/32 [02:03<04:09, 11.34s/batch, loss=0.794429, lr=1.00e-04][A
+Train epoch 2/5:  31%|███▏      | 10/32 [02:14<04:09, 11.34s/batch, loss=0.734012, lr=1.00e-04][A
+Train epoch 2/5:  34%|███▍      | 11/32 [02:14<03:55, 11.22s/batch, loss=0.734012, lr=1.00e-04][A
+Train epoch 2/5:  34%|███▍      | 11/32 [02:24<03:55, 11.22s/batch, loss=0.752359, lr=1.00e-04][A
+Train epoch 2/5:  38%|███▊      | 12/32 [02:25<03:40, 11.01s/batch, loss=0.752359, lr=1.00e-04][A
+Train epoch 2/5:  38%|███▊      | 12/32 [02:35<03:40, 11.01s/batch, loss=0.743757, lr=1.00e-04][A
+Train epoch 2/5:  41%|████      | 13/32 [02:35<03:27, 10.90s/batch, loss=0.743757, lr=1.00e-04][ATrain epoch 2/5:  41%|████      | 13/32 [02:41<03:55, 12.39s/batch, loss=0.743757, lr=1.00e-04]
+scheduling MindTS: 0it [12:39, ?it/s]
+Traceback (most recent call last):
+  File "./scripts/run_benchmark.py", line 333, in <module>
+    log_filenames = pipeline(
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/pipeline.py", line 183, in pipeline
+    result_list = [
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/pipeline.py", line 184, in <listcomp>
+    eval_multi_model(model_factory, data_name_list, text_name_list, evaluation_config)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/evaluation/evaluate_model.py", line 215, in eval_multi_model
+    eval_backend.schedule(strategy.multi_execute, (series_name, text_name, model_factory))
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/utils/parallel/__init__.py", line 57, in schedule
+    return self.backend.schedule(fn, args, timeout)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/utils/parallel/sequential_backend.py", line 51, in schedule
+    res.put(fn(*args))
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/evaluation/strategy/anomaly_detect.py", line 262, in multi_execute
+    self.model.detect_multi_fit(train_data, train_text, train_label)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/MindTS.py", line 601, in detect_multi_fit
+    outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zhangzs/miniconda3/envs/mind/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 970, in forward
+    return self.Multimodal_Time_Series(
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 861, in Multimodal_Time_Series
+    prompt_feature = self._encode_intrinsic_prompts(x_enc_time, main_device)
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 722, in _encode_intrinsic_prompts
+    embeddings = self._encode_prompts_with_llm(
+  File "/home/zhangzs/pxf/Time-series/ts_benchmark/baselines/MindTS/models/MindTS_model.py", line 506, in _encode_prompts_with_llm
+    input_ids = prompt_tokens["input_ids"].to(self._runtime_llm_device())
+KeyboardInterrupt

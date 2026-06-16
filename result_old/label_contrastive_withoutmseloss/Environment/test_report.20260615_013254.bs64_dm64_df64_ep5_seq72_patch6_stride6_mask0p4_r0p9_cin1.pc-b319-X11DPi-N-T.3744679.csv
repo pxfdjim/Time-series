@@ -1,0 +1,4 @@
+strategy_args,metric_name,"MindTS;{""align_loss_type"": ""contrastive"", ""batch_size"": 64, ""d_ff"": 64, ""d_model"": 64, ""dataset_description"": ""Environment contains daily Air Quality Index data and related reports collected from the U.S. Environmental Protection Agency and NBC."", ""e_layers"": 1, ""enc_in_time"": 1, ""horizon"": 0, ""mask_ratio"": 0.4, ""norm"": true, ""num_epochs"": 5, ""parallel_strategy"": null, ""patch_size"": 6, ""r"": 0.9, ""recon_logvar_max"": 2.0, ""recon_logvar_min"": -6.0, ""recon_loss_type"": ""gaussian_nll"", ""seq_len"": 72, ""stl_period"": 7, ""stride"": 6, ""use_information_condenser"": false}"
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",affiliation_f,0.7099482460699446
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_ROC,0.8349108994256829
+"{""seed"": 2021, ""strategy_name"": ""unfixed_detect_label""}",VUS_PR,0.414460752162139

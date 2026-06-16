@@ -1,0 +1,12 @@
+MindTS training log
+
+model_name: MindTS
+file_name: EWJ.csv
+model_params: {"align_loss_type": "contrastive", "batch_size": 16, "d_ff": 512, "d_model": 256, "dataset_description": "EWJ is a financial stock series. Numerical data come from Yahoo Finance; related financial news comes from NASDAQ, Bloomberg, and other financial news websites.", "e_layers": 1, "enc_in_time": 1, "horizon": 0, "mask_ratio": 0.3, "norm": true, "num_epochs": 5, "parallel_strategy": null, "patch_size": 6, "r": 0.5, "recon_logvar_max": 2.0, "recon_logvar_min": -6.0, "recon_loss_type": "gaussian_nll", "seq_len": 48, "stl_period": 5, "stride": 6, "use_information_condenser": false}
+
+ epoch  epoch_time_sec  learning_rate  train_loss  valid_loss
+     1      114.223530       0.000100    1.712105    0.977344
+     2      115.368605       0.000100    0.600321    0.375147
+     3      116.259616       0.000050    0.081049    0.176909
+     4      115.108421       0.000025   -0.116116    0.046789
+     5      114.904604       0.000013   -0.208546    0.056751

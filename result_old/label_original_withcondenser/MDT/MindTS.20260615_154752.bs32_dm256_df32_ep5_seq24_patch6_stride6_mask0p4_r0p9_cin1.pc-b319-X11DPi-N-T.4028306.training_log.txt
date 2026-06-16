@@ -1,0 +1,12 @@
+MindTS training log
+
+model_name: MindTS
+file_name: MDT.csv
+model_params: {"align_loss_type": "contrastive", "batch_size": 32, "d_ff": 32, "d_model": 256, "dataset_description": "MDT is a financial stock series. Numerical data come from Yahoo Finance; related financial news comes from NASDAQ, Bloomberg, and other financial news websites.", "e_layers": 1, "enc_in_time": 1, "horizon": 0, "mask_ratio": 0.4, "norm": true, "num_epochs": 5, "parallel_strategy": null, "patch_size": 6, "r": 0.9, "recon_logvar_max": 2.0, "recon_logvar_min": -6.0, "recon_loss_type": "mse", "seq_len": 24, "stl_period": 5, "stride": 6, "use_information_condenser": true}
+
+ epoch  epoch_time_sec  learning_rate  train_loss  valid_loss
+     1      117.003887       0.000100    2.134741    1.268273
+     2      117.348702       0.000100    1.530855    1.076511
+     3      117.759937       0.000050    1.274750    1.017621
+     4      117.084166       0.000025    1.116100    1.020541
+     5      111.706434       0.000013    1.019673    1.025526

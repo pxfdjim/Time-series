@@ -188,6 +188,13 @@ class MultiTransformerBlock(nn.Module):
         return output
 
 
+def _config_bool(configs, name, default):
+    value = getattr(configs, name, default)
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y", "on"}
+    return bool(value)
+
+
 class MINDTSModel(nn.Module):
     def __init__(self, configs):
         super(MINDTSModel, self).__init__()
@@ -226,9 +233,15 @@ class MINDTSModel(nn.Module):
         self.d_model = configs.d_model
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
-        self.use_de_stationary = getattr(configs, "use_de_stationary", False)
-        self.use_de_stationary_cross_view = getattr(configs, "use_de_stationary_cross_view", False)
-        self.use_information_condenser = getattr(configs, "use_information_condenser", False)
+        self.use_de_stationary = _config_bool(configs, "use_de_stationary", True)
+        self.use_de_stationary_cross_view = _config_bool(configs, "use_de_stationary_cross_view", False)
+        self.use_information_condenser = _config_bool(configs, "use_information_condenser", False)
+        self.exchange_text_features = _config_bool(configs, "exchange_text_features", True)
+        self.reconstruction_exchange_text_features = _config_bool(
+            configs,
+            "reconstruction_exchange_text_features",
+            self.exchange_text_features,
+        )
         self.align_loss_type = getattr(configs, "align_loss_type", "contrastive")# "text_gaussian_nll"、"symmetric_gaussian_kl"、"none"
         self.align_detach_target = getattr(configs, "align_detach_target", True)
         self.align_logvar_min = getattr(configs, "align_logvar_min", -6.0)
@@ -236,10 +249,7 @@ class MINDTSModel(nn.Module):
         self.recon_loss_type = getattr(configs, "recon_loss_type", "mse")
         self.recon_logvar_min = getattr(configs, "recon_logvar_min", -6.0)
         self.recon_logvar_max = getattr(configs, "recon_logvar_max", 2.0)
-        use_frequency_branch = getattr(configs, "use_frequency_branch", False)
-        if isinstance(use_frequency_branch, str):
-            use_frequency_branch = use_frequency_branch.lower() == "true"
-        self.use_frequency_branch = bool(use_frequency_branch)
+        self.use_frequency_branch = _config_bool(configs, "use_frequency_branch", False)
         self.frequency_keep_modes = max(0, int(getattr(configs, "frequency_keep_modes", 4)))
         self.time_freq_align_weight = float(getattr(configs, "time_freq_align_weight", 0.2))
         allowed_align_losses = {
@@ -880,9 +890,23 @@ class MINDTSModel(nn.Module):
         )
 
         # -------------------------------------------------------------prompt and component Cross-view Attention---------------------------------------------------
+        if self.exchange_text_features:
+            cross_query_features = semantic_features
+            cross_key_value_features = prompt_feature
+            cross_direction = (
+                "semantic_features query prompt_feature as key/value; "
+                "exchange_text_features=true"
+            )
+        else:
+            cross_query_features = prompt_feature
+            cross_key_value_features = semantic_features
+            cross_direction = (
+                "prompt_feature query semantic_features as key/value; "
+                "exchange_text_features=false"
+            )
         llm_features = self.transformer_block(
-            prompt_feature,
-            semantic_features,
+            cross_query_features,
+            cross_key_value_features,
             tau=cross_tau,
             delta=cross_delta,
         )
@@ -898,8 +922,8 @@ class MINDTSModel(nn.Module):
                     "meaning: fused trend/seasonal/residual component semantics, [batch*channels, patches, d_model]"
                 ),
                 (
-                    "attention direction after this change: "
-                    "prompt_feature query semantic_features as key/value; output keeps prompt_feature as residual backbone"
+                    f"attention direction: {cross_direction}; "
+                    "output keeps the query side as residual backbone"
                 ),
                 (
                     f"llm_features shape: {self._shape_of(llm_features)}; "
@@ -941,7 +965,36 @@ class MINDTSModel(nn.Module):
             total_mask = torch.ones_like(llm_features[..., :1])
 
         # -------------------------------------------------------------Reconstruction-----------------------------------------------------------------------------
-        multi_features = self.multimodal_Transformer_Block(llm_features, reconstruction_patch_features)
+        if self.reconstruction_exchange_text_features:
+            multi_features = self.multimodal_Transformer_Block(llm_features, reconstruction_patch_features)
+            reconstruction_direction = (
+                "llm_features as text side; reconstruction_patch_features as query/time side; "
+                "reconstruction_exchange_text_features=true"
+            )
+        else:
+            multi_features = self.multimodal_Transformer_Block(reconstruction_patch_features, llm_features)
+            reconstruction_direction = (
+                "reconstruction_patch_features as text side; llm_features as query/time side; "
+                "reconstruction_exchange_text_features=false"
+            )
+        self._write_shape_log(
+            "reconstruction_attention.first_batch",
+            [
+                (
+                    f"reconstruction_patch_features shape: {self._shape_of(reconstruction_patch_features)}; "
+                    "meaning: masked time/fused patch features before reconstruction"
+                ),
+                (
+                    f"llm_features shape: {self._shape_of(llm_features)}; "
+                    "meaning: cross-view text/component features"
+                ),
+                f"reconstruction direction: {reconstruction_direction}",
+                (
+                    f"multi_features shape: {self._shape_of(multi_features)}; "
+                    "meaning: features projected back to the reconstructed sequence"
+                ),
+            ],
+        )
         flat_features = rearrange(multi_features, '(b c) n d -> (b c) (n d)', c = self.channel_time, n = self.patch_num, d = self.d_model)
         output_mu = self.proj_patch(flat_features)
         output_logvar = self.proj_patch_logvar(flat_features)

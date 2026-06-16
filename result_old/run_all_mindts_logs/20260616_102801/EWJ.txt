@@ -1,0 +1,1565 @@
+2026-06-16 10:28:05 [INFO] ts_benchmark.data.data_source(164): Start loading 1 series in parallel
+2026-06-16 10:28:05 [INFO] ts_benchmark.data.data_source(192): Data loading finished.
+2026-06-16 10:28:05 [INFO] ts_benchmark.data.suites.global_storage(39): Data server starting...
+2026-06-16 10:28:05 [INFO] ts_benchmark.data.suites.global_storage(40): Start sending data to the global storage.
+2026-06-16 10:28:05 [INFO] ts_benchmark.data.suites.global_storage(45): Notifying all workers to sync data from the global storage.
+2026-06-16 10:28:05 [INFO] ts_benchmark.data.suites.global_storage(48): Data server started.
+2026-06-16 10:28:05 [INFO] ts_benchmark.models.model_loader(98): Trying to load model ts_benchmark.baselines.MindTS.MindTS
+2026-06-16 10:28:07 [WARNING] root(135): Unknown options: seed 
+scheduling MindTS: 0it [00:00, ?it/s]Initializing MindTS model and DeepSeek encoder...
+Loading DeepSeek with HuggingFace device_map='balanced_low_0' across 2 visible GPU(s).
+MindTS model initialized.
+Preparing validation STL windows...
+Validation loader ready: 24 batches.
+Preparing training STL windows...
+Training loader ready: 104 batches.
+Trainable parameters: 79,255,857
+Epoch 1/5 started.
+
+Train epoch 1/5:   0%|          | 0/104 [00:00<?, ?batch/s][A
+Train epoch 1/5:   0%|          | 0/104 [00:02<?, ?batch/s, loss=1.427779, lr=1.00e-04][A
+Train epoch 1/5:   1%|          | 1/104 [00:02<04:06,  2.39s/batch, loss=1.427779, lr=1.00e-04][A
+Train epoch 1/5:   1%|          | 1/104 [00:04<04:06,  2.39s/batch, loss=2.218552, lr=1.00e-04][A
+Train epoch 1/5:   2%|▏         | 2/104 [00:04<03:21,  1.98s/batch, loss=2.218552, lr=1.00e-04][A
+Train epoch 1/5:   2%|▏         | 2/104 [00:05<03:21,  1.98s/batch, loss=1.531498, lr=1.00e-04][A
+Train epoch 1/5:   3%|▎         | 3/104 [00:05<03:08,  1.86s/batch, loss=1.531498, lr=1.00e-04][A
+Train epoch 1/5:   3%|▎         | 3/104 [00:07<03:08,  1.86s/batch, loss=2.211043, lr=1.00e-04][A
+Train epoch 1/5:   4%|▍         | 4/104 [00:07<03:00,  1.80s/batch, loss=2.211043, lr=1.00e-04][A
+Train epoch 1/5:   4%|▍         | 4/104 [00:09<03:00,  1.80s/batch, loss=1.119690, lr=1.00e-04][A
+Train epoch 1/5:   5%|▍         | 5/104 [00:09<02:53,  1.75s/batch, loss=1.119690, lr=1.00e-04][A
+Train epoch 1/5:   5%|▍         | 5/104 [00:10<02:53,  1.75s/batch, loss=1.434012, lr=1.00e-04][A
+Train epoch 1/5:   6%|▌         | 6/104 [00:10<02:47,  1.71s/batch, loss=1.434012, lr=1.00e-04][A
+Train epoch 1/5:   6%|▌         | 6/104 [00:12<02:47,  1.71s/batch, loss=1.823882, lr=1.00e-04][A
+Train epoch 1/5:   7%|▋         | 7/104 [00:12<02:45,  1.71s/batch, loss=1.823882, lr=1.00e-04][A
+Train epoch 1/5:   7%|▋         | 7/104 [00:14<02:45,  1.71s/batch, loss=1.188523, lr=1.00e-04][A
+Train epoch 1/5:   8%|▊         | 8/104 [00:14<02:39,  1.66s/batch, loss=1.188523, lr=1.00e-04][A
+Train epoch 1/5:   8%|▊         | 8/104 [00:15<02:39,  1.66s/batch, loss=1.113864, lr=1.00e-04][A
+Train epoch 1/5:   9%|▊         | 9/104 [00:15<02:39,  1.68s/batch, loss=1.113864, lr=1.00e-04][A
+Train epoch 1/5:   9%|▊         | 9/104 [00:17<02:39,  1.68s/batch, loss=1.334612, lr=1.00e-04][A
+Train epoch 1/5:  10%|▉         | 10/104 [00:17<02:35,  1.66s/batch, loss=1.334612, lr=1.00e-04][A
+Train epoch 1/5:  10%|▉         | 10/104 [00:19<02:35,  1.66s/batch, loss=0.928074, lr=1.00e-04][A
+Train epoch 1/5:  11%|█         | 11/104 [00:19<02:37,  1.69s/batch, loss=0.928074, lr=1.00e-04][A
+Train epoch 1/5:  11%|█         | 11/104 [00:20<02:37,  1.69s/batch, loss=1.252641, lr=1.00e-04][A
+Train epoch 1/5:  12%|█▏        | 12/104 [00:20<02:36,  1.70s/batch, loss=1.252641, lr=1.00e-04][A
+Train epoch 1/5:  12%|█▏        | 12/104 [00:22<02:36,  1.70s/batch, loss=0.913403, lr=1.00e-04][A
+Train epoch 1/5:  12%|█▎        | 13/104 [00:22<02:36,  1.72s/batch, loss=0.913403, lr=1.00e-04][A
+Train epoch 1/5:  12%|█▎        | 13/104 [00:24<02:36,  1.72s/batch, loss=1.156665, lr=1.00e-04][A
+Train epoch 1/5:  13%|█▎        | 14/104 [00:24<02:35,  1.73s/batch, loss=1.156665, lr=1.00e-04][A
+Train epoch 1/5:  13%|█▎        | 14/104 [00:26<02:35,  1.73s/batch, loss=1.975281, lr=1.00e-04][A
+Train epoch 1/5:  14%|█▍        | 15/104 [00:26<02:34,  1.73s/batch, loss=1.975281, lr=1.00e-04][A
+Train epoch 1/5:  14%|█▍        | 15/104 [00:27<02:34,  1.73s/batch, loss=1.164171, lr=1.00e-04][A
+Train epoch 1/5:  15%|█▌        | 16/104 [00:27<02:32,  1.74s/batch, loss=1.164171, lr=1.00e-04][A
+Train epoch 1/5:  15%|█▌        | 16/104 [00:29<02:32,  1.74s/batch, loss=1.018826, lr=1.00e-04][A
+Train epoch 1/5:  16%|█▋        | 17/104 [00:29<02:29,  1.72s/batch, loss=1.018826, lr=1.00e-04][A
+Train epoch 1/5:  16%|█▋        | 17/104 [00:31<02:29,  1.72s/batch, loss=1.047685, lr=1.00e-04][A
+Train epoch 1/5:  17%|█▋        | 18/104 [00:31<02:28,  1.73s/batch, loss=1.047685, lr=1.00e-04][A
+Train epoch 1/5:  17%|█▋        | 18/104 [00:32<02:28,  1.73s/batch, loss=1.023838, lr=1.00e-04][A
+Train epoch 1/5:  18%|█▊        | 19/104 [00:32<02:25,  1.72s/batch, loss=1.023838, lr=1.00e-04][A
+Train epoch 1/5:  18%|█▊        | 19/104 [00:34<02:25,  1.72s/batch, loss=1.759804, lr=1.00e-04][A
+Train epoch 1/5:  19%|█▉        | 20/104 [00:34<02:25,  1.73s/batch, loss=1.759804, lr=1.00e-04][A
+Train epoch 1/5:  19%|█▉        | 20/104 [00:36<02:25,  1.73s/batch, loss=0.949432, lr=1.00e-04][A
+Train epoch 1/5:  20%|██        | 21/104 [00:36<02:23,  1.73s/batch, loss=0.949432, lr=1.00e-04][A
+Train epoch 1/5:  20%|██        | 21/104 [00:38<02:23,  1.73s/batch, loss=1.682181, lr=1.00e-04][A
+Train epoch 1/5:  21%|██        | 22/104 [00:38<02:23,  1.74s/batch, loss=1.682181, lr=1.00e-04][A
+Train epoch 1/5:  21%|██        | 22/104 [00:39<02:23,  1.74s/batch, loss=1.037614, lr=1.00e-04][A
+Train epoch 1/5:  22%|██▏       | 23/104 [00:39<02:15,  1.68s/batch, loss=1.037614, lr=1.00e-04][A
+Train epoch 1/5:  22%|██▏       | 23/104 [00:41<02:15,  1.68s/batch, loss=1.423784, lr=1.00e-04][A
+Train epoch 1/5:  23%|██▎       | 24/104 [00:41<02:16,  1.71s/batch, loss=1.423784, lr=1.00e-04][A
+Train epoch 1/5:  23%|██▎       | 24/104 [00:43<02:16,  1.71s/batch, loss=0.935385, lr=1.00e-04][A
+Train epoch 1/5:  24%|██▍       | 25/104 [00:43<02:16,  1.72s/batch, loss=0.935385, lr=1.00e-04][A
+Train epoch 1/5:  24%|██▍       | 25/104 [00:45<02:16,  1.72s/batch, loss=1.339505, lr=1.00e-04][A
+Train epoch 1/5:  25%|██▌       | 26/104 [00:45<02:15,  1.74s/batch, loss=1.339505, lr=1.00e-04][A
+Train epoch 1/5:  25%|██▌       | 26/104 [00:46<02:15,  1.74s/batch, loss=2.313828, lr=1.00e-04][A
+Train epoch 1/5:  26%|██▌       | 27/104 [00:46<02:11,  1.71s/batch, loss=2.313828, lr=1.00e-04][A
+Train epoch 1/5:  26%|██▌       | 27/104 [00:48<02:11,  1.71s/batch, loss=1.331682, lr=1.00e-04][A
+Train epoch 1/5:  27%|██▋       | 28/104 [00:48<02:11,  1.73s/batch, loss=1.331682, lr=1.00e-04][A
+Train epoch 1/5:  27%|██▋       | 28/104 [00:50<02:11,  1.73s/batch, loss=1.096856, lr=1.00e-04][A
+Train epoch 1/5:  28%|██▊       | 29/104 [00:50<02:08,  1.71s/batch, loss=1.096856, lr=1.00e-04][A
+Train epoch 1/5:  28%|██▊       | 29/104 [00:51<02:08,  1.71s/batch, loss=0.926697, lr=1.00e-04][A
+Train epoch 1/5:  29%|██▉       | 30/104 [00:51<02:07,  1.73s/batch, loss=0.926697, lr=1.00e-04][A
+Train epoch 1/5:  29%|██▉       | 30/104 [00:53<02:07,  1.73s/batch, loss=1.879725, lr=1.00e-04][A
+Train epoch 1/5:  30%|██▉       | 31/104 [00:53<02:04,  1.70s/batch, loss=1.879725, lr=1.00e-04][A
+Train epoch 1/5:  30%|██▉       | 31/104 [00:55<02:04,  1.70s/batch, loss=1.107280, lr=1.00e-04][A
+Train epoch 1/5:  31%|███       | 32/104 [00:55<02:03,  1.72s/batch, loss=1.107280, lr=1.00e-04][A
+Train epoch 1/5:  31%|███       | 32/104 [00:57<02:03,  1.72s/batch, loss=0.934135, lr=1.00e-04][A
+Train epoch 1/5:  32%|███▏      | 33/104 [00:57<02:02,  1.73s/batch, loss=0.934135, lr=1.00e-04][A
+Train epoch 1/5:  32%|███▏      | 33/104 [00:58<02:02,  1.73s/batch, loss=1.047222, lr=1.00e-04][A
+Train epoch 1/5:  33%|███▎      | 34/104 [00:58<02:02,  1.75s/batch, loss=1.047222, lr=1.00e-04][A
+Train epoch 1/5:  33%|███▎      | 34/104 [01:00<02:02,  1.75s/batch, loss=0.930223, lr=1.00e-04][A
+Train epoch 1/5:  34%|███▎      | 35/104 [01:00<01:59,  1.73s/batch, loss=0.930223, lr=1.00e-04][A
+Train epoch 1/5:  34%|███▎      | 35/104 [01:02<01:59,  1.73s/batch, loss=1.176904, lr=1.00e-04][A
+Train epoch 1/5:  35%|███▍      | 36/104 [01:02<01:55,  1.70s/batch, loss=1.176904, lr=1.00e-04][A
+Train epoch 1/5:  35%|███▍      | 36/104 [01:03<01:55,  1.70s/batch, loss=0.793442, lr=1.00e-04][A
+Train epoch 1/5:  36%|███▌      | 37/104 [01:03<01:55,  1.72s/batch, loss=0.793442, lr=1.00e-04][A
+Train epoch 1/5:  36%|███▌      | 37/104 [01:05<01:55,  1.72s/batch, loss=2.226496, lr=1.00e-04][A
+Train epoch 1/5:  37%|███▋      | 38/104 [01:05<01:53,  1.73s/batch, loss=2.226496, lr=1.00e-04][A
+Train epoch 1/5:  37%|███▋      | 38/104 [01:07<01:53,  1.73s/batch, loss=1.561073, lr=1.00e-04][A
+Train epoch 1/5:  38%|███▊      | 39/104 [01:07<01:51,  1.72s/batch, loss=1.561073, lr=1.00e-04][A
+Train epoch 1/5:  38%|███▊      | 39/104 [01:09<01:51,  1.72s/batch, loss=1.262092, lr=1.00e-04][A
+Train epoch 1/5:  38%|███▊      | 40/104 [01:09<01:50,  1.73s/batch, loss=1.262092, lr=1.00e-04][A
+Train epoch 1/5:  38%|███▊      | 40/104 [01:10<01:50,  1.73s/batch, loss=1.698801, lr=1.00e-04][A
+Train epoch 1/5:  39%|███▉      | 41/104 [01:10<01:48,  1.73s/batch, loss=1.698801, lr=1.00e-04][A
+Train epoch 1/5:  39%|███▉      | 41/104 [01:12<01:48,  1.73s/batch, loss=2.129210, lr=1.00e-04][A
+Train epoch 1/5:  40%|████      | 42/104 [01:12<01:47,  1.73s/batch, loss=2.129210, lr=1.00e-04][A
+Train epoch 1/5:  40%|████      | 42/104 [01:14<01:47,  1.73s/batch, loss=1.592079, lr=1.00e-04][A
+Train epoch 1/5:  41%|████▏     | 43/104 [01:14<01:46,  1.75s/batch, loss=1.592079, lr=1.00e-04][A
+Train epoch 1/5:  41%|████▏     | 43/104 [01:16<01:46,  1.75s/batch, loss=1.012412, lr=1.00e-04][A
+Train epoch 1/5:  42%|████▏     | 44/104 [01:16<01:45,  1.76s/batch, loss=1.012412, lr=1.00e-04][A
+Train epoch 1/5:  42%|████▏     | 44/104 [01:17<01:45,  1.76s/batch, loss=1.014914, lr=1.00e-04][A
+Train epoch 1/5:  43%|████▎     | 45/104 [01:17<01:42,  1.74s/batch, loss=1.014914, lr=1.00e-04][A
+Train epoch 1/5:  43%|████▎     | 45/104 [01:19<01:42,  1.74s/batch, loss=1.529189, lr=1.00e-04][A
+Train epoch 1/5:  44%|████▍     | 46/104 [01:19<01:41,  1.74s/batch, loss=1.529189, lr=1.00e-04][A
+Train epoch 1/5:  44%|████▍     | 46/104 [01:21<01:41,  1.74s/batch, loss=1.296056, lr=1.00e-04][A
+Train epoch 1/5:  45%|████▌     | 47/104 [01:21<01:35,  1.68s/batch, loss=1.296056, lr=1.00e-04][A
+Train epoch 1/5:  45%|████▌     | 47/104 [01:22<01:35,  1.68s/batch, loss=1.109565, lr=1.00e-04][A
+Train epoch 1/5:  46%|████▌     | 48/104 [01:23<01:36,  1.72s/batch, loss=1.109565, lr=1.00e-04][A
+Train epoch 1/5:  46%|████▌     | 48/104 [01:24<01:36,  1.72s/batch, loss=0.938237, lr=1.00e-04][A
+Train epoch 1/5:  47%|████▋     | 49/104 [01:24<01:35,  1.73s/batch, loss=0.938237, lr=1.00e-04][A
+Train epoch 1/5:  47%|████▋     | 49/104 [01:26<01:35,  1.73s/batch, loss=0.945617, lr=1.00e-04][A
+Train epoch 1/5:  48%|████▊     | 50/104 [01:26<01:34,  1.75s/batch, loss=0.945617, lr=1.00e-04][A
+Train epoch 1/5:  48%|████▊     | 50/104 [01:28<01:34,  1.75s/batch, loss=1.131066, lr=1.00e-04][A
+Train epoch 1/5:  49%|████▉     | 51/104 [01:28<01:32,  1.75s/batch, loss=1.131066, lr=1.00e-04][A
+Train epoch 1/5:  49%|████▉     | 51/104 [01:30<01:32,  1.75s/batch, loss=0.791947, lr=1.00e-04][A
+Train epoch 1/5:  50%|█████     | 52/104 [01:30<01:31,  1.76s/batch, loss=0.791947, lr=1.00e-04][A
+Train epoch 1/5:  50%|█████     | 52/104 [01:31<01:31,  1.76s/batch, loss=0.898637, lr=1.00e-04][A
+Train epoch 1/5:  51%|█████     | 53/104 [01:31<01:26,  1.70s/batch, loss=0.898637, lr=1.00e-04][A
+Train epoch 1/5:  51%|█████     | 53/104 [01:33<01:26,  1.70s/batch, loss=1.376128, lr=1.00e-04][A
+Train epoch 1/5:  52%|█████▏    | 54/104 [01:33<01:25,  1.72s/batch, loss=1.376128, lr=1.00e-04][A
+Train epoch 1/5:  52%|█████▏    | 54/104 [01:35<01:25,  1.72s/batch, loss=0.839235, lr=1.00e-04][A
+Train epoch 1/5:  53%|█████▎    | 55/104 [01:35<01:24,  1.72s/batch, loss=0.839235, lr=1.00e-04][A
+Train epoch 1/5:  53%|█████▎    | 55/104 [01:36<01:24,  1.72s/batch, loss=0.895886, lr=1.00e-04][A
+Train epoch 1/5:  54%|█████▍    | 56/104 [01:36<01:23,  1.73s/batch, loss=0.895886, lr=1.00e-04][A
+Train epoch 1/5:  54%|█████▍    | 56/104 [01:38<01:23,  1.73s/batch, loss=0.956843, lr=1.00e-04][A
+Train epoch 1/5:  55%|█████▍    | 57/104 [01:38<01:22,  1.74s/batch, loss=0.956843, lr=1.00e-04][A
+Train epoch 1/5:  55%|█████▍    | 57/104 [01:40<01:22,  1.74s/batch, loss=1.906757, lr=1.00e-04][A
+Train epoch 1/5:  56%|█████▌    | 58/104 [01:40<01:20,  1.75s/batch, loss=1.906757, lr=1.00e-04][A
+Train epoch 1/5:  56%|█████▌    | 58/104 [01:42<01:20,  1.75s/batch, loss=1.343060, lr=1.00e-04][A
+Train epoch 1/5:  57%|█████▋    | 59/104 [01:42<01:18,  1.74s/batch, loss=1.343060, lr=1.00e-04][A
+Train epoch 1/5:  57%|█████▋    | 59/104 [01:43<01:18,  1.74s/batch, loss=0.915607, lr=1.00e-04][A
+Train epoch 1/5:  58%|█████▊    | 60/104 [01:43<01:16,  1.75s/batch, loss=0.915607, lr=1.00e-04][A
+Train epoch 1/5:  58%|█████▊    | 60/104 [01:45<01:16,  1.75s/batch, loss=1.435685, lr=1.00e-04][A
+Train epoch 1/5:  59%|█████▊    | 61/104 [01:45<01:15,  1.75s/batch, loss=1.435685, lr=1.00e-04][A
+Train epoch 1/5:  59%|█████▊    | 61/104 [01:47<01:15,  1.75s/batch, loss=0.898439, lr=1.00e-04][A
+Train epoch 1/5:  60%|█████▉    | 62/104 [01:47<01:11,  1.70s/batch, loss=0.898439, lr=1.00e-04][A
+Train epoch 1/5:  60%|█████▉    | 62/104 [01:48<01:11,  1.70s/batch, loss=1.662563, lr=1.00e-04][A
+Train epoch 1/5:  61%|██████    | 63/104 [01:49<01:10,  1.72s/batch, loss=1.662563, lr=1.00e-04][A
+Train epoch 1/5:  61%|██████    | 63/104 [01:50<01:10,  1.72s/batch, loss=1.241539, lr=1.00e-04][A
+Train epoch 1/5:  62%|██████▏   | 64/104 [01:50<01:09,  1.73s/batch, loss=1.241539, lr=1.00e-04][A
+Train epoch 1/5:  62%|██████▏   | 64/104 [01:52<01:09,  1.73s/batch, loss=0.982107, lr=1.00e-04][A
+Train epoch 1/5:  62%|██████▎   | 65/104 [01:52<01:07,  1.74s/batch, loss=0.982107, lr=1.00e-04][A
+Train epoch 1/5:  62%|██████▎   | 65/104 [01:54<01:07,  1.74s/batch, loss=1.645888, lr=1.00e-04][A
+Train epoch 1/5:  63%|██████▎   | 66/104 [01:54<01:05,  1.72s/batch, loss=1.645888, lr=1.00e-04][A
+Train epoch 1/5:  63%|██████▎   | 66/104 [01:55<01:05,  1.72s/batch, loss=1.232471, lr=1.00e-04][A
+Train epoch 1/5:  64%|██████▍   | 67/104 [01:55<01:04,  1.74s/batch, loss=1.232471, lr=1.00e-04][A
+Train epoch 1/5:  64%|██████▍   | 67/104 [01:57<01:04,  1.74s/batch, loss=1.652716, lr=1.00e-04][A
+Train epoch 1/5:  65%|██████▌   | 68/104 [01:57<01:02,  1.75s/batch, loss=1.652716, lr=1.00e-04][A
+Train epoch 1/5:  65%|██████▌   | 68/104 [01:59<01:02,  1.75s/batch, loss=0.743449, lr=1.00e-04][A
+Train epoch 1/5:  66%|██████▋   | 69/104 [01:59<01:01,  1.75s/batch, loss=0.743449, lr=1.00e-04][A
+Train epoch 1/5:  66%|██████▋   | 69/104 [02:01<01:01,  1.75s/batch, loss=1.262673, lr=1.00e-04][A
+Train epoch 1/5:  67%|██████▋   | 70/104 [02:01<00:57,  1.68s/batch, loss=1.262673, lr=1.00e-04][A
+Train epoch 1/5:  67%|██████▋   | 70/104 [02:02<00:57,  1.68s/batch, loss=0.948745, lr=1.00e-04][A
+Train epoch 1/5:  68%|██████▊   | 71/104 [02:02<00:55,  1.67s/batch, loss=0.948745, lr=1.00e-04][A
+Train epoch 1/5:  68%|██████▊   | 71/104 [02:04<00:55,  1.67s/batch, loss=1.016982, lr=1.00e-04][A
+Train epoch 1/5:  69%|██████▉   | 72/104 [02:04<00:54,  1.71s/batch, loss=1.016982, lr=1.00e-04][A
+Train epoch 1/5:  69%|██████▉   | 72/104 [02:06<00:54,  1.71s/batch, loss=0.727222, lr=1.00e-04][A
+Train epoch 1/5:  70%|███████   | 73/104 [02:06<00:53,  1.73s/batch, loss=0.727222, lr=1.00e-04][A
+Train epoch 1/5:  70%|███████   | 73/104 [02:08<00:53,  1.73s/batch, loss=0.977905, lr=1.00e-04][A
+Train epoch 1/5:  71%|███████   | 74/104 [02:08<00:52,  1.75s/batch, loss=0.977905, lr=1.00e-04][A
+Train epoch 1/5:  71%|███████   | 74/104 [02:09<00:52,  1.75s/batch, loss=0.999325, lr=1.00e-04][A
+Train epoch 1/5:  72%|███████▏  | 75/104 [02:09<00:50,  1.75s/batch, loss=0.999325, lr=1.00e-04][A
+Train epoch 1/5:  72%|███████▏  | 75/104 [02:11<00:50,  1.75s/batch, loss=0.928962, lr=1.00e-04][A
+Train epoch 1/5:  73%|███████▎  | 76/104 [02:11<00:48,  1.73s/batch, loss=0.928962, lr=1.00e-04][A
+Train epoch 1/5:  73%|███████▎  | 76/104 [02:13<00:48,  1.73s/batch, loss=0.945033, lr=1.00e-04][A
+Train epoch 1/5:  74%|███████▍  | 77/104 [02:13<00:47,  1.74s/batch, loss=0.945033, lr=1.00e-04][A
+Train epoch 1/5:  74%|███████▍  | 77/104 [02:14<00:47,  1.74s/batch, loss=0.922273, lr=1.00e-04][A
+Train epoch 1/5:  75%|███████▌  | 78/104 [02:14<00:44,  1.72s/batch, loss=0.922273, lr=1.00e-04][A
+Train epoch 1/5:  75%|███████▌  | 78/104 [02:16<00:44,  1.72s/batch, loss=1.337167, lr=1.00e-04][A
+Train epoch 1/5:  76%|███████▌  | 79/104 [02:16<00:43,  1.74s/batch, loss=1.337167, lr=1.00e-04][A
+Train epoch 1/5:  76%|███████▌  | 79/104 [02:18<00:43,  1.74s/batch, loss=0.941611, lr=1.00e-04][A
+Train epoch 1/5:  77%|███████▋  | 80/104 [02:18<00:41,  1.71s/batch, loss=0.941611, lr=1.00e-04][A
+Train epoch 1/5:  77%|███████▋  | 80/104 [02:20<00:41,  1.71s/batch, loss=0.920761, lr=1.00e-04][A
+Train epoch 1/5:  78%|███████▊  | 81/104 [02:20<00:39,  1.73s/batch, loss=0.920761, lr=1.00e-04][A
+Train epoch 1/5:  78%|███████▊  | 81/104 [02:21<00:39,  1.73s/batch, loss=0.865555, lr=1.00e-04][A
+Train epoch 1/5:  79%|███████▉  | 82/104 [02:21<00:37,  1.71s/batch, loss=0.865555, lr=1.00e-04][A
+Train epoch 1/5:  79%|███████▉  | 82/104 [02:23<00:37,  1.71s/batch, loss=1.275759, lr=1.00e-04][A
+Train epoch 1/5:  80%|███████▉  | 83/104 [02:23<00:35,  1.71s/batch, loss=1.275759, lr=1.00e-04][A
+Train epoch 1/5:  80%|███████▉  | 83/104 [02:25<00:35,  1.71s/batch, loss=0.906950, lr=1.00e-04][A
+Train epoch 1/5:  81%|████████  | 84/104 [02:25<00:34,  1.73s/batch, loss=0.906950, lr=1.00e-04][A
+Train epoch 1/5:  81%|████████  | 84/104 [02:26<00:34,  1.73s/batch, loss=0.769296, lr=1.00e-04][A
+Train epoch 1/5:  82%|████████▏ | 85/104 [02:27<00:33,  1.74s/batch, loss=0.769296, lr=1.00e-04][A
+Train epoch 1/5:  82%|████████▏ | 85/104 [02:28<00:33,  1.74s/batch, loss=0.857114, lr=1.00e-04][A
+Train epoch 1/5:  83%|████████▎ | 86/104 [02:28<00:31,  1.73s/batch, loss=0.857114, lr=1.00e-04][A
+Train epoch 1/5:  83%|████████▎ | 86/104 [02:30<00:31,  1.73s/batch, loss=0.982045, lr=1.00e-04][A
+Train epoch 1/5:  84%|████████▎ | 87/104 [02:30<00:29,  1.74s/batch, loss=0.982045, lr=1.00e-04][A
+Train epoch 1/5:  84%|████████▎ | 87/104 [02:32<00:29,  1.74s/batch, loss=0.959760, lr=1.00e-04][A
+Train epoch 1/5:  85%|████████▍ | 88/104 [02:32<00:27,  1.72s/batch, loss=0.959760, lr=1.00e-04][A
+Train epoch 1/5:  85%|████████▍ | 88/104 [02:33<00:27,  1.72s/batch, loss=1.786256, lr=1.00e-04][A
+Train epoch 1/5:  86%|████████▌ | 89/104 [02:33<00:25,  1.73s/batch, loss=1.786256, lr=1.00e-04][A
+Train epoch 1/5:  86%|████████▌ | 89/104 [02:35<00:25,  1.73s/batch, loss=0.859176, lr=1.00e-04][A
+Train epoch 1/5:  87%|████████▋ | 90/104 [02:35<00:24,  1.74s/batch, loss=0.859176, lr=1.00e-04][A
+Train epoch 1/5:  87%|████████▋ | 90/104 [02:37<00:24,  1.74s/batch, loss=0.857177, lr=1.00e-04][A
+Train epoch 1/5:  88%|████████▊ | 91/104 [02:37<00:22,  1.75s/batch, loss=0.857177, lr=1.00e-04][A
+Train epoch 1/5:  88%|████████▊ | 91/104 [02:39<00:22,  1.75s/batch, loss=1.403293, lr=1.00e-04][A
+Train epoch 1/5:  88%|████████▊ | 92/104 [02:39<00:21,  1.75s/batch, loss=1.403293, lr=1.00e-04][A
+Train epoch 1/5:  88%|████████▊ | 92/104 [02:40<00:21,  1.75s/batch, loss=1.290185, lr=1.00e-04][A
+Train epoch 1/5:  89%|████████▉ | 93/104 [02:40<00:19,  1.75s/batch, loss=1.290185, lr=1.00e-04][A
+Train epoch 1/5:  89%|████████▉ | 93/104 [02:42<00:19,  1.75s/batch, loss=0.795953, lr=1.00e-04][A
+Train epoch 1/5:  90%|█████████ | 94/104 [02:42<00:17,  1.70s/batch, loss=0.795953, lr=1.00e-04][A
+Train epoch 1/5:  90%|█████████ | 94/104 [02:44<00:17,  1.70s/batch, loss=1.290101, lr=1.00e-04][A
+Train epoch 1/5:  91%|█████████▏| 95/104 [02:44<00:15,  1.72s/batch, loss=1.290101, lr=1.00e-04][A
+Train epoch 1/5:  91%|█████████▏| 95/104 [02:46<00:15,  1.72s/batch, loss=1.557980, lr=1.00e-04][A
+Train epoch 1/5:  92%|█████████▏| 96/104 [02:46<00:13,  1.74s/batch, loss=1.557980, lr=1.00e-04][A
+Train epoch 1/5:  92%|█████████▏| 96/104 [02:47<00:13,  1.74s/batch, loss=1.312614, lr=1.00e-04][A
+Train epoch 1/5:  93%|█████████▎| 97/104 [02:47<00:12,  1.73s/batch, loss=1.312614, lr=1.00e-04][A
+Train epoch 1/5:  93%|█████████▎| 97/104 [02:49<00:12,  1.73s/batch, loss=1.542133, lr=1.00e-04][A
+Train epoch 1/5:  94%|█████████▍| 98/104 [02:49<00:10,  1.75s/batch, loss=1.542133, lr=1.00e-04][A
+Train epoch 1/5:  94%|█████████▍| 98/104 [02:51<00:10,  1.75s/batch, loss=0.946219, lr=1.00e-04][A
+Train epoch 1/5:  95%|█████████▌| 99/104 [02:51<00:08,  1.75s/batch, loss=0.946219, lr=1.00e-04][A
+Train epoch 1/5:  95%|█████████▌| 99/104 [02:53<00:08,  1.75s/batch, loss=1.180463, lr=1.00e-04][A
+Train epoch 1/5:  96%|█████████▌| 100/104 [02:53<00:06,  1.74s/batch, loss=1.180463, lr=1.00e-04][A
+Train epoch 1/5:  96%|█████████▌| 100/104 [02:54<00:06,  1.74s/batch, loss=0.843668, lr=1.00e-04][A
+Train epoch 1/5:  97%|█████████▋| 101/104 [02:54<00:05,  1.75s/batch, loss=0.843668, lr=1.00e-04][A
+Train epoch 1/5:  97%|█████████▋| 101/104 [02:56<00:05,  1.75s/batch, loss=1.690883, lr=1.00e-04][A
+Train epoch 1/5:  98%|█████████▊| 102/104 [02:56<00:03,  1.74s/batch, loss=1.690883, lr=1.00e-04][A
+Train epoch 1/5:  98%|█████████▊| 102/104 [02:58<00:03,  1.74s/batch, loss=1.111526, lr=1.00e-04][A
+Train epoch 1/5:  99%|█████████▉| 103/104 [02:58<00:01,  1.76s/batch, loss=1.111526, lr=1.00e-04][A
+Train epoch 1/5:  99%|█████████▉| 103/104 [02:59<00:01,  1.76s/batch, loss=1.979614, lr=1.00e-04][A
+Train epoch 1/5: 100%|██████████| 104/104 [02:59<00:00,  1.44s/batch, loss=1.979614, lr=1.00e-04][ATrain epoch 1/5: 100%|██████████| 104/104 [02:59<00:00,  1.72s/batch, loss=1.979614, lr=1.00e-04]
+
+Validate epoch 1/5:   0%|          | 0/24 [00:00<?, ?batch/s][A
+Validate epoch 1/5:   0%|          | 0/24 [00:01<?, ?batch/s, loss=0.726075][A
+Validate epoch 1/5:   4%|▍         | 1/24 [00:01<00:40,  1.75s/batch, loss=0.726075][A
+Validate epoch 1/5:   4%|▍         | 1/24 [00:03<00:40,  1.75s/batch, loss=0.759871][A
+Validate epoch 1/5:   8%|▊         | 2/24 [00:03<00:36,  1.65s/batch, loss=0.759871][A
+Validate epoch 1/5:   8%|▊         | 2/24 [00:05<00:36,  1.65s/batch, loss=0.846103][A
+Validate epoch 1/5:  12%|█▎        | 3/24 [00:05<00:35,  1.68s/batch, loss=0.846103][A
+Validate epoch 1/5:  12%|█▎        | 3/24 [00:06<00:35,  1.68s/batch, loss=0.866650][A
+Validate epoch 1/5:  17%|█▋        | 4/24 [00:06<00:34,  1.71s/batch, loss=0.866650][A
+Validate epoch 1/5:  17%|█▋        | 4/24 [00:08<00:34,  1.71s/batch, loss=0.788957][A
+Validate epoch 1/5:  21%|██        | 5/24 [00:08<00:32,  1.72s/batch, loss=0.788957][A
+Validate epoch 1/5:  21%|██        | 5/24 [00:10<00:32,  1.72s/batch, loss=0.715983][A
+Validate epoch 1/5:  25%|██▌       | 6/24 [00:10<00:30,  1.69s/batch, loss=0.715983][A
+Validate epoch 1/5:  25%|██▌       | 6/24 [00:11<00:30,  1.69s/batch, loss=0.677621][A
+Validate epoch 1/5:  29%|██▉       | 7/24 [00:11<00:29,  1.71s/batch, loss=0.677621][A
+Validate epoch 1/5:  29%|██▉       | 7/24 [00:13<00:29,  1.71s/batch, loss=0.905583][A
+Validate epoch 1/5:  33%|███▎      | 8/24 [00:13<00:27,  1.69s/batch, loss=0.905583][A
+Validate epoch 1/5:  33%|███▎      | 8/24 [00:15<00:27,  1.69s/batch, loss=0.693516][A
+Validate epoch 1/5:  38%|███▊      | 9/24 [00:15<00:25,  1.70s/batch, loss=0.693516][A
+Validate epoch 1/5:  38%|███▊      | 9/24 [00:17<00:25,  1.70s/batch, loss=0.800929][A
+Validate epoch 1/5:  42%|████▏     | 10/24 [00:17<00:23,  1.71s/batch, loss=0.800929][A
+Validate epoch 1/5:  42%|████▏     | 10/24 [00:18<00:23,  1.71s/batch, loss=0.816366][A
+Validate epoch 1/5:  46%|████▌     | 11/24 [00:18<00:22,  1.71s/batch, loss=0.816366][A
+Validate epoch 1/5:  46%|████▌     | 11/24 [00:20<00:22,  1.71s/batch, loss=0.847469][A
+Validate epoch 1/5:  50%|█████     | 12/24 [00:20<00:20,  1.72s/batch, loss=0.847469][A
+Validate epoch 1/5:  50%|█████     | 12/24 [00:22<00:20,  1.72s/batch, loss=0.776799][A
+Validate epoch 1/5:  54%|█████▍    | 13/24 [00:22<00:18,  1.72s/batch, loss=0.776799][A
+Validate epoch 1/5:  54%|█████▍    | 13/24 [00:23<00:18,  1.72s/batch, loss=0.728371][A
+Validate epoch 1/5:  58%|█████▊    | 14/24 [00:23<00:16,  1.67s/batch, loss=0.728371][A
+Validate epoch 1/5:  58%|█████▊    | 14/24 [00:25<00:16,  1.67s/batch, loss=0.822301][A
+Validate epoch 1/5:  62%|██████▎   | 15/24 [00:25<00:15,  1.69s/batch, loss=0.822301][A
+Validate epoch 1/5:  62%|██████▎   | 15/24 [00:27<00:15,  1.69s/batch, loss=0.840083][A
+Validate epoch 1/5:  67%|██████▋   | 16/24 [00:27<00:13,  1.71s/batch, loss=0.840083][A
+Validate epoch 1/5:  67%|██████▋   | 16/24 [00:28<00:13,  1.71s/batch, loss=0.640638][A
+Validate epoch 1/5:  71%|███████   | 17/24 [00:28<00:12,  1.71s/batch, loss=0.640638][A
+Validate epoch 1/5:  71%|███████   | 17/24 [00:30<00:12,  1.71s/batch, loss=0.814433][A
+Validate epoch 1/5:  75%|███████▌  | 18/24 [00:30<00:10,  1.73s/batch, loss=0.814433][A
+Validate epoch 1/5:  75%|███████▌  | 18/24 [00:32<00:10,  1.73s/batch, loss=0.759874][A
+Validate epoch 1/5:  79%|███████▉  | 19/24 [00:32<00:08,  1.73s/batch, loss=0.759874][A
+Validate epoch 1/5:  79%|███████▉  | 19/24 [00:34<00:08,  1.73s/batch, loss=0.900094][A
+Validate epoch 1/5:  83%|████████▎ | 20/24 [00:34<00:06,  1.70s/batch, loss=0.900094][A
+Validate epoch 1/5:  83%|████████▎ | 20/24 [00:35<00:06,  1.70s/batch, loss=1.005556][A
+Validate epoch 1/5:  88%|████████▊ | 21/24 [00:35<00:05,  1.70s/batch, loss=1.005556][A
+Validate epoch 1/5:  88%|████████▊ | 21/24 [00:37<00:05,  1.70s/batch, loss=0.809116][A
+Validate epoch 1/5:  92%|█████████▏| 22/24 [00:37<00:03,  1.68s/batch, loss=0.809116][A
+Validate epoch 1/5:  92%|█████████▏| 22/24 [00:39<00:03,  1.68s/batch, loss=0.713782][A
+Validate epoch 1/5:  96%|█████████▌| 23/24 [00:39<00:01,  1.70s/batch, loss=0.713782][A
+Validate epoch 1/5:  96%|█████████▌| 23/24 [00:40<00:01,  1.70s/batch, loss=0.729676][A
+Validate epoch 1/5: 100%|██████████| 24/24 [00:40<00:00,  1.56s/batch, loss=0.729676][AValidate epoch 1/5: 100%|██████████| 24/24 [00:40<00:00,  1.68s/batch, loss=0.729676]Epoch 1/5 finished: train_loss=1.234691, valid_loss=0.791077
+Best validation loss updated at epoch 1: 0.791077. Saving checkpoint.
+Updating learning rate to 0.0001
+Epoch 2/5 started.
+
+
+Train epoch 2/5:   0%|          | 0/104 [00:00<?, ?batch/s][A
+Train epoch 2/5:   0%|          | 0/104 [00:01<?, ?batch/s, loss=0.849583, lr=1.00e-04][A
+Train epoch 2/5:   1%|          | 1/104 [00:01<03:01,  1.76s/batch, loss=0.849583, lr=1.00e-04][A
+Train epoch 2/5:   1%|          | 1/104 [00:03<03:01,  1.76s/batch, loss=0.828322, lr=1.00e-04][A
+Train epoch 2/5:   2%|▏         | 2/104 [00:03<02:58,  1.75s/batch, loss=0.828322, lr=1.00e-04][A
+Train epoch 2/5:   2%|▏         | 2/104 [00:05<02:58,  1.75s/batch, loss=2.216959, lr=1.00e-04][A
+Train epoch 2/5:   3%|▎         | 3/104 [00:05<02:57,  1.76s/batch, loss=2.216959, lr=1.00e-04][A
+Train epoch 2/5:   3%|▎         | 3/104 [00:06<02:57,  1.76s/batch, loss=1.016269, lr=1.00e-04][A
+Train epoch 2/5:   4%|▍         | 4/104 [00:07<02:55,  1.76s/batch, loss=1.016269, lr=1.00e-04][A
+Train epoch 2/5:   4%|▍         | 4/104 [00:08<02:55,  1.76s/batch, loss=0.819482, lr=1.00e-04][A
+Train epoch 2/5:   5%|▍         | 5/104 [00:08<02:49,  1.72s/batch, loss=0.819482, lr=1.00e-04][A
+Train epoch 2/5:   5%|▍         | 5/104 [00:10<02:49,  1.72s/batch, loss=0.721523, lr=1.00e-04][A
+Train epoch 2/5:   6%|▌         | 6/104 [00:10<02:42,  1.66s/batch, loss=0.721523, lr=1.00e-04][A
+Train epoch 2/5:   6%|▌         | 6/104 [00:11<02:42,  1.66s/batch, loss=0.762689, lr=1.00e-04][A
+Train epoch 2/5:   7%|▋         | 7/104 [00:11<02:43,  1.69s/batch, loss=0.762689, lr=1.00e-04][A
+Train epoch 2/5:   7%|▋         | 7/104 [00:13<02:43,  1.69s/batch, loss=1.317145, lr=1.00e-04][A
+Train epoch 2/5:   8%|▊         | 8/104 [00:13<02:43,  1.70s/batch, loss=1.317145, lr=1.00e-04][A
+Train epoch 2/5:   8%|▊         | 8/104 [00:15<02:43,  1.70s/batch, loss=1.058116, lr=1.00e-04][A
+Train epoch 2/5:   9%|▊         | 9/104 [00:15<02:43,  1.72s/batch, loss=1.058116, lr=1.00e-04][A
+Train epoch 2/5:   9%|▊         | 9/104 [00:17<02:43,  1.72s/batch, loss=0.869823, lr=1.00e-04][A
+Train epoch 2/5:  10%|▉         | 10/104 [00:17<02:45,  1.76s/batch, loss=0.869823, lr=1.00e-04][A
+Train epoch 2/5:  10%|▉         | 10/104 [00:19<02:45,  1.76s/batch, loss=1.116436, lr=1.00e-04][A
+Train epoch 2/5:  11%|█         | 11/104 [00:19<02:44,  1.77s/batch, loss=1.116436, lr=1.00e-04][A
+Train epoch 2/5:  11%|█         | 11/104 [00:20<02:44,  1.77s/batch, loss=0.806472, lr=1.00e-04][A
+Train epoch 2/5:  12%|█▏        | 12/104 [00:20<02:44,  1.79s/batch, loss=0.806472, lr=1.00e-04][A
+Train epoch 2/5:  12%|█▏        | 12/104 [00:22<02:44,  1.79s/batch, loss=0.838842, lr=1.00e-04][A
+Train epoch 2/5:  12%|█▎        | 13/104 [00:22<02:41,  1.78s/batch, loss=0.838842, lr=1.00e-04][A
+Train epoch 2/5:  12%|█▎        | 13/104 [00:24<02:41,  1.78s/batch, loss=1.335867, lr=1.00e-04][A
+Train epoch 2/5:  13%|█▎        | 14/104 [00:24<02:35,  1.73s/batch, loss=1.335867, lr=1.00e-04][A
+Train epoch 2/5:  13%|█▎        | 14/104 [00:26<02:35,  1.73s/batch, loss=0.789928, lr=1.00e-04][A
+Train epoch 2/5:  14%|█▍        | 15/104 [00:26<02:36,  1.76s/batch, loss=0.789928, lr=1.00e-04][A
+Train epoch 2/5:  14%|█▍        | 15/104 [00:27<02:36,  1.76s/batch, loss=1.182866, lr=1.00e-04][A
+Train epoch 2/5:  15%|█▌        | 16/104 [00:27<02:36,  1.78s/batch, loss=1.182866, lr=1.00e-04][A
+Train epoch 2/5:  15%|█▌        | 16/104 [00:29<02:36,  1.78s/batch, loss=1.011795, lr=1.00e-04][A
+Train epoch 2/5:  16%|█▋        | 17/104 [00:29<02:35,  1.79s/batch, loss=1.011795, lr=1.00e-04][A
+Train epoch 2/5:  16%|█▋        | 17/104 [00:31<02:35,  1.79s/batch, loss=0.782419, lr=1.00e-04][A
+Train epoch 2/5:  17%|█▋        | 18/104 [00:31<02:34,  1.79s/batch, loss=0.782419, lr=1.00e-04][A
+Train epoch 2/5:  17%|█▋        | 18/104 [00:33<02:34,  1.79s/batch, loss=0.855642, lr=1.00e-04][A
+Train epoch 2/5:  18%|█▊        | 19/104 [00:33<02:31,  1.79s/batch, loss=0.855642, lr=1.00e-04][A
+Train epoch 2/5:  18%|█▊        | 19/104 [00:34<02:31,  1.79s/batch, loss=0.763073, lr=1.00e-04][A
+Train epoch 2/5:  19%|█▉        | 20/104 [00:35<02:27,  1.76s/batch, loss=0.763073, lr=1.00e-04][A
+Train epoch 2/5:  19%|█▉        | 20/104 [00:36<02:27,  1.76s/batch, loss=1.158394, lr=1.00e-04][A
+Train epoch 2/5:  20%|██        | 21/104 [00:36<02:22,  1.72s/batch, loss=1.158394, lr=1.00e-04][A
+Train epoch 2/5:  20%|██        | 21/104 [00:38<02:22,  1.72s/batch, loss=1.325915, lr=1.00e-04][A
+Train epoch 2/5:  21%|██        | 22/104 [00:38<02:22,  1.74s/batch, loss=1.325915, lr=1.00e-04][A
+Train epoch 2/5:  21%|██        | 22/104 [00:40<02:22,  1.74s/batch, loss=1.238112, lr=1.00e-04][A
+Train epoch 2/5:  22%|██▏       | 23/104 [00:40<02:19,  1.72s/batch, loss=1.238112, lr=1.00e-04][A
+Train epoch 2/5:  22%|██▏       | 23/104 [00:41<02:19,  1.72s/batch, loss=1.292435, lr=1.00e-04][A
+Train epoch 2/5:  23%|██▎       | 24/104 [00:41<02:18,  1.73s/batch, loss=1.292435, lr=1.00e-04][A
+Train epoch 2/5:  23%|██▎       | 24/104 [00:43<02:18,  1.73s/batch, loss=0.819228, lr=1.00e-04][A
+Train epoch 2/5:  24%|██▍       | 25/104 [00:43<02:18,  1.75s/batch, loss=0.819228, lr=1.00e-04][A
+Train epoch 2/5:  24%|██▍       | 25/104 [00:45<02:18,  1.75s/batch, loss=0.971449, lr=1.00e-04][A
+Train epoch 2/5:  25%|██▌       | 26/104 [00:45<02:16,  1.75s/batch, loss=0.971449, lr=1.00e-04][A
+Train epoch 2/5:  25%|██▌       | 26/104 [00:47<02:16,  1.75s/batch, loss=1.046556, lr=1.00e-04][A
+Train epoch 2/5:  26%|██▌       | 27/104 [00:47<02:15,  1.76s/batch, loss=1.046556, lr=1.00e-04][A
+Train epoch 2/5:  26%|██▌       | 27/104 [00:48<02:15,  1.76s/batch, loss=1.188317, lr=1.00e-04][A
+Train epoch 2/5:  27%|██▋       | 28/104 [00:49<02:14,  1.77s/batch, loss=1.188317, lr=1.00e-04][A
+Train epoch 2/5:  27%|██▋       | 28/104 [00:50<02:14,  1.77s/batch, loss=0.934653, lr=1.00e-04][A
+Train epoch 2/5:  28%|██▊       | 29/104 [00:50<02:11,  1.76s/batch, loss=0.934653, lr=1.00e-04][A
+Train epoch 2/5:  28%|██▊       | 29/104 [00:52<02:11,  1.76s/batch, loss=0.843746, lr=1.00e-04][A
+Train epoch 2/5:  29%|██▉       | 30/104 [00:52<02:10,  1.76s/batch, loss=0.843746, lr=1.00e-04][A
+Train epoch 2/5:  29%|██▉       | 30/104 [00:53<02:10,  1.76s/batch, loss=1.057750, lr=1.00e-04][A
+Train epoch 2/5:  30%|██▉       | 31/104 [00:54<02:03,  1.69s/batch, loss=1.057750, lr=1.00e-04][A
+Train epoch 2/5:  30%|██▉       | 31/104 [00:55<02:03,  1.69s/batch, loss=0.704778, lr=1.00e-04][A
+Train epoch 2/5:  31%|███       | 32/104 [00:55<02:00,  1.68s/batch, loss=0.704778, lr=1.00e-04][A
+Train epoch 2/5:  31%|███       | 32/104 [00:57<02:00,  1.68s/batch, loss=1.038747, lr=1.00e-04][A
+Train epoch 2/5:  32%|███▏      | 33/104 [00:57<02:00,  1.70s/batch, loss=1.038747, lr=1.00e-04][A
+Train epoch 2/5:  32%|███▏      | 33/104 [00:59<02:00,  1.70s/batch, loss=1.234050, lr=1.00e-04][A
+Train epoch 2/5:  33%|███▎      | 34/104 [00:59<02:00,  1.72s/batch, loss=1.234050, lr=1.00e-04][A
+Train epoch 2/5:  33%|███▎      | 34/104 [01:00<02:00,  1.72s/batch, loss=1.192677, lr=1.00e-04][A
+Train epoch 2/5:  34%|███▎      | 35/104 [01:00<01:59,  1.73s/batch, loss=1.192677, lr=1.00e-04][A
+Train epoch 2/5:  34%|███▎      | 35/104 [01:02<01:59,  1.73s/batch, loss=0.776090, lr=1.00e-04][A
+Train epoch 2/5:  35%|███▍      | 36/104 [01:02<01:56,  1.71s/batch, loss=0.776090, lr=1.00e-04][A
+Train epoch 2/5:  35%|███▍      | 36/104 [01:04<01:56,  1.71s/batch, loss=0.675886, lr=1.00e-04][A
+Train epoch 2/5:  36%|███▌      | 37/104 [01:04<01:56,  1.73s/batch, loss=0.675886, lr=1.00e-04][A
+Train epoch 2/5:  36%|███▌      | 37/104 [01:06<01:56,  1.73s/batch, loss=0.626777, lr=1.00e-04][A
+Train epoch 2/5:  37%|███▋      | 38/104 [01:06<01:53,  1.72s/batch, loss=0.626777, lr=1.00e-04][A
+Train epoch 2/5:  37%|███▋      | 38/104 [01:07<01:53,  1.72s/batch, loss=0.931781, lr=1.00e-04][A
+Train epoch 2/5:  38%|███▊      | 39/104 [01:07<01:52,  1.74s/batch, loss=0.931781, lr=1.00e-04][A
+Train epoch 2/5:  38%|███▊      | 39/104 [01:09<01:52,  1.74s/batch, loss=0.659585, lr=1.00e-04][A
+Train epoch 2/5:  38%|███▊      | 40/104 [01:09<01:50,  1.72s/batch, loss=0.659585, lr=1.00e-04][A
+Train epoch 2/5:  38%|███▊      | 40/104 [01:11<01:50,  1.72s/batch, loss=1.033323, lr=1.00e-04][A
+Train epoch 2/5:  39%|███▉      | 41/104 [01:11<01:49,  1.74s/batch, loss=1.033323, lr=1.00e-04][A
+Train epoch 2/5:  39%|███▉      | 41/104 [01:13<01:49,  1.74s/batch, loss=1.266201, lr=1.00e-04][A
+Train epoch 2/5:  40%|████      | 42/104 [01:13<01:48,  1.75s/batch, loss=1.266201, lr=1.00e-04][A
+Train epoch 2/5:  40%|████      | 42/104 [01:14<01:48,  1.75s/batch, loss=0.964387, lr=1.00e-04][A
+Train epoch 2/5:  41%|████▏     | 43/104 [01:14<01:46,  1.75s/batch, loss=0.964387, lr=1.00e-04][A
+Train epoch 2/5:  41%|████▏     | 43/104 [01:16<01:46,  1.75s/batch, loss=0.702696, lr=1.00e-04][A
+Train epoch 2/5:  42%|████▏     | 44/104 [01:16<01:44,  1.74s/batch, loss=0.702696, lr=1.00e-04][A
+Train epoch 2/5:  42%|████▏     | 44/104 [01:18<01:44,  1.74s/batch, loss=0.771382, lr=1.00e-04][A
+Train epoch 2/5:  43%|████▎     | 45/104 [01:18<01:43,  1.76s/batch, loss=0.771382, lr=1.00e-04][A
+Train epoch 2/5:  43%|████▎     | 45/104 [01:20<01:43,  1.76s/batch, loss=1.402828, lr=1.00e-04][A
+Train epoch 2/5:  44%|████▍     | 46/104 [01:20<01:42,  1.77s/batch, loss=1.402828, lr=1.00e-04][A
+Train epoch 2/5:  44%|████▍     | 46/104 [01:21<01:42,  1.77s/batch, loss=1.117929, lr=1.00e-04][A
+Train epoch 2/5:  45%|████▌     | 47/104 [01:21<01:41,  1.77s/batch, loss=1.117929, lr=1.00e-04][A
+Train epoch 2/5:  45%|████▌     | 47/104 [01:23<01:41,  1.77s/batch, loss=0.934742, lr=1.00e-04][A
+Train epoch 2/5:  46%|████▌     | 48/104 [01:23<01:39,  1.78s/batch, loss=0.934742, lr=1.00e-04][A
+Train epoch 2/5:  46%|████▌     | 48/104 [01:25<01:39,  1.78s/batch, loss=0.798915, lr=1.00e-04][A
+Train epoch 2/5:  47%|████▋     | 49/104 [01:25<01:35,  1.74s/batch, loss=0.798915, lr=1.00e-04][A
+Train epoch 2/5:  47%|████▋     | 49/104 [01:27<01:35,  1.74s/batch, loss=1.277737, lr=1.00e-04][A
+Train epoch 2/5:  48%|████▊     | 50/104 [01:27<01:34,  1.76s/batch, loss=1.277737, lr=1.00e-04][A
+Train epoch 2/5:  48%|████▊     | 50/104 [01:28<01:34,  1.76s/batch, loss=0.752313, lr=1.00e-04][A
+Train epoch 2/5:  49%|████▉     | 51/104 [01:28<01:33,  1.76s/batch, loss=0.752313, lr=1.00e-04][A
+Train epoch 2/5:  49%|████▉     | 51/104 [01:30<01:33,  1.76s/batch, loss=0.760476, lr=1.00e-04][A
+Train epoch 2/5:  50%|█████     | 52/104 [01:30<01:32,  1.78s/batch, loss=0.760476, lr=1.00e-04][A
+Train epoch 2/5:  50%|█████     | 52/104 [01:32<01:32,  1.78s/batch, loss=0.661097, lr=1.00e-04][A
+Train epoch 2/5:  51%|█████     | 53/104 [01:32<01:30,  1.78s/batch, loss=0.661097, lr=1.00e-04][A
+Train epoch 2/5:  51%|█████     | 53/104 [01:34<01:30,  1.78s/batch, loss=0.758515, lr=1.00e-04][A
+Train epoch 2/5:  52%|█████▏    | 54/104 [01:34<01:29,  1.79s/batch, loss=0.758515, lr=1.00e-04][A
+Train epoch 2/5:  52%|█████▏    | 54/104 [01:36<01:29,  1.79s/batch, loss=1.020628, lr=1.00e-04][A
+Train epoch 2/5:  53%|█████▎    | 55/104 [01:36<01:26,  1.77s/batch, loss=1.020628, lr=1.00e-04][A
+Train epoch 2/5:  53%|█████▎    | 55/104 [01:37<01:26,  1.77s/batch, loss=0.753041, lr=1.00e-04][A
+Train epoch 2/5:  54%|█████▍    | 56/104 [01:37<01:25,  1.79s/batch, loss=0.753041, lr=1.00e-04][A
+Train epoch 2/5:  54%|█████▍    | 56/104 [01:39<01:25,  1.79s/batch, loss=0.880958, lr=1.00e-04][A
+Train epoch 2/5:  55%|█████▍    | 57/104 [01:39<01:23,  1.78s/batch, loss=0.880958, lr=1.00e-04][A
+Train epoch 2/5:  55%|█████▍    | 57/104 [01:41<01:23,  1.78s/batch, loss=0.630988, lr=1.00e-04][A
+Train epoch 2/5:  56%|█████▌    | 58/104 [01:41<01:22,  1.80s/batch, loss=0.630988, lr=1.00e-04][A
+Train epoch 2/5:  56%|█████▌    | 58/104 [01:43<01:22,  1.80s/batch, loss=1.276403, lr=1.00e-04][A
+Train epoch 2/5:  57%|█████▋    | 59/104 [01:43<01:20,  1.78s/batch, loss=1.276403, lr=1.00e-04][A
+Train epoch 2/5:  57%|█████▋    | 59/104 [01:44<01:20,  1.78s/batch, loss=0.949689, lr=1.00e-04][A
+Train epoch 2/5:  58%|█████▊    | 60/104 [01:45<01:17,  1.77s/batch, loss=0.949689, lr=1.00e-04][A
+Train epoch 2/5:  58%|█████▊    | 60/104 [01:46<01:17,  1.77s/batch, loss=0.602519, lr=1.00e-04][A
+Train epoch 2/5:  59%|█████▊    | 61/104 [01:46<01:16,  1.77s/batch, loss=0.602519, lr=1.00e-04][A
+Train epoch 2/5:  59%|█████▊    | 61/104 [01:48<01:16,  1.77s/batch, loss=0.683303, lr=1.00e-04][A
+Train epoch 2/5:  60%|█████▉    | 62/104 [01:48<01:14,  1.77s/batch, loss=0.683303, lr=1.00e-04][A
+Train epoch 2/5:  60%|█████▉    | 62/104 [01:50<01:14,  1.77s/batch, loss=0.788421, lr=1.00e-04][A
+Train epoch 2/5:  61%|██████    | 63/104 [01:50<01:12,  1.77s/batch, loss=0.788421, lr=1.00e-04][A
+Train epoch 2/5:  61%|██████    | 63/104 [01:52<01:12,  1.77s/batch, loss=0.696230, lr=1.00e-04][A
+Train epoch 2/5:  62%|██████▏   | 64/104 [01:52<01:10,  1.76s/batch, loss=0.696230, lr=1.00e-04][A
+Train epoch 2/5:  62%|██████▏   | 64/104 [01:53<01:10,  1.76s/batch, loss=1.257853, lr=1.00e-04][A
+Train epoch 2/5:  62%|██████▎   | 65/104 [01:53<01:08,  1.77s/batch, loss=1.257853, lr=1.00e-04][A
+Train epoch 2/5:  62%|██████▎   | 65/104 [01:55<01:08,  1.77s/batch, loss=0.860245, lr=1.00e-04][A
+Train epoch 2/5:  63%|██████▎   | 66/104 [01:55<01:04,  1.70s/batch, loss=0.860245, lr=1.00e-04][A
+Train epoch 2/5:  63%|██████▎   | 66/104 [01:57<01:04,  1.70s/batch, loss=1.158701, lr=1.00e-04][A
+Train epoch 2/5:  64%|██████▍   | 67/104 [01:57<01:02,  1.69s/batch, loss=1.158701, lr=1.00e-04][A
+Train epoch 2/5:  64%|██████▍   | 67/104 [01:58<01:02,  1.69s/batch, loss=1.052371, lr=1.00e-04][A
+Train epoch 2/5:  65%|██████▌   | 68/104 [01:58<01:01,  1.71s/batch, loss=1.052371, lr=1.00e-04][A
+Train epoch 2/5:  65%|██████▌   | 68/104 [02:00<01:01,  1.71s/batch, loss=1.342110, lr=1.00e-04][A
+Train epoch 2/5:  66%|██████▋   | 69/104 [02:00<01:00,  1.73s/batch, loss=1.342110, lr=1.00e-04][A
+Train epoch 2/5:  66%|██████▋   | 69/104 [02:02<01:00,  1.73s/batch, loss=1.175053, lr=1.00e-04][A
+Train epoch 2/5:  67%|██████▋   | 70/104 [02:02<00:59,  1.74s/batch, loss=1.175053, lr=1.00e-04][A
+Train epoch 2/5:  67%|██████▋   | 70/104 [02:04<00:59,  1.74s/batch, loss=0.684511, lr=1.00e-04][A
+Train epoch 2/5:  68%|██████▊   | 71/104 [02:04<00:57,  1.75s/batch, loss=0.684511, lr=1.00e-04][A
+Train epoch 2/5:  68%|██████▊   | 71/104 [02:05<00:57,  1.75s/batch, loss=0.725016, lr=1.00e-04][A
+Train epoch 2/5:  69%|██████▉   | 72/104 [02:05<00:55,  1.74s/batch, loss=0.725016, lr=1.00e-04][A
+Train epoch 2/5:  69%|██████▉   | 72/104 [02:07<00:55,  1.74s/batch, loss=0.738307, lr=1.00e-04][A
+Train epoch 2/5:  70%|███████   | 73/104 [02:07<00:53,  1.74s/batch, loss=0.738307, lr=1.00e-04][A
+Train epoch 2/5:  70%|███████   | 73/104 [02:09<00:53,  1.74s/batch, loss=0.906198, lr=1.00e-04][A
+Train epoch 2/5:  71%|███████   | 74/104 [02:09<00:51,  1.73s/batch, loss=0.906198, lr=1.00e-04][A
+Train epoch 2/5:  71%|███████   | 74/104 [02:11<00:51,  1.73s/batch, loss=1.054901, lr=1.00e-04][A
+Train epoch 2/5:  72%|███████▏  | 75/104 [02:11<00:50,  1.74s/batch, loss=1.054901, lr=1.00e-04][A
+Train epoch 2/5:  72%|███████▏  | 75/104 [02:12<00:50,  1.74s/batch, loss=0.702848, lr=1.00e-04][A
+Train epoch 2/5:  73%|███████▎  | 76/104 [02:12<00:48,  1.75s/batch, loss=0.702848, lr=1.00e-04][A
+Train epoch 2/5:  73%|███████▎  | 76/104 [02:14<00:48,  1.75s/batch, loss=0.725588, lr=1.00e-04][A
+Train epoch 2/5:  74%|███████▍  | 77/104 [02:14<00:47,  1.76s/batch, loss=0.725588, lr=1.00e-04][A
+Train epoch 2/5:  74%|███████▍  | 77/104 [02:16<00:47,  1.76s/batch, loss=0.761340, lr=1.00e-04][A
+Train epoch 2/5:  75%|███████▌  | 78/104 [02:16<00:45,  1.74s/batch, loss=0.761340, lr=1.00e-04][A
+Train epoch 2/5:  75%|███████▌  | 78/104 [02:18<00:45,  1.74s/batch, loss=0.670156, lr=1.00e-04][A
+Train epoch 2/5:  76%|███████▌  | 79/104 [02:18<00:43,  1.75s/batch, loss=0.670156, lr=1.00e-04][A
+Train epoch 2/5:  76%|███████▌  | 79/104 [02:19<00:43,  1.75s/batch, loss=0.558594, lr=1.00e-04][A
+Train epoch 2/5:  77%|███████▋  | 80/104 [02:19<00:42,  1.77s/batch, loss=0.558594, lr=1.00e-04][A
+Train epoch 2/5:  77%|███████▋  | 80/104 [02:21<00:42,  1.77s/batch, loss=0.968347, lr=1.00e-04][A
+Train epoch 2/5:  78%|███████▊  | 81/104 [02:21<00:40,  1.77s/batch, loss=0.968347, lr=1.00e-04][A
+Train epoch 2/5:  78%|███████▊  | 81/104 [02:23<00:40,  1.77s/batch, loss=1.003656, lr=1.00e-04][A
+Train epoch 2/5:  79%|███████▉  | 82/104 [02:23<00:38,  1.75s/batch, loss=1.003656, lr=1.00e-04][A
+Train epoch 2/5:  79%|███████▉  | 82/104 [02:24<00:38,  1.75s/batch, loss=1.012585, lr=1.00e-04][A
+Train epoch 2/5:  80%|███████▉  | 83/104 [02:24<00:35,  1.71s/batch, loss=1.012585, lr=1.00e-04][A
+Train epoch 2/5:  80%|███████▉  | 83/104 [02:26<00:35,  1.71s/batch, loss=0.880720, lr=1.00e-04][A
+Train epoch 2/5:  81%|████████  | 84/104 [02:26<00:34,  1.70s/batch, loss=0.880720, lr=1.00e-04][A
+Train epoch 2/5:  81%|████████  | 84/104 [02:28<00:34,  1.70s/batch, loss=0.611851, lr=1.00e-04][A
+Train epoch 2/5:  82%|████████▏ | 85/104 [02:28<00:32,  1.71s/batch, loss=0.611851, lr=1.00e-04][A
+Train epoch 2/5:  82%|████████▏ | 85/104 [02:30<00:32,  1.71s/batch, loss=0.720540, lr=1.00e-04][A
+Train epoch 2/5:  83%|████████▎ | 86/104 [02:30<00:31,  1.73s/batch, loss=0.720540, lr=1.00e-04][A
+Train epoch 2/5:  83%|████████▎ | 86/104 [02:31<00:31,  1.73s/batch, loss=0.795472, lr=1.00e-04][A
+Train epoch 2/5:  84%|████████▎ | 87/104 [02:31<00:29,  1.75s/batch, loss=0.795472, lr=1.00e-04][A
+Train epoch 2/5:  84%|████████▎ | 87/104 [02:33<00:29,  1.75s/batch, loss=0.749202, lr=1.00e-04][A
+Train epoch 2/5:  85%|████████▍ | 88/104 [02:33<00:28,  1.76s/batch, loss=0.749202, lr=1.00e-04][A
+Train epoch 2/5:  85%|████████▍ | 88/104 [02:35<00:28,  1.76s/batch, loss=0.887617, lr=1.00e-04][A
+Train epoch 2/5:  86%|████████▌ | 89/104 [02:35<00:26,  1.77s/batch, loss=0.887617, lr=1.00e-04][A
+Train epoch 2/5:  86%|████████▌ | 89/104 [02:37<00:26,  1.77s/batch, loss=1.130594, lr=1.00e-04][A
+Train epoch 2/5:  87%|████████▋ | 90/104 [02:37<00:24,  1.76s/batch, loss=1.130594, lr=1.00e-04][A
+Train epoch 2/5:  87%|████████▋ | 90/104 [02:39<00:24,  1.76s/batch, loss=1.059776, lr=1.00e-04][A
+Train epoch 2/5:  88%|████████▊ | 91/104 [02:39<00:23,  1.78s/batch, loss=1.059776, lr=1.00e-04][A
+Train epoch 2/5:  88%|████████▊ | 91/104 [02:40<00:23,  1.78s/batch, loss=0.679956, lr=1.00e-04][A
+Train epoch 2/5:  88%|████████▊ | 92/104 [02:40<00:21,  1.78s/batch, loss=0.679956, lr=1.00e-04][A
+Train epoch 2/5:  88%|████████▊ | 92/104 [02:42<00:21,  1.78s/batch, loss=0.793840, lr=1.00e-04][A
+Train epoch 2/5:  89%|████████▉ | 93/104 [02:42<00:19,  1.78s/batch, loss=0.793840, lr=1.00e-04][A
+Train epoch 2/5:  89%|████████▉ | 93/104 [02:44<00:19,  1.78s/batch, loss=0.686741, lr=1.00e-04][A
+Train epoch 2/5:  90%|█████████ | 94/104 [02:44<00:17,  1.79s/batch, loss=0.686741, lr=1.00e-04][A
+Train epoch 2/5:  90%|█████████ | 94/104 [02:46<00:17,  1.79s/batch, loss=0.960554, lr=1.00e-04][A
+Train epoch 2/5:  91%|█████████▏| 95/104 [02:46<00:16,  1.78s/batch, loss=0.960554, lr=1.00e-04][A
+Train epoch 2/5:  91%|█████████▏| 95/104 [02:48<00:16,  1.78s/batch, loss=0.738968, lr=1.00e-04][A
+Train epoch 2/5:  92%|█████████▏| 96/104 [02:48<00:14,  1.79s/batch, loss=0.738968, lr=1.00e-04][A
+Train epoch 2/5:  92%|█████████▏| 96/104 [02:49<00:14,  1.79s/batch, loss=0.922075, lr=1.00e-04][A
+Train epoch 2/5:  93%|█████████▎| 97/104 [02:49<00:12,  1.79s/batch, loss=0.922075, lr=1.00e-04][A
+Train epoch 2/5:  93%|█████████▎| 97/104 [02:51<00:12,  1.79s/batch, loss=1.073415, lr=1.00e-04][A
+Train epoch 2/5:  94%|█████████▍| 98/104 [02:51<00:10,  1.80s/batch, loss=1.073415, lr=1.00e-04][A
+Train epoch 2/5:  94%|█████████▍| 98/104 [02:53<00:10,  1.80s/batch, loss=0.902943, lr=1.00e-04][A
+Train epoch 2/5:  95%|█████████▌| 99/104 [02:53<00:09,  1.82s/batch, loss=0.902943, lr=1.00e-04][A
+Train epoch 2/5:  95%|█████████▌| 99/104 [02:55<00:09,  1.82s/batch, loss=0.523070, lr=1.00e-04][A
+Train epoch 2/5:  96%|█████████▌| 100/104 [02:55<00:07,  1.80s/batch, loss=0.523070, lr=1.00e-04][A
+Train epoch 2/5:  96%|█████████▌| 100/104 [02:57<00:07,  1.80s/batch, loss=0.717288, lr=1.00e-04][A
+Train epoch 2/5:  97%|█████████▋| 101/104 [02:57<00:05,  1.79s/batch, loss=0.717288, lr=1.00e-04][A
+Train epoch 2/5:  97%|█████████▋| 101/104 [02:58<00:05,  1.79s/batch, loss=0.601208, lr=1.00e-04][A
+Train epoch 2/5:  98%|█████████▊| 102/104 [02:58<00:03,  1.80s/batch, loss=0.601208, lr=1.00e-04][A
+Train epoch 2/5:  98%|█████████▊| 102/104 [03:00<00:03,  1.80s/batch, loss=0.721682, lr=1.00e-04][A
+Train epoch 2/5:  99%|█████████▉| 103/104 [03:00<00:01,  1.80s/batch, loss=0.721682, lr=1.00e-04][A
+Train epoch 2/5:  99%|█████████▉| 103/104 [03:01<00:01,  1.80s/batch, loss=0.713459, lr=1.00e-04][A
+Train epoch 2/5: 100%|██████████| 104/104 [03:01<00:00,  1.45s/batch, loss=0.713459, lr=1.00e-04][ATrain epoch 2/5: 100%|██████████| 104/104 [03:01<00:00,  1.74s/batch, loss=0.713459, lr=1.00e-04]
+
+Validate epoch 2/5:   0%|          | 0/24 [00:00<?, ?batch/s][A
+Validate epoch 2/5:   0%|          | 0/24 [00:01<?, ?batch/s, loss=0.631035][A
+Validate epoch 2/5:   4%|▍         | 1/24 [00:01<00:39,  1.73s/batch, loss=0.631035][A
+Validate epoch 2/5:   4%|▍         | 1/24 [00:03<00:39,  1.73s/batch, loss=0.551753][A
+Validate epoch 2/5:   8%|▊         | 2/24 [00:03<00:37,  1.71s/batch, loss=0.551753][A
+Validate epoch 2/5:   8%|▊         | 2/24 [00:05<00:37,  1.71s/batch, loss=0.466607][A
+Validate epoch 2/5:  12%|█▎        | 3/24 [00:05<00:35,  1.68s/batch, loss=0.466607][A
+Validate epoch 2/5:  12%|█▎        | 3/24 [00:06<00:35,  1.68s/batch, loss=0.579099][A
+Validate epoch 2/5:  17%|█▋        | 4/24 [00:06<00:34,  1.73s/batch, loss=0.579099][A
+Validate epoch 2/5:  17%|█▋        | 4/24 [00:08<00:34,  1.73s/batch, loss=0.582318][A
+Validate epoch 2/5:  21%|██        | 5/24 [00:08<00:32,  1.73s/batch, loss=0.582318][A
+Validate epoch 2/5:  21%|██        | 5/24 [00:10<00:32,  1.73s/batch, loss=0.552070][A
+Validate epoch 2/5:  25%|██▌       | 6/24 [00:10<00:30,  1.72s/batch, loss=0.552070][A
+Validate epoch 2/5:  25%|██▌       | 6/24 [00:12<00:30,  1.72s/batch, loss=0.574933][A
+Validate epoch 2/5:  29%|██▉       | 7/24 [00:12<00:29,  1.72s/batch, loss=0.574933][A
+Validate epoch 2/5:  29%|██▉       | 7/24 [00:13<00:29,  1.72s/batch, loss=0.579978][A
+Validate epoch 2/5:  33%|███▎      | 8/24 [00:13<00:27,  1.72s/batch, loss=0.579978][A
+Validate epoch 2/5:  33%|███▎      | 8/24 [00:15<00:27,  1.72s/batch, loss=0.561946][A
+Validate epoch 2/5:  38%|███▊      | 9/24 [00:15<00:24,  1.66s/batch, loss=0.561946][A
+Validate epoch 2/5:  38%|███▊      | 9/24 [00:16<00:24,  1.66s/batch, loss=0.624127][A
+Validate epoch 2/5:  42%|████▏     | 10/24 [00:16<00:23,  1.68s/batch, loss=0.624127][A
+Validate epoch 2/5:  42%|████▏     | 10/24 [00:18<00:23,  1.68s/batch, loss=0.615099][A
+Validate epoch 2/5:  46%|████▌     | 11/24 [00:18<00:21,  1.69s/batch, loss=0.615099][A
+Validate epoch 2/5:  46%|████▌     | 11/24 [00:20<00:21,  1.69s/batch, loss=0.627668][A
+Validate epoch 2/5:  50%|█████     | 12/24 [00:20<00:20,  1.71s/batch, loss=0.627668][A
+Validate epoch 2/5:  50%|█████     | 12/24 [00:22<00:20,  1.71s/batch, loss=0.630159][A
+Validate epoch 2/5:  54%|█████▍    | 13/24 [00:22<00:19,  1.74s/batch, loss=0.630159][A
+Validate epoch 2/5:  54%|█████▍    | 13/24 [00:23<00:19,  1.74s/batch, loss=0.647913][A
+Validate epoch 2/5:  58%|█████▊    | 14/24 [00:23<00:17,  1.73s/batch, loss=0.647913][A
+Validate epoch 2/5:  58%|█████▊    | 14/24 [00:25<00:17,  1.73s/batch, loss=0.614711][A
+Validate epoch 2/5:  62%|██████▎   | 15/24 [00:25<00:15,  1.73s/batch, loss=0.614711][A
+Validate epoch 2/5:  62%|██████▎   | 15/24 [00:27<00:15,  1.73s/batch, loss=0.573460][A
+Validate epoch 2/5:  67%|██████▋   | 16/24 [00:27<00:13,  1.73s/batch, loss=0.573460][A
+Validate epoch 2/5:  67%|██████▋   | 16/24 [00:29<00:13,  1.73s/batch, loss=0.503028][A
+Validate epoch 2/5:  71%|███████   | 17/24 [00:29<00:11,  1.71s/batch, loss=0.503028][A
+Validate epoch 2/5:  71%|███████   | 17/24 [00:30<00:11,  1.71s/batch, loss=0.616198][A
+Validate epoch 2/5:  75%|███████▌  | 18/24 [00:30<00:10,  1.71s/batch, loss=0.616198][A
+Validate epoch 2/5:  75%|███████▌  | 18/24 [00:32<00:10,  1.71s/batch, loss=0.642271][A
+Validate epoch 2/5:  79%|███████▉  | 19/24 [00:32<00:08,  1.71s/batch, loss=0.642271][A
+Validate epoch 2/5:  79%|███████▉  | 19/24 [00:34<00:08,  1.71s/batch, loss=0.617909][A
+Validate epoch 2/5:  83%|████████▎ | 20/24 [00:34<00:06,  1.71s/batch, loss=0.617909][A
+Validate epoch 2/5:  83%|████████▎ | 20/24 [00:35<00:06,  1.71s/batch, loss=0.582669][A
+Validate epoch 2/5:  88%|████████▊ | 21/24 [00:35<00:05,  1.69s/batch, loss=0.582669][A
+Validate epoch 2/5:  88%|████████▊ | 21/24 [00:37<00:05,  1.69s/batch, loss=0.579947][A
+Validate epoch 2/5:  92%|█████████▏| 22/24 [00:37<00:03,  1.70s/batch, loss=0.579947][A
+Validate epoch 2/5:  92%|█████████▏| 22/24 [00:39<00:03,  1.70s/batch, loss=0.498575][A
+Validate epoch 2/5:  96%|█████████▌| 23/24 [00:39<00:01,  1.70s/batch, loss=0.498575][A
+Validate epoch 2/5:  96%|█████████▌| 23/24 [00:40<00:01,  1.70s/batch, loss=0.598108][A
+Validate epoch 2/5: 100%|██████████| 24/24 [00:40<00:00,  1.55s/batch, loss=0.598108][AValidate epoch 2/5: 100%|██████████| 24/24 [00:40<00:00,  1.69s/batch, loss=0.598108]Epoch 2/5 finished: train_loss=0.917060, valid_loss=0.585483
+Best validation loss updated at epoch 2: 0.585483. Saving checkpoint.
+Updating learning rate to 5e-05
+Epoch 3/5 started.
+
+
+Train epoch 3/5:   0%|          | 0/104 [00:00<?, ?batch/s][A
+Train epoch 3/5:   0%|          | 0/104 [00:01<?, ?batch/s, loss=0.689773, lr=5.00e-05][A
+Train epoch 3/5:   1%|          | 1/104 [00:01<02:57,  1.72s/batch, loss=0.689773, lr=5.00e-05][A
+Train epoch 3/5:   1%|          | 1/104 [00:03<02:57,  1.72s/batch, loss=0.680757, lr=5.00e-05][A
+Train epoch 3/5:   2%|▏         | 2/104 [00:03<02:59,  1.76s/batch, loss=0.680757, lr=5.00e-05][A
+Train epoch 3/5:   2%|▏         | 2/104 [00:05<02:59,  1.76s/batch, loss=0.998879, lr=5.00e-05][A
+Train epoch 3/5:   3%|▎         | 3/104 [00:05<02:56,  1.74s/batch, loss=0.998879, lr=5.00e-05][A
+Train epoch 3/5:   3%|▎         | 3/104 [00:06<02:56,  1.74s/batch, loss=0.830904, lr=5.00e-05][A
+Train epoch 3/5:   4%|▍         | 4/104 [00:07<02:55,  1.76s/batch, loss=0.830904, lr=5.00e-05][A
+Train epoch 3/5:   4%|▍         | 4/104 [00:08<02:55,  1.76s/batch, loss=0.782097, lr=5.00e-05][A
+Train epoch 3/5:   5%|▍         | 5/104 [00:08<02:55,  1.77s/batch, loss=0.782097, lr=5.00e-05][A
+Train epoch 3/5:   5%|▍         | 5/104 [00:10<02:55,  1.77s/batch, loss=1.119239, lr=5.00e-05][A
+Train epoch 3/5:   6%|▌         | 6/104 [00:10<02:54,  1.78s/batch, loss=1.119239, lr=5.00e-05][A
+Train epoch 3/5:   6%|▌         | 6/104 [00:12<02:54,  1.78s/batch, loss=0.693094, lr=5.00e-05][A
+Train epoch 3/5:   7%|▋         | 7/104 [00:12<02:52,  1.78s/batch, loss=0.693094, lr=5.00e-05][A
+Train epoch 3/5:   7%|▋         | 7/104 [00:13<02:52,  1.78s/batch, loss=1.457332, lr=5.00e-05][A
+Train epoch 3/5:   8%|▊         | 8/104 [00:13<02:43,  1.70s/batch, loss=1.457332, lr=5.00e-05][A
+Train epoch 3/5:   8%|▊         | 8/104 [00:15<02:43,  1.70s/batch, loss=1.299929, lr=5.00e-05][A
+Train epoch 3/5:   9%|▊         | 9/104 [00:15<02:39,  1.68s/batch, loss=1.299929, lr=5.00e-05][A
+Train epoch 3/5:   9%|▊         | 9/104 [00:17<02:39,  1.68s/batch, loss=0.538953, lr=5.00e-05][A
+Train epoch 3/5:  10%|▉         | 10/104 [00:17<02:42,  1.73s/batch, loss=0.538953, lr=5.00e-05][A
+Train epoch 3/5:  10%|▉         | 10/104 [00:19<02:42,  1.73s/batch, loss=0.789913, lr=5.00e-05][A
+Train epoch 3/5:  11%|█         | 11/104 [00:19<02:42,  1.75s/batch, loss=0.789913, lr=5.00e-05][A
+Train epoch 3/5:  11%|█         | 11/104 [00:20<02:42,  1.75s/batch, loss=0.670233, lr=5.00e-05][A
+Train epoch 3/5:  12%|█▏        | 12/104 [00:21<02:42,  1.77s/batch, loss=0.670233, lr=5.00e-05][A
+Train epoch 3/5:  12%|█▏        | 12/104 [00:22<02:42,  1.77s/batch, loss=1.043272, lr=5.00e-05][A
+Train epoch 3/5:  12%|█▎        | 13/104 [00:22<02:41,  1.77s/batch, loss=1.043272, lr=5.00e-05][A
+Train epoch 3/5:  12%|█▎        | 13/104 [00:24<02:41,  1.77s/batch, loss=0.632309, lr=5.00e-05][A
+Train epoch 3/5:  13%|█▎        | 14/104 [00:24<02:38,  1.77s/batch, loss=0.632309, lr=5.00e-05][A
+Train epoch 3/5:  13%|█▎        | 14/104 [00:26<02:38,  1.77s/batch, loss=0.561637, lr=5.00e-05][A
+Train epoch 3/5:  14%|█▍        | 15/104 [00:26<02:34,  1.74s/batch, loss=0.561637, lr=5.00e-05][A
+Train epoch 3/5:  14%|█▍        | 15/104 [00:27<02:34,  1.74s/batch, loss=1.056580, lr=5.00e-05][A
+Train epoch 3/5:  15%|█▌        | 16/104 [00:28<02:34,  1.75s/batch, loss=1.056580, lr=5.00e-05][A
+Train epoch 3/5:  15%|█▌        | 16/104 [00:29<02:34,  1.75s/batch, loss=0.858970, lr=5.00e-05][A
+Train epoch 3/5:  16%|█▋        | 17/104 [00:29<02:22,  1.64s/batch, loss=0.858970, lr=5.00e-05][A
+Train epoch 3/5:  16%|█▋        | 17/104 [00:31<02:22,  1.64s/batch, loss=1.315336, lr=5.00e-05][A
+Train epoch 3/5:  17%|█▋        | 18/104 [00:31<02:24,  1.68s/batch, loss=1.315336, lr=5.00e-05][A
+Train epoch 3/5:  17%|█▋        | 18/104 [00:32<02:24,  1.68s/batch, loss=0.515025, lr=5.00e-05][A
+Train epoch 3/5:  18%|█▊        | 19/104 [00:32<02:25,  1.71s/batch, loss=0.515025, lr=5.00e-05][A
+Train epoch 3/5:  18%|█▊        | 19/104 [00:34<02:25,  1.71s/batch, loss=0.713096, lr=5.00e-05][A
+Train epoch 3/5:  19%|█▉        | 20/104 [00:34<02:25,  1.73s/batch, loss=0.713096, lr=5.00e-05][A
+Train epoch 3/5:  19%|█▉        | 20/104 [00:36<02:25,  1.73s/batch, loss=0.595301, lr=5.00e-05][A
+Train epoch 3/5:  20%|██        | 21/104 [00:36<02:24,  1.74s/batch, loss=0.595301, lr=5.00e-05][A
+Train epoch 3/5:  20%|██        | 21/104 [00:38<02:24,  1.74s/batch, loss=0.562358, lr=5.00e-05][A
+Train epoch 3/5:  21%|██        | 22/104 [00:38<02:23,  1.75s/batch, loss=0.562358, lr=5.00e-05][A
+Train epoch 3/5:  21%|██        | 22/104 [00:39<02:23,  1.75s/batch, loss=1.002344, lr=5.00e-05][A
+Train epoch 3/5:  22%|██▏       | 23/104 [00:39<02:20,  1.73s/batch, loss=1.002344, lr=5.00e-05][A
+Train epoch 3/5:  22%|██▏       | 23/104 [00:41<02:20,  1.73s/batch, loss=0.625956, lr=5.00e-05][A
+Train epoch 3/5:  23%|██▎       | 24/104 [00:41<02:19,  1.74s/batch, loss=0.625956, lr=5.00e-05][A
+Train epoch 3/5:  23%|██▎       | 24/104 [00:43<02:19,  1.74s/batch, loss=0.737561, lr=5.00e-05][A
+Train epoch 3/5:  24%|██▍       | 25/104 [00:43<02:15,  1.72s/batch, loss=0.737561, lr=5.00e-05][A
+Train epoch 3/5:  24%|██▍       | 25/104 [00:45<02:15,  1.72s/batch, loss=1.219828, lr=5.00e-05][A
+Train epoch 3/5:  25%|██▌       | 26/104 [00:45<02:14,  1.73s/batch, loss=1.219828, lr=5.00e-05][A
+Train epoch 3/5:  25%|██▌       | 26/104 [00:46<02:14,  1.73s/batch, loss=0.756205, lr=5.00e-05][A
+Train epoch 3/5:  26%|██▌       | 27/104 [00:46<02:14,  1.74s/batch, loss=0.756205, lr=5.00e-05][A
+Train epoch 3/5:  26%|██▌       | 27/104 [00:48<02:14,  1.74s/batch, loss=0.783293, lr=5.00e-05][A
+Train epoch 3/5:  27%|██▋       | 28/104 [00:48<02:13,  1.75s/batch, loss=0.783293, lr=5.00e-05][A
+Train epoch 3/5:  27%|██▋       | 28/104 [00:50<02:13,  1.75s/batch, loss=1.455445, lr=5.00e-05][A
+Train epoch 3/5:  28%|██▊       | 29/104 [00:50<02:13,  1.78s/batch, loss=1.455445, lr=5.00e-05][A
+Train epoch 3/5:  28%|██▊       | 29/104 [00:52<02:13,  1.78s/batch, loss=0.780174, lr=5.00e-05][A
+Train epoch 3/5:  29%|██▉       | 30/104 [00:52<02:12,  1.79s/batch, loss=0.780174, lr=5.00e-05][A
+Train epoch 3/5:  29%|██▉       | 30/104 [00:54<02:12,  1.79s/batch, loss=0.913500, lr=5.00e-05][A
+Train epoch 3/5:  30%|██▉       | 31/104 [00:54<02:10,  1.78s/batch, loss=0.913500, lr=5.00e-05][A
+Train epoch 3/5:  30%|██▉       | 31/104 [00:55<02:10,  1.78s/batch, loss=0.708085, lr=5.00e-05][A
+Train epoch 3/5:  31%|███       | 32/104 [00:55<02:05,  1.74s/batch, loss=0.708085, lr=5.00e-05][A
+Train epoch 3/5:  31%|███       | 32/104 [00:57<02:05,  1.74s/batch, loss=1.075377, lr=5.00e-05][A
+Train epoch 3/5:  32%|███▏      | 33/104 [00:57<02:04,  1.75s/batch, loss=1.075377, lr=5.00e-05][A
+Train epoch 3/5:  32%|███▏      | 33/104 [00:59<02:04,  1.75s/batch, loss=0.689350, lr=5.00e-05][A
+Train epoch 3/5:  33%|███▎      | 34/104 [00:59<02:03,  1.76s/batch, loss=0.689350, lr=5.00e-05][A
+Train epoch 3/5:  33%|███▎      | 34/104 [01:01<02:03,  1.76s/batch, loss=0.758105, lr=5.00e-05][A
+Train epoch 3/5:  34%|███▎      | 35/104 [01:01<02:01,  1.77s/batch, loss=0.758105, lr=5.00e-05][A
+Train epoch 3/5:  34%|███▎      | 35/104 [01:02<02:01,  1.77s/batch, loss=0.628287, lr=5.00e-05][A
+Train epoch 3/5:  35%|███▍      | 36/104 [01:02<02:00,  1.77s/batch, loss=0.628287, lr=5.00e-05][A
+Train epoch 3/5:  35%|███▍      | 36/104 [01:04<02:00,  1.77s/batch, loss=0.666162, lr=5.00e-05][A
+Train epoch 3/5:  36%|███▌      | 37/104 [01:04<01:58,  1.77s/batch, loss=0.666162, lr=5.00e-05][A
+Train epoch 3/5:  36%|███▌      | 37/104 [01:06<01:58,  1.77s/batch, loss=1.044521, lr=5.00e-05][A
+Train epoch 3/5:  37%|███▋      | 38/104 [01:06<01:56,  1.76s/batch, loss=1.044521, lr=5.00e-05][A
+Train epoch 3/5:  37%|███▋      | 38/104 [01:08<01:56,  1.76s/batch, loss=0.741955, lr=5.00e-05][A
+Train epoch 3/5:  38%|███▊      | 39/104 [01:08<01:54,  1.76s/batch, loss=0.741955, lr=5.00e-05][A
+Train epoch 3/5:  38%|███▊      | 39/104 [01:09<01:54,  1.76s/batch, loss=0.807845, lr=5.00e-05][A
+Train epoch 3/5:  38%|███▊      | 40/104 [01:09<01:51,  1.75s/batch, loss=0.807845, lr=5.00e-05][A
+Train epoch 3/5:  38%|███▊      | 40/104 [01:11<01:51,  1.75s/batch, loss=1.805839, lr=5.00e-05][A
+Train epoch 3/5:  39%|███▉      | 41/104 [01:11<01:49,  1.74s/batch, loss=1.805839, lr=5.00e-05][A
+Train epoch 3/5:  39%|███▉      | 41/104 [01:13<01:49,  1.74s/batch, loss=0.727285, lr=5.00e-05][A
+Train epoch 3/5:  40%|████      | 42/104 [01:13<01:48,  1.75s/batch, loss=0.727285, lr=5.00e-05][A
+Train epoch 3/5:  40%|████      | 42/104 [01:15<01:48,  1.75s/batch, loss=0.635094, lr=5.00e-05][A
+Train epoch 3/5:  41%|████▏     | 43/104 [01:15<01:47,  1.76s/batch, loss=0.635094, lr=5.00e-05][A
+Train epoch 3/5:  41%|████▏     | 43/104 [01:16<01:47,  1.76s/batch, loss=0.738230, lr=5.00e-05][A
+Train epoch 3/5:  42%|████▏     | 44/104 [01:16<01:44,  1.74s/batch, loss=0.738230, lr=5.00e-05][A
+Train epoch 3/5:  42%|████▏     | 44/104 [01:18<01:44,  1.74s/batch, loss=0.715717, lr=5.00e-05][A
+Train epoch 3/5:  43%|████▎     | 45/104 [01:18<01:43,  1.75s/batch, loss=0.715717, lr=5.00e-05][A
+Train epoch 3/5:  43%|████▎     | 45/104 [01:20<01:43,  1.75s/batch, loss=0.645603, lr=5.00e-05][A
+Train epoch 3/5:  44%|████▍     | 46/104 [01:20<01:42,  1.76s/batch, loss=0.645603, lr=5.00e-05][A
+Train epoch 3/5:  44%|████▍     | 46/104 [01:22<01:42,  1.76s/batch, loss=0.677447, lr=5.00e-05][A
+Train epoch 3/5:  45%|████▌     | 47/104 [01:22<01:40,  1.77s/batch, loss=0.677447, lr=5.00e-05][A
+Train epoch 3/5:  45%|████▌     | 47/104 [01:23<01:40,  1.77s/batch, loss=1.211632, lr=5.00e-05][A
+Train epoch 3/5:  46%|████▌     | 48/104 [01:23<01:37,  1.75s/batch, loss=1.211632, lr=5.00e-05][A
+Train epoch 3/5:  46%|████▌     | 48/104 [01:25<01:37,  1.75s/batch, loss=0.668678, lr=5.00e-05][A
+Train epoch 3/5:  47%|████▋     | 49/104 [01:25<01:35,  1.74s/batch, loss=0.668678, lr=5.00e-05][A
+Train epoch 3/5:  47%|████▋     | 49/104 [01:27<01:35,  1.74s/batch, loss=0.635032, lr=5.00e-05][A
+Train epoch 3/5:  48%|████▊     | 50/104 [01:27<01:33,  1.73s/batch, loss=0.635032, lr=5.00e-05][A
+Train epoch 3/5:  48%|████▊     | 50/104 [01:29<01:33,  1.73s/batch, loss=0.828832, lr=5.00e-05][A
+Train epoch 3/5:  49%|████▉     | 51/104 [01:29<01:32,  1.75s/batch, loss=0.828832, lr=5.00e-05][A
+Train epoch 3/5:  49%|████▉     | 51/104 [01:30<01:32,  1.75s/batch, loss=0.589494, lr=5.00e-05][A
+Train epoch 3/5:  50%|█████     | 52/104 [01:30<01:31,  1.76s/batch, loss=0.589494, lr=5.00e-05][A
+Train epoch 3/5:  50%|█████     | 52/104 [01:32<01:31,  1.76s/batch, loss=0.767752, lr=5.00e-05][A
+Train epoch 3/5:  51%|█████     | 53/104 [01:32<01:30,  1.77s/batch, loss=0.767752, lr=5.00e-05][A
+Train epoch 3/5:  51%|█████     | 53/104 [01:34<01:30,  1.77s/batch, loss=0.684474, lr=5.00e-05][A
+Train epoch 3/5:  52%|█████▏    | 54/104 [01:34<01:29,  1.78s/batch, loss=0.684474, lr=5.00e-05][A
+Train epoch 3/5:  52%|█████▏    | 54/104 [01:36<01:29,  1.78s/batch, loss=0.796432, lr=5.00e-05][A
+Train epoch 3/5:  53%|█████▎    | 55/104 [01:36<01:27,  1.79s/batch, loss=0.796432, lr=5.00e-05][A
+Train epoch 3/5:  53%|█████▎    | 55/104 [01:37<01:27,  1.79s/batch, loss=1.007389, lr=5.00e-05][A
+Train epoch 3/5:  54%|█████▍    | 56/104 [01:37<01:21,  1.69s/batch, loss=1.007389, lr=5.00e-05][A
+Train epoch 3/5:  54%|█████▍    | 56/104 [01:39<01:21,  1.69s/batch, loss=0.900747, lr=5.00e-05][A
+Train epoch 3/5:  55%|█████▍    | 57/104 [01:39<01:20,  1.71s/batch, loss=0.900747, lr=5.00e-05][A
+Train epoch 3/5:  55%|█████▍    | 57/104 [01:41<01:20,  1.71s/batch, loss=0.784556, lr=5.00e-05][A
+Train epoch 3/5:  56%|█████▌    | 58/104 [01:41<01:18,  1.71s/batch, loss=0.784556, lr=5.00e-05][A
+Train epoch 3/5:  56%|█████▌    | 58/104 [01:42<01:18,  1.71s/batch, loss=0.999477, lr=5.00e-05][A
+Train epoch 3/5:  57%|█████▋    | 59/104 [01:42<01:18,  1.74s/batch, loss=0.999477, lr=5.00e-05][A
+Train epoch 3/5:  57%|█████▋    | 59/104 [01:44<01:18,  1.74s/batch, loss=0.736156, lr=5.00e-05][A
+Train epoch 3/5:  58%|█████▊    | 60/104 [01:44<01:17,  1.75s/batch, loss=0.736156, lr=5.00e-05][A
+Train epoch 3/5:  58%|█████▊    | 60/104 [01:46<01:17,  1.75s/batch, loss=0.760050, lr=5.00e-05][A
+Train epoch 3/5:  59%|█████▊    | 61/104 [01:46<01:15,  1.75s/batch, loss=0.760050, lr=5.00e-05][A
+Train epoch 3/5:  59%|█████▊    | 61/104 [01:47<01:15,  1.75s/batch, loss=0.738865, lr=5.00e-05][A
+Train epoch 3/5:  60%|█████▉    | 62/104 [01:47<01:09,  1.65s/batch, loss=0.738865, lr=5.00e-05][A
+Train epoch 3/5:  60%|█████▉    | 62/104 [01:49<01:09,  1.65s/batch, loss=0.661261, lr=5.00e-05][A
+Train epoch 3/5:  61%|██████    | 63/104 [01:49<01:05,  1.61s/batch, loss=0.661261, lr=5.00e-05][A
+Train epoch 3/5:  61%|██████    | 63/104 [01:50<01:05,  1.61s/batch, loss=0.703080, lr=5.00e-05][A
+Train epoch 3/5:  62%|██████▏   | 64/104 [01:50<01:01,  1.55s/batch, loss=0.703080, lr=5.00e-05][A
+Train epoch 3/5:  62%|██████▏   | 64/104 [01:52<01:01,  1.55s/batch, loss=0.640112, lr=5.00e-05][A
+Train epoch 3/5:  62%|██████▎   | 65/104 [01:52<01:00,  1.54s/batch, loss=0.640112, lr=5.00e-05][A
+Train epoch 3/5:  62%|██████▎   | 65/104 [01:53<01:00,  1.54s/batch, loss=0.643133, lr=5.00e-05][A
+Train epoch 3/5:  63%|██████▎   | 66/104 [01:53<00:58,  1.53s/batch, loss=0.643133, lr=5.00e-05][A
+Train epoch 3/5:  63%|██████▎   | 66/104 [01:55<00:58,  1.53s/batch, loss=0.618643, lr=5.00e-05][A
+Train epoch 3/5:  64%|██████▍   | 67/104 [01:55<00:55,  1.50s/batch, loss=0.618643, lr=5.00e-05][A
+Train epoch 3/5:  64%|██████▍   | 67/104 [01:56<00:55,  1.50s/batch, loss=0.971631, lr=5.00e-05][A
+Train epoch 3/5:  65%|██████▌   | 68/104 [01:56<00:53,  1.48s/batch, loss=0.971631, lr=5.00e-05][A
+Train epoch 3/5:  65%|██████▌   | 68/104 [01:58<00:53,  1.48s/batch, loss=0.788098, lr=5.00e-05][A
+Train epoch 3/5:  66%|██████▋   | 69/104 [01:58<00:52,  1.49s/batch, loss=0.788098, lr=5.00e-05][A
+Train epoch 3/5:  66%|██████▋   | 69/104 [01:59<00:52,  1.49s/batch, loss=0.616315, lr=5.00e-05][A
+Train epoch 3/5:  67%|██████▋   | 70/104 [01:59<00:50,  1.50s/batch, loss=0.616315, lr=5.00e-05][A
+Train epoch 3/5:  67%|██████▋   | 70/104 [02:01<00:50,  1.50s/batch, loss=0.593862, lr=5.00e-05][A
+Train epoch 3/5:  68%|██████▊   | 71/104 [02:01<00:49,  1.50s/batch, loss=0.593862, lr=5.00e-05][A
+Train epoch 3/5:  68%|██████▊   | 71/104 [02:02<00:49,  1.50s/batch, loss=1.065199, lr=5.00e-05][A
+Train epoch 3/5:  69%|██████▉   | 72/104 [02:02<00:47,  1.49s/batch, loss=1.065199, lr=5.00e-05][A
+Train epoch 3/5:  69%|██████▉   | 72/104 [02:04<00:47,  1.49s/batch, loss=0.805466, lr=5.00e-05][A
+Train epoch 3/5:  70%|███████   | 73/104 [02:04<00:46,  1.49s/batch, loss=0.805466, lr=5.00e-05][A
+Train epoch 3/5:  70%|███████   | 73/104 [02:05<00:46,  1.49s/batch, loss=0.916435, lr=5.00e-05][A
+Train epoch 3/5:  71%|███████   | 74/104 [02:05<00:45,  1.51s/batch, loss=0.916435, lr=5.00e-05][A
+Train epoch 3/5:  71%|███████   | 74/104 [02:07<00:45,  1.51s/batch, loss=0.674136, lr=5.00e-05][A
+Train epoch 3/5:  72%|███████▏  | 75/104 [02:07<00:43,  1.49s/batch, loss=0.674136, lr=5.00e-05][A
+Train epoch 3/5:  72%|███████▏  | 75/104 [02:08<00:43,  1.49s/batch, loss=0.707501, lr=5.00e-05][A
+Train epoch 3/5:  73%|███████▎  | 76/104 [02:08<00:42,  1.50s/batch, loss=0.707501, lr=5.00e-05][A
+Train epoch 3/5:  73%|███████▎  | 76/104 [02:10<00:42,  1.50s/batch, loss=0.614494, lr=5.00e-05][A
+Train epoch 3/5:  74%|███████▍  | 77/104 [02:10<00:40,  1.51s/batch, loss=0.614494, lr=5.00e-05][A
+Train epoch 3/5:  74%|███████▍  | 77/104 [02:11<00:40,  1.51s/batch, loss=0.975165, lr=5.00e-05][A
+Train epoch 3/5:  75%|███████▌  | 78/104 [02:11<00:39,  1.51s/batch, loss=0.975165, lr=5.00e-05][A
+Train epoch 3/5:  75%|███████▌  | 78/104 [02:13<00:39,  1.51s/batch, loss=0.961209, lr=5.00e-05][A
+Train epoch 3/5:  76%|███████▌  | 79/104 [02:13<00:36,  1.46s/batch, loss=0.961209, lr=5.00e-05][A
+Train epoch 3/5:  76%|███████▌  | 79/104 [02:14<00:36,  1.46s/batch, loss=0.601789, lr=5.00e-05][A
+Train epoch 3/5:  77%|███████▋  | 80/104 [02:14<00:35,  1.48s/batch, loss=0.601789, lr=5.00e-05][A
+Train epoch 3/5:  77%|███████▋  | 80/104 [02:16<00:35,  1.48s/batch, loss=0.765943, lr=5.00e-05][A
+Train epoch 3/5:  78%|███████▊  | 81/104 [02:16<00:34,  1.49s/batch, loss=0.765943, lr=5.00e-05][A
+Train epoch 3/5:  78%|███████▊  | 81/104 [02:17<00:34,  1.49s/batch, loss=1.239681, lr=5.00e-05][A
+Train epoch 3/5:  79%|███████▉  | 82/104 [02:17<00:33,  1.51s/batch, loss=1.239681, lr=5.00e-05][A
+Train epoch 3/5:  79%|███████▉  | 82/104 [02:19<00:33,  1.51s/batch, loss=0.801230, lr=5.00e-05][A
+Train epoch 3/5:  80%|███████▉  | 83/104 [02:19<00:31,  1.50s/batch, loss=0.801230, lr=5.00e-05][A
+Train epoch 3/5:  80%|███████▉  | 83/104 [02:20<00:31,  1.50s/batch, loss=0.628992, lr=5.00e-05][A
+Train epoch 3/5:  81%|████████  | 84/104 [02:20<00:30,  1.53s/batch, loss=0.628992, lr=5.00e-05][A
+Train epoch 3/5:  81%|████████  | 84/104 [02:22<00:30,  1.53s/batch, loss=0.611201, lr=5.00e-05][A
+Train epoch 3/5:  82%|████████▏ | 85/104 [02:22<00:28,  1.51s/batch, loss=0.611201, lr=5.00e-05][A
+Train epoch 3/5:  82%|████████▏ | 85/104 [02:23<00:28,  1.51s/batch, loss=0.595367, lr=5.00e-05][A
+Train epoch 3/5:  83%|████████▎ | 86/104 [02:23<00:27,  1.52s/batch, loss=0.595367, lr=5.00e-05][A
+Train epoch 3/5:  83%|████████▎ | 86/104 [02:24<00:27,  1.52s/batch, loss=0.679939, lr=5.00e-05][A
+Train epoch 3/5:  84%|████████▎ | 87/104 [02:24<00:23,  1.41s/batch, loss=0.679939, lr=5.00e-05][A
+Train epoch 3/5:  84%|████████▎ | 87/104 [02:26<00:23,  1.41s/batch, loss=0.617223, lr=5.00e-05][A
+Train epoch 3/5:  85%|████████▍ | 88/104 [02:26<00:23,  1.44s/batch, loss=0.617223, lr=5.00e-05][A
+Train epoch 3/5:  85%|████████▍ | 88/104 [02:28<00:23,  1.44s/batch, loss=0.871691, lr=5.00e-05][A
+Train epoch 3/5:  86%|████████▌ | 89/104 [02:28<00:22,  1.47s/batch, loss=0.871691, lr=5.00e-05][A
+Train epoch 3/5:  86%|████████▌ | 89/104 [02:29<00:22,  1.47s/batch, loss=0.954947, lr=5.00e-05][A
+Train epoch 3/5:  87%|████████▋ | 90/104 [02:29<00:20,  1.49s/batch, loss=0.954947, lr=5.00e-05][A
+Train epoch 3/5:  87%|████████▋ | 90/104 [02:31<00:20,  1.49s/batch, loss=0.680131, lr=5.00e-05][A
+Train epoch 3/5:  88%|████████▊ | 91/104 [02:31<00:19,  1.48s/batch, loss=0.680131, lr=5.00e-05][A
+Train epoch 3/5:  88%|████████▊ | 91/104 [02:32<00:19,  1.48s/batch, loss=0.866778, lr=5.00e-05][A
+Train epoch 3/5:  88%|████████▊ | 92/104 [02:32<00:17,  1.49s/batch, loss=0.866778, lr=5.00e-05][A
+Train epoch 3/5:  88%|████████▊ | 92/104 [02:34<00:17,  1.49s/batch, loss=1.301031, lr=5.00e-05][A
+Train epoch 3/5:  89%|████████▉ | 93/104 [02:34<00:16,  1.50s/batch, loss=1.301031, lr=5.00e-05][A
+Train epoch 3/5:  89%|████████▉ | 93/104 [02:35<00:16,  1.50s/batch, loss=0.674421, lr=5.00e-05][A
+Train epoch 3/5:  90%|█████████ | 94/104 [02:35<00:15,  1.51s/batch, loss=0.674421, lr=5.00e-05][A
+Train epoch 3/5:  90%|█████████ | 94/104 [02:37<00:15,  1.51s/batch, loss=0.627508, lr=5.00e-05][A
+Train epoch 3/5:  91%|█████████▏| 95/104 [02:37<00:13,  1.48s/batch, loss=0.627508, lr=5.00e-05][A
+Train epoch 3/5:  91%|█████████▏| 95/104 [02:38<00:13,  1.48s/batch, loss=0.533719, lr=5.00e-05][A
+Train epoch 3/5:  92%|█████████▏| 96/104 [02:38<00:11,  1.46s/batch, loss=0.533719, lr=5.00e-05][A
+Train epoch 3/5:  92%|█████████▏| 96/104 [02:39<00:11,  1.46s/batch, loss=0.870683, lr=5.00e-05][A
+Train epoch 3/5:  93%|█████████▎| 97/104 [02:39<00:10,  1.44s/batch, loss=0.870683, lr=5.00e-05][A
+Train epoch 3/5:  93%|█████████▎| 97/104 [02:41<00:10,  1.44s/batch, loss=0.894412, lr=5.00e-05][A
+Train epoch 3/5:  94%|█████████▍| 98/104 [02:41<00:08,  1.47s/batch, loss=0.894412, lr=5.00e-05][A
+Train epoch 3/5:  94%|█████████▍| 98/104 [02:42<00:08,  1.47s/batch, loss=1.025677, lr=5.00e-05][A
+Train epoch 3/5:  95%|█████████▌| 99/104 [02:42<00:07,  1.48s/batch, loss=1.025677, lr=5.00e-05][A
+Train epoch 3/5:  95%|█████████▌| 99/104 [02:44<00:07,  1.48s/batch, loss=0.589566, lr=5.00e-05][A
+Train epoch 3/5:  96%|█████████▌| 100/104 [02:44<00:05,  1.49s/batch, loss=0.589566, lr=5.00e-05][A
+Train epoch 3/5:  96%|█████████▌| 100/104 [02:45<00:05,  1.49s/batch, loss=0.783197, lr=5.00e-05][A
+Train epoch 3/5:  97%|█████████▋| 101/104 [02:45<00:04,  1.50s/batch, loss=0.783197, lr=5.00e-05][A
+Train epoch 3/5:  97%|█████████▋| 101/104 [02:47<00:04,  1.50s/batch, loss=0.553968, lr=5.00e-05][A
+Train epoch 3/5:  98%|█████████▊| 102/104 [02:47<00:03,  1.50s/batch, loss=0.553968, lr=5.00e-05][A
+Train epoch 3/5:  98%|█████████▊| 102/104 [02:48<00:03,  1.50s/batch, loss=0.627798, lr=5.00e-05][A
+Train epoch 3/5:  99%|█████████▉| 103/104 [02:48<00:01,  1.42s/batch, loss=0.627798, lr=5.00e-05][A
+Train epoch 3/5:  99%|█████████▉| 103/104 [02:49<00:01,  1.42s/batch, loss=0.520017, lr=5.00e-05][A
+Train epoch 3/5: 100%|██████████| 104/104 [02:49<00:00,  1.16s/batch, loss=0.520017, lr=5.00e-05][ATrain epoch 3/5: 100%|██████████| 104/104 [02:49<00:00,  1.63s/batch, loss=0.520017, lr=5.00e-05]
+
+Validate epoch 3/5:   0%|          | 0/24 [00:00<?, ?batch/s][A
+Validate epoch 3/5:   0%|          | 0/24 [00:01<?, ?batch/s, loss=0.571810][A
+Validate epoch 3/5:   4%|▍         | 1/24 [00:01<00:32,  1.40s/batch, loss=0.571810][A
+Validate epoch 3/5:   4%|▍         | 1/24 [00:02<00:32,  1.40s/batch, loss=0.629319][A
+Validate epoch 3/5:   8%|▊         | 2/24 [00:02<00:32,  1.46s/batch, loss=0.629319][A
+Validate epoch 3/5:   8%|▊         | 2/24 [00:04<00:32,  1.46s/batch, loss=0.550524][A
+Validate epoch 3/5:  12%|█▎        | 3/24 [00:04<00:30,  1.47s/batch, loss=0.550524][A
+Validate epoch 3/5:  12%|█▎        | 3/24 [00:05<00:30,  1.47s/batch, loss=0.502264][A
+Validate epoch 3/5:  17%|█▋        | 4/24 [00:05<00:29,  1.48s/batch, loss=0.502264][A
+Validate epoch 3/5:  17%|█▋        | 4/24 [00:07<00:29,  1.48s/batch, loss=0.553911][A
+Validate epoch 3/5:  21%|██        | 5/24 [00:07<00:27,  1.46s/batch, loss=0.553911][A
+Validate epoch 3/5:  21%|██        | 5/24 [00:08<00:27,  1.46s/batch, loss=0.590575][A
+Validate epoch 3/5:  25%|██▌       | 6/24 [00:08<00:26,  1.47s/batch, loss=0.590575][A
+Validate epoch 3/5:  25%|██▌       | 6/24 [00:10<00:26,  1.47s/batch, loss=0.498239][A
+Validate epoch 3/5:  29%|██▉       | 7/24 [00:10<00:24,  1.44s/batch, loss=0.498239][A
+Validate epoch 3/5:  29%|██▉       | 7/24 [00:11<00:24,  1.44s/batch, loss=0.637921][A
+Validate epoch 3/5:  33%|███▎      | 8/24 [00:11<00:23,  1.45s/batch, loss=0.637921][A
+Validate epoch 3/5:  33%|███▎      | 8/24 [00:13<00:23,  1.45s/batch, loss=0.547082][A
+Validate epoch 3/5:  38%|███▊      | 9/24 [00:13<00:21,  1.46s/batch, loss=0.547082][A
+Validate epoch 3/5:  38%|███▊      | 9/24 [00:14<00:21,  1.46s/batch, loss=0.466936][A
+Validate epoch 3/5:  42%|████▏     | 10/24 [00:14<00:20,  1.44s/batch, loss=0.466936][A
+Validate epoch 3/5:  42%|████▏     | 10/24 [00:15<00:20,  1.44s/batch, loss=0.589897][A
+Validate epoch 3/5:  46%|████▌     | 11/24 [00:15<00:18,  1.45s/batch, loss=0.589897][A
+Validate epoch 3/5:  46%|████▌     | 11/24 [00:17<00:18,  1.45s/batch, loss=0.549627][A
+Validate epoch 3/5:  50%|█████     | 12/24 [00:17<00:17,  1.46s/batch, loss=0.549627][A
+Validate epoch 3/5:  50%|█████     | 12/24 [00:18<00:17,  1.46s/batch, loss=0.584657][A
+Validate epoch 3/5:  54%|█████▍    | 13/24 [00:18<00:16,  1.47s/batch, loss=0.584657][A
+Validate epoch 3/5:  54%|█████▍    | 13/24 [00:20<00:16,  1.47s/batch, loss=0.514065][A
+Validate epoch 3/5:  58%|█████▊    | 14/24 [00:20<00:14,  1.47s/batch, loss=0.514065][A
+Validate epoch 3/5:  58%|█████▊    | 14/24 [00:21<00:14,  1.47s/batch, loss=0.587400][A
+Validate epoch 3/5:  62%|██████▎   | 15/24 [00:21<00:12,  1.44s/batch, loss=0.587400][A
+Validate epoch 3/5:  62%|██████▎   | 15/24 [00:23<00:12,  1.44s/batch, loss=0.523021][A
+Validate epoch 3/5:  67%|██████▋   | 16/24 [00:23<00:11,  1.46s/batch, loss=0.523021][A
+Validate epoch 3/5:  67%|██████▋   | 16/24 [00:24<00:11,  1.46s/batch, loss=0.492980][A
+Validate epoch 3/5:  71%|███████   | 17/24 [00:24<00:10,  1.46s/batch, loss=0.492980][A
+Validate epoch 3/5:  71%|███████   | 17/24 [00:26<00:10,  1.46s/batch, loss=0.550269][A
+Validate epoch 3/5:  75%|███████▌  | 18/24 [00:26<00:08,  1.46s/batch, loss=0.550269][A
+Validate epoch 3/5:  75%|███████▌  | 18/24 [00:27<00:08,  1.46s/batch, loss=0.542904][A
+Validate epoch 3/5:  79%|███████▉  | 19/24 [00:27<00:07,  1.43s/batch, loss=0.542904][A
+Validate epoch 3/5:  79%|███████▉  | 19/24 [00:29<00:07,  1.43s/batch, loss=0.579657][A
+Validate epoch 3/5:  83%|████████▎ | 20/24 [00:29<00:05,  1.45s/batch, loss=0.579657][A
+Validate epoch 3/5:  83%|████████▎ | 20/24 [00:30<00:05,  1.45s/batch, loss=0.552722][A
+Validate epoch 3/5:  88%|████████▊ | 21/24 [00:30<00:04,  1.45s/batch, loss=0.552722][A
+Validate epoch 3/5:  88%|████████▊ | 21/24 [00:32<00:04,  1.45s/batch, loss=0.562737][A
+Validate epoch 3/5:  92%|█████████▏| 22/24 [00:32<00:02,  1.46s/batch, loss=0.562737][A
+Validate epoch 3/5:  92%|█████████▏| 22/24 [00:33<00:02,  1.46s/batch, loss=0.602967][A
+Validate epoch 3/5:  96%|█████████▌| 23/24 [00:33<00:01,  1.45s/batch, loss=0.602967][A
+Validate epoch 3/5:  96%|█████████▌| 23/24 [00:34<00:01,  1.45s/batch, loss=0.511093][A
+Validate epoch 3/5: 100%|██████████| 24/24 [00:34<00:00,  1.30s/batch, loss=0.511093][AValidate epoch 3/5: 100%|██████████| 24/24 [00:34<00:00,  1.43s/batch, loss=0.511093]Epoch 3/5 finished: train_loss=0.805062, valid_loss=0.553857
+Best validation loss updated at epoch 3: 0.553857. Saving checkpoint.
+Updating learning rate to 2.5e-05
+Epoch 4/5 started.
+
+
+Train epoch 4/5:   0%|          | 0/104 [00:00<?, ?batch/s][A
+Train epoch 4/5:   0%|          | 0/104 [00:01<?, ?batch/s, loss=0.777815, lr=2.50e-05][A
+Train epoch 4/5:   1%|          | 1/104 [00:01<02:43,  1.59s/batch, loss=0.777815, lr=2.50e-05][A
+Train epoch 4/5:   1%|          | 1/104 [00:03<02:43,  1.59s/batch, loss=0.990489, lr=2.50e-05][A
+Train epoch 4/5:   2%|▏         | 2/104 [00:03<02:39,  1.56s/batch, loss=0.990489, lr=2.50e-05][A
+Train epoch 4/5:   2%|▏         | 2/104 [00:04<02:39,  1.56s/batch, loss=1.053101, lr=2.50e-05][A
+Train epoch 4/5:   3%|▎         | 3/104 [00:04<02:34,  1.53s/batch, loss=1.053101, lr=2.50e-05][A
+Train epoch 4/5:   3%|▎         | 3/104 [00:06<02:34,  1.53s/batch, loss=1.206306, lr=2.50e-05][A
+Train epoch 4/5:   4%|▍         | 4/104 [00:06<02:31,  1.51s/batch, loss=1.206306, lr=2.50e-05][A
+Train epoch 4/5:   4%|▍         | 4/104 [00:07<02:31,  1.51s/batch, loss=0.651427, lr=2.50e-05][A
+Train epoch 4/5:   5%|▍         | 5/104 [00:07<02:27,  1.49s/batch, loss=0.651427, lr=2.50e-05][A
+Train epoch 4/5:   5%|▍         | 5/104 [00:09<02:27,  1.49s/batch, loss=0.621803, lr=2.50e-05][A
+Train epoch 4/5:   6%|▌         | 6/104 [00:09<02:26,  1.50s/batch, loss=0.621803, lr=2.50e-05][A
+Train epoch 4/5:   6%|▌         | 6/104 [00:10<02:26,  1.50s/batch, loss=0.603215, lr=2.50e-05][A
+Train epoch 4/5:   7%|▋         | 7/104 [00:10<02:25,  1.50s/batch, loss=0.603215, lr=2.50e-05][A
+Train epoch 4/5:   7%|▋         | 7/104 [00:12<02:25,  1.50s/batch, loss=0.734961, lr=2.50e-05][A
+Train epoch 4/5:   8%|▊         | 8/104 [00:12<02:25,  1.52s/batch, loss=0.734961, lr=2.50e-05][A
+Train epoch 4/5:   8%|▊         | 8/104 [00:13<02:25,  1.52s/batch, loss=1.083014, lr=2.50e-05][A
+Train epoch 4/5:   9%|▊         | 9/104 [00:13<02:24,  1.52s/batch, loss=1.083014, lr=2.50e-05][A
+Train epoch 4/5:   9%|▊         | 9/104 [00:15<02:24,  1.52s/batch, loss=0.577107, lr=2.50e-05][A
+Train epoch 4/5:  10%|▉         | 10/104 [00:15<02:22,  1.52s/batch, loss=0.577107, lr=2.50e-05][A
+Train epoch 4/5:  10%|▉         | 10/104 [00:16<02:22,  1.52s/batch, loss=0.642265, lr=2.50e-05][A
+Train epoch 4/5:  11%|█         | 11/104 [00:16<02:19,  1.50s/batch, loss=0.642265, lr=2.50e-05][A
+Train epoch 4/5:  11%|█         | 11/104 [00:17<02:19,  1.50s/batch, loss=1.085725, lr=2.50e-05][A
+Train epoch 4/5:  12%|█▏        | 12/104 [00:18<02:14,  1.46s/batch, loss=1.085725, lr=2.50e-05][A
+Train epoch 4/5:  12%|█▏        | 12/104 [00:19<02:14,  1.46s/batch, loss=0.677686, lr=2.50e-05][A
+Train epoch 4/5:  12%|█▎        | 13/104 [00:19<02:14,  1.48s/batch, loss=0.677686, lr=2.50e-05][A
+Train epoch 4/5:  12%|█▎        | 13/104 [00:20<02:14,  1.48s/batch, loss=0.651124, lr=2.50e-05][A
+Train epoch 4/5:  13%|█▎        | 14/104 [00:20<02:11,  1.46s/batch, loss=0.651124, lr=2.50e-05][A
+Train epoch 4/5:  13%|█▎        | 14/104 [00:22<02:11,  1.46s/batch, loss=1.132295, lr=2.50e-05][A
+Train epoch 4/5:  14%|█▍        | 15/104 [00:22<02:11,  1.48s/batch, loss=1.132295, lr=2.50e-05][A
+Train epoch 4/5:  14%|█▍        | 15/104 [00:23<02:11,  1.48s/batch, loss=0.553196, lr=2.50e-05][A
+Train epoch 4/5:  15%|█▌        | 16/104 [00:24<02:11,  1.50s/batch, loss=0.553196, lr=2.50e-05][A
+Train epoch 4/5:  15%|█▌        | 16/104 [00:25<02:11,  1.50s/batch, loss=0.601359, lr=2.50e-05][A
+Train epoch 4/5:  16%|█▋        | 17/104 [00:25<02:09,  1.49s/batch, loss=0.601359, lr=2.50e-05][A
+Train epoch 4/5:  16%|█▋        | 17/104 [00:26<02:09,  1.49s/batch, loss=1.014616, lr=2.50e-05][A
+Train epoch 4/5:  17%|█▋        | 18/104 [00:26<02:08,  1.50s/batch, loss=1.014616, lr=2.50e-05][A
+Train epoch 4/5:  17%|█▋        | 18/104 [00:28<02:08,  1.50s/batch, loss=0.607108, lr=2.50e-05][A
+Train epoch 4/5:  18%|█▊        | 19/104 [00:28<02:08,  1.51s/batch, loss=0.607108, lr=2.50e-05][A
+Train epoch 4/5:  18%|█▊        | 19/104 [00:29<02:08,  1.51s/batch, loss=0.580570, lr=2.50e-05][A
+Train epoch 4/5:  19%|█▉        | 20/104 [00:30<02:06,  1.51s/batch, loss=0.580570, lr=2.50e-05][A
+Train epoch 4/5:  19%|█▉        | 20/104 [00:31<02:06,  1.51s/batch, loss=0.593718, lr=2.50e-05][A
+Train epoch 4/5:  20%|██        | 21/104 [00:31<02:01,  1.47s/batch, loss=0.593718, lr=2.50e-05][A
+Train epoch 4/5:  20%|██        | 21/104 [00:32<02:01,  1.47s/batch, loss=0.986387, lr=2.50e-05][A
+Train epoch 4/5:  21%|██        | 22/104 [00:32<01:58,  1.44s/batch, loss=0.986387, lr=2.50e-05][A
+Train epoch 4/5:  21%|██        | 22/104 [00:34<01:58,  1.44s/batch, loss=0.798524, lr=2.50e-05][A
+Train epoch 4/5:  22%|██▏       | 23/104 [00:34<01:54,  1.41s/batch, loss=0.798524, lr=2.50e-05][A
+Train epoch 4/5:  22%|██▏       | 23/104 [00:35<01:54,  1.41s/batch, loss=0.604098, lr=2.50e-05][A
+Train epoch 4/5:  23%|██▎       | 24/104 [00:35<01:49,  1.37s/batch, loss=0.604098, lr=2.50e-05][A
+Train epoch 4/5:  23%|██▎       | 24/104 [00:36<01:49,  1.37s/batch, loss=1.026058, lr=2.50e-05][A
+Train epoch 4/5:  24%|██▍       | 25/104 [00:36<01:45,  1.33s/batch, loss=1.026058, lr=2.50e-05][A
+Train epoch 4/5:  24%|██▍       | 25/104 [00:37<01:45,  1.33s/batch, loss=0.686876, lr=2.50e-05][A
+Train epoch 4/5:  25%|██▌       | 26/104 [00:37<01:41,  1.30s/batch, loss=0.686876, lr=2.50e-05][A
+Train epoch 4/5:  25%|██▌       | 26/104 [00:39<01:41,  1.30s/batch, loss=0.936804, lr=2.50e-05][A
+Train epoch 4/5:  26%|██▌       | 27/104 [00:39<01:39,  1.29s/batch, loss=0.936804, lr=2.50e-05][A
+Train epoch 4/5:  26%|██▌       | 27/104 [00:40<01:39,  1.29s/batch, loss=0.778322, lr=2.50e-05][A
+Train epoch 4/5:  27%|██▋       | 28/104 [00:40<01:34,  1.25s/batch, loss=0.778322, lr=2.50e-05][A
+Train epoch 4/5:  27%|██▋       | 28/104 [00:41<01:34,  1.25s/batch, loss=0.910437, lr=2.50e-05][A
+Train epoch 4/5:  28%|██▊       | 29/104 [00:41<01:31,  1.22s/batch, loss=0.910437, lr=2.50e-05][A
+Train epoch 4/5:  28%|██▊       | 29/104 [00:42<01:31,  1.22s/batch, loss=0.787469, lr=2.50e-05][A
+Train epoch 4/5:  29%|██▉       | 30/104 [00:42<01:22,  1.12s/batch, loss=0.787469, lr=2.50e-05][A
+Train epoch 4/5:  29%|██▉       | 30/104 [00:43<01:22,  1.12s/batch, loss=0.757315, lr=2.50e-05][A
+Train epoch 4/5:  30%|██▉       | 31/104 [00:43<01:24,  1.16s/batch, loss=0.757315, lr=2.50e-05][A
+Train epoch 4/5:  30%|██▉       | 31/104 [00:44<01:24,  1.16s/batch, loss=1.223523, lr=2.50e-05][A
+Train epoch 4/5:  31%|███       | 32/104 [00:44<01:25,  1.19s/batch, loss=1.223523, lr=2.50e-05][A
+Train epoch 4/5:  31%|███       | 32/104 [00:46<01:25,  1.19s/batch, loss=0.748020, lr=2.50e-05][A
+Train epoch 4/5:  32%|███▏      | 33/104 [00:46<01:25,  1.20s/batch, loss=0.748020, lr=2.50e-05][A
+Train epoch 4/5:  32%|███▏      | 33/104 [00:47<01:25,  1.20s/batch, loss=0.671374, lr=2.50e-05][A
+Train epoch 4/5:  33%|███▎      | 34/104 [00:47<01:24,  1.21s/batch, loss=0.671374, lr=2.50e-05][A
+Train epoch 4/5:  33%|███▎      | 34/104 [00:48<01:24,  1.21s/batch, loss=0.630627, lr=2.50e-05][A
+Train epoch 4/5:  34%|███▎      | 35/104 [00:48<01:24,  1.22s/batch, loss=0.630627, lr=2.50e-05][A
+Train epoch 4/5:  34%|███▎      | 35/104 [00:49<01:24,  1.22s/batch, loss=0.570394, lr=2.50e-05][A
+Train epoch 4/5:  35%|███▍      | 36/104 [00:49<01:22,  1.22s/batch, loss=0.570394, lr=2.50e-05][A
+Train epoch 4/5:  35%|███▍      | 36/104 [00:50<01:22,  1.22s/batch, loss=0.562020, lr=2.50e-05][A
+Train epoch 4/5:  36%|███▌      | 37/104 [00:50<01:21,  1.22s/batch, loss=0.562020, lr=2.50e-05][A
+Train epoch 4/5:  36%|███▌      | 37/104 [00:52<01:21,  1.22s/batch, loss=0.630733, lr=2.50e-05][A
+Train epoch 4/5:  37%|███▋      | 38/104 [00:52<01:18,  1.19s/batch, loss=0.630733, lr=2.50e-05][A
+Train epoch 4/5:  37%|███▋      | 38/104 [00:53<01:18,  1.19s/batch, loss=0.653152, lr=2.50e-05][A
+Train epoch 4/5:  38%|███▊      | 39/104 [00:53<01:16,  1.18s/batch, loss=0.653152, lr=2.50e-05][A
+Train epoch 4/5:  38%|███▊      | 39/104 [00:54<01:16,  1.18s/batch, loss=0.750571, lr=2.50e-05][A
+Train epoch 4/5:  38%|███▊      | 40/104 [00:54<01:16,  1.19s/batch, loss=0.750571, lr=2.50e-05][A
+Train epoch 4/5:  38%|███▊      | 40/104 [00:55<01:16,  1.19s/batch, loss=0.643521, lr=2.50e-05][A
+Train epoch 4/5:  39%|███▉      | 41/104 [00:55<01:16,  1.21s/batch, loss=0.643521, lr=2.50e-05][A
+Train epoch 4/5:  39%|███▉      | 41/104 [00:56<01:16,  1.21s/batch, loss=0.982910, lr=2.50e-05][A
+Train epoch 4/5:  40%|████      | 42/104 [00:56<01:15,  1.22s/batch, loss=0.982910, lr=2.50e-05][A
+Train epoch 4/5:  40%|████      | 42/104 [00:58<01:15,  1.22s/batch, loss=0.671497, lr=2.50e-05][A
+Train epoch 4/5:  41%|████▏     | 43/104 [00:58<01:14,  1.22s/batch, loss=0.671497, lr=2.50e-05][A
+Train epoch 4/5:  41%|████▏     | 43/104 [00:59<01:14,  1.22s/batch, loss=0.720678, lr=2.50e-05][A
+Train epoch 4/5:  42%|████▏     | 44/104 [00:59<01:13,  1.23s/batch, loss=0.720678, lr=2.50e-05][A
+Train epoch 4/5:  42%|████▏     | 44/104 [01:00<01:13,  1.23s/batch, loss=1.100390, lr=2.50e-05][A
+Train epoch 4/5:  43%|████▎     | 45/104 [01:00<01:07,  1.15s/batch, loss=1.100390, lr=2.50e-05][A
+Train epoch 4/5:  43%|████▎     | 45/104 [01:01<01:07,  1.15s/batch, loss=0.808300, lr=2.50e-05][A
+Train epoch 4/5:  44%|████▍     | 46/104 [01:01<01:08,  1.17s/batch, loss=0.808300, lr=2.50e-05][A
+Train epoch 4/5:  44%|████▍     | 46/104 [01:02<01:08,  1.17s/batch, loss=0.829059, lr=2.50e-05][A
+Train epoch 4/5:  45%|████▌     | 47/104 [01:02<01:06,  1.16s/batch, loss=0.829059, lr=2.50e-05][A
+Train epoch 4/5:  45%|████▌     | 47/104 [01:03<01:06,  1.16s/batch, loss=0.697067, lr=2.50e-05][A
+Train epoch 4/5:  46%|████▌     | 48/104 [01:04<01:06,  1.19s/batch, loss=0.697067, lr=2.50e-05][A
+Train epoch 4/5:  46%|████▌     | 48/104 [01:05<01:06,  1.19s/batch, loss=0.787535, lr=2.50e-05][A
+Train epoch 4/5:  47%|████▋     | 49/104 [01:05<01:06,  1.21s/batch, loss=0.787535, lr=2.50e-05][A
+Train epoch 4/5:  47%|████▋     | 49/104 [01:06<01:06,  1.21s/batch, loss=0.774737, lr=2.50e-05][A
+Train epoch 4/5:  48%|████▊     | 50/104 [01:06<01:05,  1.22s/batch, loss=0.774737, lr=2.50e-05][A
+Train epoch 4/5:  48%|████▊     | 50/104 [01:07<01:05,  1.22s/batch, loss=0.676508, lr=2.50e-05][A
+Train epoch 4/5:  49%|████▉     | 51/104 [01:07<01:03,  1.20s/batch, loss=0.676508, lr=2.50e-05][A
+Train epoch 4/5:  49%|████▉     | 51/104 [01:08<01:03,  1.20s/batch, loss=0.851512, lr=2.50e-05][A
+Train epoch 4/5:  50%|█████     | 52/104 [01:08<01:02,  1.20s/batch, loss=0.851512, lr=2.50e-05][A
+Train epoch 4/5:  50%|█████     | 52/104 [01:09<01:02,  1.20s/batch, loss=0.621989, lr=2.50e-05][A
+Train epoch 4/5:  51%|█████     | 53/104 [01:10<01:00,  1.18s/batch, loss=0.621989, lr=2.50e-05][A
+Train epoch 4/5:  51%|█████     | 53/104 [01:11<01:00,  1.18s/batch, loss=0.713955, lr=2.50e-05][A
+Train epoch 4/5:  52%|█████▏    | 54/104 [01:11<00:59,  1.20s/batch, loss=0.713955, lr=2.50e-05][A
+Train epoch 4/5:  52%|█████▏    | 54/104 [01:12<00:59,  1.20s/batch, loss=0.581199, lr=2.50e-05][A
+Train epoch 4/5:  53%|█████▎    | 55/104 [01:12<00:58,  1.20s/batch, loss=0.581199, lr=2.50e-05][A
+Train epoch 4/5:  53%|█████▎    | 55/104 [01:13<00:58,  1.20s/batch, loss=0.679118, lr=2.50e-05][A
+Train epoch 4/5:  54%|█████▍    | 56/104 [01:13<00:57,  1.19s/batch, loss=0.679118, lr=2.50e-05][A
+Train epoch 4/5:  54%|█████▍    | 56/104 [01:14<00:57,  1.19s/batch, loss=0.626116, lr=2.50e-05][A
+Train epoch 4/5:  55%|█████▍    | 57/104 [01:14<00:56,  1.21s/batch, loss=0.626116, lr=2.50e-05][A
+Train epoch 4/5:  55%|█████▍    | 57/104 [01:16<00:56,  1.21s/batch, loss=0.882354, lr=2.50e-05][A
+Train epoch 4/5:  56%|█████▌    | 58/104 [01:16<00:56,  1.22s/batch, loss=0.882354, lr=2.50e-05][A
+Train epoch 4/5:  56%|█████▌    | 58/104 [01:17<00:56,  1.22s/batch, loss=0.675747, lr=2.50e-05][A
+Train epoch 4/5:  57%|█████▋    | 59/104 [01:17<00:54,  1.22s/batch, loss=0.675747, lr=2.50e-05][A
+Train epoch 4/5:  57%|█████▋    | 59/104 [01:18<00:54,  1.22s/batch, loss=0.634019, lr=2.50e-05][A
+Train epoch 4/5:  58%|█████▊    | 60/104 [01:18<00:53,  1.21s/batch, loss=0.634019, lr=2.50e-05][A
+Train epoch 4/5:  58%|█████▊    | 60/104 [01:19<00:53,  1.21s/batch, loss=0.850424, lr=2.50e-05][A
+Train epoch 4/5:  59%|█████▊    | 61/104 [01:19<00:52,  1.22s/batch, loss=0.850424, lr=2.50e-05][A
+Train epoch 4/5:  59%|█████▊    | 61/104 [01:20<00:52,  1.22s/batch, loss=0.675411, lr=2.50e-05][A
+Train epoch 4/5:  60%|█████▉    | 62/104 [01:20<00:50,  1.20s/batch, loss=0.675411, lr=2.50e-05][A
+Train epoch 4/5:  60%|█████▉    | 62/104 [01:22<00:50,  1.20s/batch, loss=0.781306, lr=2.50e-05][A
+Train epoch 4/5:  61%|██████    | 63/104 [01:22<00:49,  1.22s/batch, loss=0.781306, lr=2.50e-05][A
+Train epoch 4/5:  61%|██████    | 63/104 [01:23<00:49,  1.22s/batch, loss=0.695715, lr=2.50e-05][A
+Train epoch 4/5:  62%|██████▏   | 64/104 [01:23<00:47,  1.18s/batch, loss=0.695715, lr=2.50e-05][A
+Train epoch 4/5:  62%|██████▏   | 64/104 [01:24<00:47,  1.18s/batch, loss=1.324979, lr=2.50e-05][A
+Train epoch 4/5:  62%|██████▎   | 65/104 [01:24<00:46,  1.19s/batch, loss=1.324979, lr=2.50e-05][A
+Train epoch 4/5:  62%|██████▎   | 65/104 [01:25<00:46,  1.19s/batch, loss=0.586657, lr=2.50e-05][A
+Train epoch 4/5:  63%|██████▎   | 66/104 [01:25<00:45,  1.21s/batch, loss=0.586657, lr=2.50e-05][A
+Train epoch 4/5:  63%|██████▎   | 66/104 [01:26<00:45,  1.21s/batch, loss=0.613528, lr=2.50e-05][A
+Train epoch 4/5:  64%|██████▍   | 67/104 [01:26<00:45,  1.22s/batch, loss=0.613528, lr=2.50e-05][A
+Train epoch 4/5:  64%|██████▍   | 67/104 [01:27<00:45,  1.22s/batch, loss=0.939580, lr=2.50e-05][A
+Train epoch 4/5:  65%|██████▌   | 68/104 [01:27<00:40,  1.12s/batch, loss=0.939580, lr=2.50e-05][A
+Train epoch 4/5:  65%|██████▌   | 68/104 [01:29<00:40,  1.12s/batch, loss=0.937647, lr=2.50e-05][A
+Train epoch 4/5:  66%|██████▋   | 69/104 [01:29<00:40,  1.16s/batch, loss=0.937647, lr=2.50e-05][A
+Train epoch 4/5:  66%|██████▋   | 69/104 [01:30<00:40,  1.16s/batch, loss=0.544236, lr=2.50e-05][A
+Train epoch 4/5:  67%|██████▋   | 70/104 [01:30<00:40,  1.19s/batch, loss=0.544236, lr=2.50e-05][A
+Train epoch 4/5:  67%|██████▋   | 70/104 [01:31<00:40,  1.19s/batch, loss=0.585710, lr=2.50e-05][A
+Train epoch 4/5:  68%|██████▊   | 71/104 [01:31<00:39,  1.21s/batch, loss=0.585710, lr=2.50e-05][A
+Train epoch 4/5:  68%|██████▊   | 71/104 [01:32<00:39,  1.21s/batch, loss=0.665148, lr=2.50e-05][A
+Train epoch 4/5:  69%|██████▉   | 72/104 [01:32<00:38,  1.21s/batch, loss=0.665148, lr=2.50e-05][A
+Train epoch 4/5:  69%|██████▉   | 72/104 [01:33<00:38,  1.21s/batch, loss=0.808259, lr=2.50e-05][A
+Train epoch 4/5:  70%|███████   | 73/104 [01:34<00:37,  1.20s/batch, loss=0.808259, lr=2.50e-05][A
+Train epoch 4/5:  70%|███████   | 73/104 [01:35<00:37,  1.20s/batch, loss=0.631810, lr=2.50e-05][A
+Train epoch 4/5:  71%|███████   | 74/104 [01:35<00:35,  1.19s/batch, loss=0.631810, lr=2.50e-05][A
+Train epoch 4/5:  71%|███████   | 74/104 [01:36<00:35,  1.19s/batch, loss=0.821945, lr=2.50e-05][A
+Train epoch 4/5:  72%|███████▏  | 75/104 [01:36<00:34,  1.20s/batch, loss=0.821945, lr=2.50e-05][A
+Train epoch 4/5:  72%|███████▏  | 75/104 [01:37<00:34,  1.20s/batch, loss=0.567582, lr=2.50e-05][A
+Train epoch 4/5:  73%|███████▎  | 76/104 [01:37<00:33,  1.18s/batch, loss=0.567582, lr=2.50e-05][A
+Train epoch 4/5:  73%|███████▎  | 76/104 [01:38<00:33,  1.18s/batch, loss=0.890103, lr=2.50e-05][A
+Train epoch 4/5:  74%|███████▍  | 77/104 [01:38<00:32,  1.20s/batch, loss=0.890103, lr=2.50e-05][A
+Train epoch 4/5:  74%|███████▍  | 77/104 [01:39<00:32,  1.20s/batch, loss=0.631991, lr=2.50e-05][A
+Train epoch 4/5:  75%|███████▌  | 78/104 [01:40<00:31,  1.21s/batch, loss=0.631991, lr=2.50e-05][A
+Train epoch 4/5:  75%|███████▌  | 78/104 [01:41<00:31,  1.21s/batch, loss=0.566107, lr=2.50e-05][A
+Train epoch 4/5:  76%|███████▌  | 79/104 [01:41<00:30,  1.22s/batch, loss=0.566107, lr=2.50e-05][A
+Train epoch 4/5:  76%|███████▌  | 79/104 [01:42<00:30,  1.22s/batch, loss=0.520164, lr=2.50e-05][A
+Train epoch 4/5:  77%|███████▋  | 80/104 [01:42<00:29,  1.23s/batch, loss=0.520164, lr=2.50e-05][A
+Train epoch 4/5:  77%|███████▋  | 80/104 [01:43<00:29,  1.23s/batch, loss=0.692942, lr=2.50e-05][A
+Train epoch 4/5:  78%|███████▊  | 81/104 [01:43<00:27,  1.18s/batch, loss=0.692942, lr=2.50e-05][A
+Train epoch 4/5:  78%|███████▊  | 81/104 [01:44<00:27,  1.18s/batch, loss=0.551488, lr=2.50e-05][A
+Train epoch 4/5:  79%|███████▉  | 82/104 [01:44<00:26,  1.21s/batch, loss=0.551488, lr=2.50e-05][A
+Train epoch 4/5:  79%|███████▉  | 82/104 [01:45<00:26,  1.21s/batch, loss=0.599886, lr=2.50e-05][A
+Train epoch 4/5:  80%|███████▉  | 83/104 [01:46<00:25,  1.19s/batch, loss=0.599886, lr=2.50e-05][A
+Train epoch 4/5:  80%|███████▉  | 83/104 [01:47<00:25,  1.19s/batch, loss=0.628589, lr=2.50e-05][A
+Train epoch 4/5:  81%|████████  | 84/104 [01:47<00:24,  1.21s/batch, loss=0.628589, lr=2.50e-05][A
+Train epoch 4/5:  81%|████████  | 84/104 [01:48<00:24,  1.21s/batch, loss=0.741436, lr=2.50e-05][A
+Train epoch 4/5:  82%|████████▏ | 85/104 [01:48<00:22,  1.19s/batch, loss=0.741436, lr=2.50e-05][A
+Train epoch 4/5:  82%|████████▏ | 85/104 [01:49<00:22,  1.19s/batch, loss=0.614086, lr=2.50e-05][A
+Train epoch 4/5:  83%|████████▎ | 86/104 [01:49<00:21,  1.20s/batch, loss=0.614086, lr=2.50e-05][A
+Train epoch 4/5:  83%|████████▎ | 86/104 [01:50<00:21,  1.20s/batch, loss=0.596818, lr=2.50e-05][A
+Train epoch 4/5:  84%|████████▎ | 87/104 [01:50<00:20,  1.22s/batch, loss=0.596818, lr=2.50e-05][A
+Train epoch 4/5:  84%|████████▎ | 87/104 [01:52<00:20,  1.22s/batch, loss=1.613075, lr=2.50e-05][A
+Train epoch 4/5:  85%|████████▍ | 88/104 [01:52<00:19,  1.22s/batch, loss=1.613075, lr=2.50e-05][A
+Train epoch 4/5:  85%|████████▍ | 88/104 [01:53<00:19,  1.22s/batch, loss=0.780404, lr=2.50e-05][A
+Train epoch 4/5:  86%|████████▌ | 89/104 [01:53<00:18,  1.23s/batch, loss=0.780404, lr=2.50e-05][A
+Train epoch 4/5:  86%|████████▌ | 89/104 [01:54<00:18,  1.23s/batch, loss=0.601886, lr=2.50e-05][A
+Train epoch 4/5:  87%|████████▋ | 90/104 [01:54<00:16,  1.21s/batch, loss=0.601886, lr=2.50e-05][A
+Train epoch 4/5:  87%|████████▋ | 90/104 [01:55<00:16,  1.21s/batch, loss=0.696296, lr=2.50e-05][A
+Train epoch 4/5:  88%|████████▊ | 91/104 [01:55<00:14,  1.10s/batch, loss=0.696296, lr=2.50e-05][A
+Train epoch 4/5:  88%|████████▊ | 91/104 [01:56<00:14,  1.10s/batch, loss=0.646224, lr=2.50e-05][A
+Train epoch 4/5:  88%|████████▊ | 92/104 [01:56<00:13,  1.15s/batch, loss=0.646224, lr=2.50e-05][A
+Train epoch 4/5:  88%|████████▊ | 92/104 [01:57<00:13,  1.15s/batch, loss=0.839837, lr=2.50e-05][A
+Train epoch 4/5:  89%|████████▉ | 93/104 [01:57<00:12,  1.18s/batch, loss=0.839837, lr=2.50e-05][A
+Train epoch 4/5:  89%|████████▉ | 93/104 [01:59<00:12,  1.18s/batch, loss=1.416426, lr=2.50e-05][A
+Train epoch 4/5:  90%|█████████ | 94/104 [01:59<00:11,  1.20s/batch, loss=1.416426, lr=2.50e-05][A
+Train epoch 4/5:  90%|█████████ | 94/104 [02:00<00:11,  1.20s/batch, loss=0.697180, lr=2.50e-05][A
+Train epoch 4/5:  91%|█████████▏| 95/104 [02:00<00:10,  1.21s/batch, loss=0.697180, lr=2.50e-05][A
+Train epoch 4/5:  91%|█████████▏| 95/104 [02:01<00:10,  1.21s/batch, loss=0.877165, lr=2.50e-05][A
+Train epoch 4/5:  92%|█████████▏| 96/104 [02:01<00:09,  1.22s/batch, loss=0.877165, lr=2.50e-05][A
+Train epoch 4/5:  92%|█████████▏| 96/104 [02:02<00:09,  1.22s/batch, loss=0.677627, lr=2.50e-05][A
+Train epoch 4/5:  93%|█████████▎| 97/104 [02:02<00:08,  1.19s/batch, loss=0.677627, lr=2.50e-05][A
+Train epoch 4/5:  93%|█████████▎| 97/104 [02:03<00:08,  1.19s/batch, loss=0.724767, lr=2.50e-05][A
+Train epoch 4/5:  94%|█████████▍| 98/104 [02:03<00:07,  1.17s/batch, loss=0.724767, lr=2.50e-05][A
+Train epoch 4/5:  94%|█████████▍| 98/104 [02:04<00:07,  1.17s/batch, loss=0.625775, lr=2.50e-05][A
+Train epoch 4/5:  95%|█████████▌| 99/104 [02:04<00:05,  1.16s/batch, loss=0.625775, lr=2.50e-05][A
+Train epoch 4/5:  95%|█████████▌| 99/104 [02:06<00:05,  1.16s/batch, loss=0.764927, lr=2.50e-05][A
+Train epoch 4/5:  96%|█████████▌| 100/104 [02:06<00:04,  1.18s/batch, loss=0.764927, lr=2.50e-05][A
+Train epoch 4/5:  96%|█████████▌| 100/104 [02:07<00:04,  1.18s/batch, loss=0.568512, lr=2.50e-05][A
+Train epoch 4/5:  97%|█████████▋| 101/104 [02:07<00:03,  1.20s/batch, loss=0.568512, lr=2.50e-05][A
+Train epoch 4/5:  97%|█████████▋| 101/104 [02:08<00:03,  1.20s/batch, loss=0.648734, lr=2.50e-05][A
+Train epoch 4/5:  98%|█████████▊| 102/104 [02:08<00:02,  1.22s/batch, loss=0.648734, lr=2.50e-05][A
+Train epoch 4/5:  98%|█████████▊| 102/104 [02:09<00:02,  1.22s/batch, loss=0.744615, lr=2.50e-05][A
+Train epoch 4/5:  99%|█████████▉| 103/104 [02:09<00:01,  1.20s/batch, loss=0.744615, lr=2.50e-05][A
+Train epoch 4/5:  99%|█████████▉| 103/104 [02:10<00:01,  1.20s/batch, loss=0.705755, lr=2.50e-05][A
+Train epoch 4/5: 100%|██████████| 104/104 [02:10<00:00,  1.03batch/s, loss=0.705755, lr=2.50e-05][ATrain epoch 4/5: 100%|██████████| 104/104 [02:10<00:00,  1.25s/batch, loss=0.705755, lr=2.50e-05]
+
+Validate epoch 4/5:   0%|          | 0/24 [00:00<?, ?batch/s][A
+Validate epoch 4/5:   0%|          | 0/24 [00:01<?, ?batch/s, loss=0.604040][A
+Validate epoch 4/5:   4%|▍         | 1/24 [00:01<00:27,  1.20s/batch, loss=0.604040][A
+Validate epoch 4/5:   4%|▍         | 1/24 [00:02<00:27,  1.20s/batch, loss=0.502378][A
+Validate epoch 4/5:   8%|▊         | 2/24 [00:02<00:26,  1.21s/batch, loss=0.502378][A
+Validate epoch 4/5:   8%|▊         | 2/24 [00:03<00:26,  1.21s/batch, loss=0.497511][A
+Validate epoch 4/5:  12%|█▎        | 3/24 [00:03<00:24,  1.15s/batch, loss=0.497511][A
+Validate epoch 4/5:  12%|█▎        | 3/24 [00:04<00:24,  1.15s/batch, loss=0.590039][A
+Validate epoch 4/5:  17%|█▋        | 4/24 [00:04<00:20,  1.04s/batch, loss=0.590039][A
+Validate epoch 4/5:  17%|█▋        | 4/24 [00:05<00:20,  1.04s/batch, loss=0.537239][A
+Validate epoch 4/5:  21%|██        | 5/24 [00:05<00:20,  1.07s/batch, loss=0.537239][A
+Validate epoch 4/5:  21%|██        | 5/24 [00:06<00:20,  1.07s/batch, loss=0.468779][A
+Validate epoch 4/5:  25%|██▌       | 6/24 [00:06<00:20,  1.12s/batch, loss=0.468779][A
+Validate epoch 4/5:  25%|██▌       | 6/24 [00:07<00:20,  1.12s/batch, loss=0.557140][A
+Validate epoch 4/5:  29%|██▉       | 7/24 [00:07<00:19,  1.15s/batch, loss=0.557140][A
+Validate epoch 4/5:  29%|██▉       | 7/24 [00:09<00:19,  1.15s/batch, loss=0.537322][A
+Validate epoch 4/5:  33%|███▎      | 8/24 [00:09<00:18,  1.17s/batch, loss=0.537322][A
+Validate epoch 4/5:  33%|███▎      | 8/24 [00:10<00:18,  1.17s/batch, loss=0.506129][A
+Validate epoch 4/5:  38%|███▊      | 9/24 [00:10<00:17,  1.18s/batch, loss=0.506129][A
+Validate epoch 4/5:  38%|███▊      | 9/24 [00:11<00:17,  1.18s/batch, loss=0.535222][A
+Validate epoch 4/5:  42%|████▏     | 10/24 [00:11<00:16,  1.19s/batch, loss=0.535222][A
+Validate epoch 4/5:  42%|████▏     | 10/24 [00:12<00:16,  1.19s/batch, loss=0.513389][A
+Validate epoch 4/5:  46%|████▌     | 11/24 [00:12<00:15,  1.17s/batch, loss=0.513389][A
+Validate epoch 4/5:  46%|████▌     | 11/24 [00:13<00:15,  1.17s/batch, loss=0.486089][A
+Validate epoch 4/5:  50%|█████     | 12/24 [00:13<00:13,  1.16s/batch, loss=0.486089][A
+Validate epoch 4/5:  50%|█████     | 12/24 [00:14<00:13,  1.16s/batch, loss=0.436409][A
+Validate epoch 4/5:  54%|█████▍    | 13/24 [00:14<00:12,  1.13s/batch, loss=0.436409][A
+Validate epoch 4/5:  54%|█████▍    | 13/24 [00:16<00:12,  1.13s/batch, loss=0.557985][A
+Validate epoch 4/5:  58%|█████▊    | 14/24 [00:16<00:11,  1.15s/batch, loss=0.557985][A
+Validate epoch 4/5:  58%|█████▊    | 14/24 [00:17<00:11,  1.15s/batch, loss=0.547513][A
+Validate epoch 4/5:  62%|██████▎   | 15/24 [00:17<00:10,  1.16s/batch, loss=0.547513][A
+Validate epoch 4/5:  62%|██████▎   | 15/24 [00:18<00:10,  1.16s/batch, loss=0.487352][A
+Validate epoch 4/5:  67%|██████▋   | 16/24 [00:18<00:09,  1.18s/batch, loss=0.487352][A
+Validate epoch 4/5:  67%|██████▋   | 16/24 [00:19<00:09,  1.18s/batch, loss=0.551915][A
+Validate epoch 4/5:  71%|███████   | 17/24 [00:19<00:08,  1.16s/batch, loss=0.551915][A
+Validate epoch 4/5:  71%|███████   | 17/24 [00:20<00:08,  1.16s/batch, loss=0.584638][A
+Validate epoch 4/5:  75%|███████▌  | 18/24 [00:20<00:07,  1.17s/batch, loss=0.584638][A
+Validate epoch 4/5:  75%|███████▌  | 18/24 [00:21<00:07,  1.17s/batch, loss=0.524974][A
+Validate epoch 4/5:  79%|███████▉  | 19/24 [00:21<00:05,  1.18s/batch, loss=0.524974][A
+Validate epoch 4/5:  79%|███████▉  | 19/24 [00:23<00:05,  1.18s/batch, loss=0.529596][A
+Validate epoch 4/5:  83%|████████▎ | 20/24 [00:23<00:04,  1.16s/batch, loss=0.529596][A
+Validate epoch 4/5:  83%|████████▎ | 20/24 [00:24<00:04,  1.16s/batch, loss=0.465698][A
+Validate epoch 4/5:  88%|████████▊ | 21/24 [00:24<00:03,  1.18s/batch, loss=0.465698][A
+Validate epoch 4/5:  88%|████████▊ | 21/24 [00:25<00:03,  1.18s/batch, loss=0.459467][A
+Validate epoch 4/5:  92%|█████████▏| 22/24 [00:25<00:02,  1.15s/batch, loss=0.459467][A
+Validate epoch 4/5:  92%|█████████▏| 22/24 [00:26<00:02,  1.15s/batch, loss=0.505698][A
+Validate epoch 4/5:  96%|█████████▌| 23/24 [00:26<00:01,  1.14s/batch, loss=0.505698][A
+Validate epoch 4/5:  96%|█████████▌| 23/24 [00:27<00:01,  1.14s/batch, loss=0.627049][A
+Validate epoch 4/5: 100%|██████████| 24/24 [00:27<00:00,  1.05s/batch, loss=0.627049][AValidate epoch 4/5: 100%|██████████| 24/24 [00:27<00:00,  1.14s/batch, loss=0.627049]Epoch 4/5 finished: train_loss=0.757717, valid_loss=0.525565
+Best validation loss updated at epoch 4: 0.525565. Saving checkpoint.
+Updating learning rate to 1.25e-05
+Epoch 5/5 started.
+
+
+Train epoch 5/5:   0%|          | 0/104 [00:00<?, ?batch/s][A
+Train epoch 5/5:   0%|          | 0/104 [00:01<?, ?batch/s, loss=0.992610, lr=1.25e-05][A
+Train epoch 5/5:   1%|          | 1/104 [00:01<02:08,  1.25s/batch, loss=0.992610, lr=1.25e-05][A
+Train epoch 5/5:   1%|          | 1/104 [00:02<02:08,  1.25s/batch, loss=0.942481, lr=1.25e-05][A
+Train epoch 5/5:   2%|▏         | 2/104 [00:02<02:07,  1.25s/batch, loss=0.942481, lr=1.25e-05][A
+Train epoch 5/5:   2%|▏         | 2/104 [00:03<02:07,  1.25s/batch, loss=0.756514, lr=1.25e-05][A
+Train epoch 5/5:   3%|▎         | 3/104 [00:03<02:00,  1.19s/batch, loss=0.756514, lr=1.25e-05][A
+Train epoch 5/5:   3%|▎         | 3/104 [00:04<02:00,  1.19s/batch, loss=0.638713, lr=1.25e-05][A
+Train epoch 5/5:   4%|▍         | 4/104 [00:04<02:00,  1.20s/batch, loss=0.638713, lr=1.25e-05][A
+Train epoch 5/5:   4%|▍         | 4/104 [00:06<02:00,  1.20s/batch, loss=0.620478, lr=1.25e-05][A
+Train epoch 5/5:   5%|▍         | 5/104 [00:06<01:59,  1.21s/batch, loss=0.620478, lr=1.25e-05][A
+Train epoch 5/5:   5%|▍         | 5/104 [00:07<01:59,  1.21s/batch, loss=0.586107, lr=1.25e-05][A
+Train epoch 5/5:   6%|▌         | 6/104 [00:07<01:54,  1.17s/batch, loss=0.586107, lr=1.25e-05][A
+Train epoch 5/5:   6%|▌         | 6/104 [00:08<01:54,  1.17s/batch, loss=0.777117, lr=1.25e-05][A
+Train epoch 5/5:   7%|▋         | 7/104 [00:08<01:55,  1.19s/batch, loss=0.777117, lr=1.25e-05][A
+Train epoch 5/5:   7%|▋         | 7/104 [00:09<01:55,  1.19s/batch, loss=0.622512, lr=1.25e-05][A
+Train epoch 5/5:   8%|▊         | 8/104 [00:09<01:56,  1.21s/batch, loss=0.622512, lr=1.25e-05][A
+Train epoch 5/5:   8%|▊         | 8/104 [00:10<01:56,  1.21s/batch, loss=0.631330, lr=1.25e-05][A
+Train epoch 5/5:   9%|▊         | 9/104 [00:10<01:55,  1.22s/batch, loss=0.631330, lr=1.25e-05][A
+Train epoch 5/5:   9%|▊         | 9/104 [00:12<01:55,  1.22s/batch, loss=0.967707, lr=1.25e-05][A
+Train epoch 5/5:  10%|▉         | 10/104 [00:12<01:52,  1.20s/batch, loss=0.967707, lr=1.25e-05][A
+Train epoch 5/5:  10%|▉         | 10/104 [00:13<01:52,  1.20s/batch, loss=0.560964, lr=1.25e-05][A
+Train epoch 5/5:  11%|█         | 11/104 [00:13<01:49,  1.18s/batch, loss=0.560964, lr=1.25e-05][A
+Train epoch 5/5:  11%|█         | 11/104 [00:14<01:49,  1.18s/batch, loss=0.782386, lr=1.25e-05][A
+Train epoch 5/5:  12%|█▏        | 12/104 [00:14<01:50,  1.20s/batch, loss=0.782386, lr=1.25e-05][A
+Train epoch 5/5:  12%|█▏        | 12/104 [00:15<01:50,  1.20s/batch, loss=0.852387, lr=1.25e-05][A
+Train epoch 5/5:  12%|█▎        | 13/104 [00:15<01:50,  1.22s/batch, loss=0.852387, lr=1.25e-05][A
+Train epoch 5/5:  12%|█▎        | 13/104 [00:16<01:50,  1.22s/batch, loss=0.725448, lr=1.25e-05][A
+Train epoch 5/5:  13%|█▎        | 14/104 [00:16<01:50,  1.23s/batch, loss=0.725448, lr=1.25e-05][A
+Train epoch 5/5:  13%|█▎        | 14/104 [00:18<01:50,  1.23s/batch, loss=0.603231, lr=1.25e-05][A
+Train epoch 5/5:  14%|█▍        | 15/104 [00:18<01:46,  1.20s/batch, loss=0.603231, lr=1.25e-05][A
+Train epoch 5/5:  14%|█▍        | 15/104 [00:19<01:46,  1.20s/batch, loss=0.901571, lr=1.25e-05][A
+Train epoch 5/5:  15%|█▌        | 16/104 [00:19<01:43,  1.18s/batch, loss=0.901571, lr=1.25e-05][A
+Train epoch 5/5:  15%|█▌        | 16/104 [00:20<01:43,  1.18s/batch, loss=0.848391, lr=1.25e-05][A
+Train epoch 5/5:  16%|█▋        | 17/104 [00:20<01:44,  1.20s/batch, loss=0.848391, lr=1.25e-05][A
+Train epoch 5/5:  16%|█▋        | 17/104 [00:21<01:44,  1.20s/batch, loss=0.836119, lr=1.25e-05][A
+Train epoch 5/5:  17%|█▋        | 18/104 [00:21<01:42,  1.19s/batch, loss=0.836119, lr=1.25e-05][A
+Train epoch 5/5:  17%|█▋        | 18/104 [00:22<01:42,  1.19s/batch, loss=0.649297, lr=1.25e-05][A
+Train epoch 5/5:  18%|█▊        | 19/104 [00:22<01:43,  1.22s/batch, loss=0.649297, lr=1.25e-05][A
+Train epoch 5/5:  18%|█▊        | 19/104 [00:24<01:43,  1.22s/batch, loss=0.834583, lr=1.25e-05][A
+Train epoch 5/5:  19%|█▉        | 20/104 [00:24<01:42,  1.23s/batch, loss=0.834583, lr=1.25e-05][A
+Train epoch 5/5:  19%|█▉        | 20/104 [00:25<01:42,  1.23s/batch, loss=0.524476, lr=1.25e-05][A
+Train epoch 5/5:  20%|██        | 21/104 [00:25<01:41,  1.23s/batch, loss=0.524476, lr=1.25e-05][A
+Train epoch 5/5:  20%|██        | 21/104 [00:26<01:41,  1.23s/batch, loss=0.709559, lr=1.25e-05][A
+Train epoch 5/5:  21%|██        | 22/104 [00:26<01:39,  1.22s/batch, loss=0.709559, lr=1.25e-05][A
+Train epoch 5/5:  21%|██        | 22/104 [00:27<01:39,  1.22s/batch, loss=0.564560, lr=1.25e-05][A
+Train epoch 5/5:  22%|██▏       | 23/104 [00:27<01:36,  1.19s/batch, loss=0.564560, lr=1.25e-05][A
+Train epoch 5/5:  22%|██▏       | 23/104 [00:28<01:36,  1.19s/batch, loss=0.563099, lr=1.25e-05][A
+Train epoch 5/5:  23%|██▎       | 24/104 [00:28<01:37,  1.21s/batch, loss=0.563099, lr=1.25e-05][A
+Train epoch 5/5:  23%|██▎       | 24/104 [00:30<01:37,  1.21s/batch, loss=0.657048, lr=1.25e-05][A
+Train epoch 5/5:  24%|██▍       | 25/104 [00:30<01:37,  1.23s/batch, loss=0.657048, lr=1.25e-05][A
+Train epoch 5/5:  24%|██▍       | 25/104 [00:31<01:37,  1.23s/batch, loss=0.607955, lr=1.25e-05][A
+Train epoch 5/5:  25%|██▌       | 26/104 [00:31<01:33,  1.20s/batch, loss=0.607955, lr=1.25e-05][A
+Train epoch 5/5:  25%|██▌       | 26/104 [00:32<01:33,  1.20s/batch, loss=0.622691, lr=1.25e-05][A
+Train epoch 5/5:  26%|██▌       | 27/104 [00:32<01:32,  1.20s/batch, loss=0.622691, lr=1.25e-05][A
+Train epoch 5/5:  26%|██▌       | 27/104 [00:33<01:32,  1.20s/batch, loss=0.963148, lr=1.25e-05][A
+Train epoch 5/5:  27%|██▋       | 28/104 [00:33<01:31,  1.21s/batch, loss=0.963148, lr=1.25e-05][A
+Train epoch 5/5:  27%|██▋       | 28/104 [00:34<01:31,  1.21s/batch, loss=0.724789, lr=1.25e-05][A
+Train epoch 5/5:  28%|██▊       | 29/104 [00:35<01:31,  1.22s/batch, loss=0.724789, lr=1.25e-05][A
+Train epoch 5/5:  28%|██▊       | 29/104 [00:36<01:31,  1.22s/batch, loss=0.619988, lr=1.25e-05][A
+Train epoch 5/5:  29%|██▉       | 30/104 [00:36<01:30,  1.23s/batch, loss=0.619988, lr=1.25e-05][A
+Train epoch 5/5:  29%|██▉       | 30/104 [00:37<01:30,  1.23s/batch, loss=0.678486, lr=1.25e-05][A
+Train epoch 5/5:  30%|██▉       | 31/104 [00:37<01:29,  1.23s/batch, loss=0.678486, lr=1.25e-05][A
+Train epoch 5/5:  30%|██▉       | 31/104 [00:38<01:29,  1.23s/batch, loss=1.072884, lr=1.25e-05][A
+Train epoch 5/5:  31%|███       | 32/104 [00:38<01:25,  1.19s/batch, loss=1.072884, lr=1.25e-05][A
+Train epoch 5/5:  31%|███       | 32/104 [00:39<01:25,  1.19s/batch, loss=0.682626, lr=1.25e-05][A
+Train epoch 5/5:  32%|███▏      | 33/104 [00:39<01:23,  1.18s/batch, loss=0.682626, lr=1.25e-05][A
+Train epoch 5/5:  32%|███▏      | 33/104 [00:40<01:23,  1.18s/batch, loss=0.773862, lr=1.25e-05][A
+Train epoch 5/5:  33%|███▎      | 34/104 [00:40<01:23,  1.19s/batch, loss=0.773862, lr=1.25e-05][A
+Train epoch 5/5:  33%|███▎      | 34/104 [00:42<01:23,  1.19s/batch, loss=0.745020, lr=1.25e-05][A
+Train epoch 5/5:  34%|███▎      | 35/104 [00:42<01:23,  1.21s/batch, loss=0.745020, lr=1.25e-05][A
+Train epoch 5/5:  34%|███▎      | 35/104 [00:43<01:23,  1.21s/batch, loss=0.699971, lr=1.25e-05][A
+Train epoch 5/5:  35%|███▍      | 36/104 [00:43<01:23,  1.22s/batch, loss=0.699971, lr=1.25e-05][A
+Train epoch 5/5:  35%|███▍      | 36/104 [00:44<01:23,  1.22s/batch, loss=0.575979, lr=1.25e-05][A
+Train epoch 5/5:  36%|███▌      | 37/104 [00:44<01:22,  1.23s/batch, loss=0.575979, lr=1.25e-05][A
+Train epoch 5/5:  36%|███▌      | 37/104 [00:45<01:22,  1.23s/batch, loss=0.676724, lr=1.25e-05][A
+Train epoch 5/5:  37%|███▋      | 38/104 [00:45<01:21,  1.24s/batch, loss=0.676724, lr=1.25e-05][A
+Train epoch 5/5:  37%|███▋      | 38/104 [00:47<01:21,  1.24s/batch, loss=0.801915, lr=1.25e-05][A
+Train epoch 5/5:  38%|███▊      | 39/104 [00:47<01:19,  1.22s/batch, loss=0.801915, lr=1.25e-05][A
+Train epoch 5/5:  38%|███▊      | 39/104 [00:48<01:19,  1.22s/batch, loss=0.676837, lr=1.25e-05][A
+Train epoch 5/5:  38%|███▊      | 40/104 [00:48<01:16,  1.19s/batch, loss=0.676837, lr=1.25e-05][A
+Train epoch 5/5:  38%|███▊      | 40/104 [00:49<01:16,  1.19s/batch, loss=0.764408, lr=1.25e-05][A
+Train epoch 5/5:  39%|███▉      | 41/104 [00:49<01:14,  1.18s/batch, loss=0.764408, lr=1.25e-05][A
+Train epoch 5/5:  39%|███▉      | 41/104 [00:50<01:14,  1.18s/batch, loss=0.520548, lr=1.25e-05][A
+Train epoch 5/5:  40%|████      | 42/104 [00:50<01:14,  1.19s/batch, loss=0.520548, lr=1.25e-05][A
+Train epoch 5/5:  40%|████      | 42/104 [00:51<01:14,  1.19s/batch, loss=0.540496, lr=1.25e-05][A
+Train epoch 5/5:  41%|████▏     | 43/104 [00:51<01:13,  1.21s/batch, loss=0.540496, lr=1.25e-05][A
+Train epoch 5/5:  41%|████▏     | 43/104 [00:53<01:13,  1.21s/batch, loss=0.946227, lr=1.25e-05][A
+Train epoch 5/5:  42%|████▏     | 44/104 [00:53<01:12,  1.20s/batch, loss=0.946227, lr=1.25e-05][A
+Train epoch 5/5:  42%|████▏     | 44/104 [00:54<01:12,  1.20s/batch, loss=0.646702, lr=1.25e-05][A
+Train epoch 5/5:  43%|████▎     | 45/104 [00:54<01:12,  1.22s/batch, loss=0.646702, lr=1.25e-05][A
+Train epoch 5/5:  43%|████▎     | 45/104 [00:55<01:12,  1.22s/batch, loss=0.527676, lr=1.25e-05][A
+Train epoch 5/5:  44%|████▍     | 46/104 [00:55<01:11,  1.23s/batch, loss=0.527676, lr=1.25e-05][A
+Train epoch 5/5:  44%|████▍     | 46/104 [00:56<01:11,  1.23s/batch, loss=1.040776, lr=1.25e-05][A
+Train epoch 5/5:  45%|████▌     | 47/104 [00:56<01:10,  1.23s/batch, loss=1.040776, lr=1.25e-05][A
+Train epoch 5/5:  45%|████▌     | 47/104 [00:58<01:10,  1.23s/batch, loss=0.635209, lr=1.25e-05][A
+Train epoch 5/5:  46%|████▌     | 48/104 [00:58<01:08,  1.23s/batch, loss=0.635209, lr=1.25e-05][A
+Train epoch 5/5:  46%|████▌     | 48/104 [00:58<01:08,  1.23s/batch, loss=0.622143, lr=1.25e-05][A
+Train epoch 5/5:  47%|████▋     | 49/104 [00:58<01:01,  1.11s/batch, loss=0.622143, lr=1.25e-05][A
+Train epoch 5/5:  47%|████▋     | 49/104 [01:00<01:01,  1.11s/batch, loss=0.964116, lr=1.25e-05][A
+Train epoch 5/5:  48%|████▊     | 50/104 [01:00<01:00,  1.13s/batch, loss=0.964116, lr=1.25e-05][A
+Train epoch 5/5:  48%|████▊     | 50/104 [01:01<01:00,  1.13s/batch, loss=0.708970, lr=1.25e-05][A
+Train epoch 5/5:  49%|████▉     | 51/104 [01:01<01:01,  1.15s/batch, loss=0.708970, lr=1.25e-05][A
+Train epoch 5/5:  49%|████▉     | 51/104 [01:02<01:01,  1.15s/batch, loss=0.895345, lr=1.25e-05][A
+Train epoch 5/5:  50%|█████     | 52/104 [01:02<01:01,  1.18s/batch, loss=0.895345, lr=1.25e-05][A
+Train epoch 5/5:  50%|█████     | 52/104 [01:03<01:01,  1.18s/batch, loss=0.692736, lr=1.25e-05][A
+Train epoch 5/5:  51%|█████     | 53/104 [01:03<01:01,  1.20s/batch, loss=0.692736, lr=1.25e-05][A
+Train epoch 5/5:  51%|█████     | 53/104 [01:04<01:01,  1.20s/batch, loss=0.701454, lr=1.25e-05][A
+Train epoch 5/5:  52%|█████▏    | 54/104 [01:05<01:00,  1.21s/batch, loss=0.701454, lr=1.25e-05][A
+Train epoch 5/5:  52%|█████▏    | 54/104 [01:06<01:00,  1.21s/batch, loss=0.651183, lr=1.25e-05][A
+Train epoch 5/5:  53%|█████▎    | 55/104 [01:06<00:59,  1.21s/batch, loss=0.651183, lr=1.25e-05][A
+Train epoch 5/5:  53%|█████▎    | 55/104 [01:07<00:59,  1.21s/batch, loss=0.814821, lr=1.25e-05][A
+Train epoch 5/5:  54%|█████▍    | 56/104 [01:07<00:58,  1.22s/batch, loss=0.814821, lr=1.25e-05][A
+Train epoch 5/5:  54%|█████▍    | 56/104 [01:08<00:58,  1.22s/batch, loss=0.687137, lr=1.25e-05][A
+Train epoch 5/5:  55%|█████▍    | 57/104 [01:08<00:56,  1.20s/batch, loss=0.687137, lr=1.25e-05][A
+Train epoch 5/5:  55%|█████▍    | 57/104 [01:09<00:56,  1.20s/batch, loss=0.501447, lr=1.25e-05][A
+Train epoch 5/5:  56%|█████▌    | 58/104 [01:09<00:54,  1.19s/batch, loss=0.501447, lr=1.25e-05][A
+Train epoch 5/5:  56%|█████▌    | 58/104 [01:10<00:54,  1.19s/batch, loss=0.581343, lr=1.25e-05][A
+Train epoch 5/5:  57%|█████▋    | 59/104 [01:11<00:54,  1.21s/batch, loss=0.581343, lr=1.25e-05][A
+Train epoch 5/5:  57%|█████▋    | 59/104 [01:12<00:54,  1.21s/batch, loss=0.657611, lr=1.25e-05][A
+Train epoch 5/5:  58%|█████▊    | 60/104 [01:12<00:53,  1.22s/batch, loss=0.657611, lr=1.25e-05][A
+Train epoch 5/5:  58%|█████▊    | 60/104 [01:13<00:53,  1.22s/batch, loss=1.054997, lr=1.25e-05][A
+Train epoch 5/5:  59%|█████▊    | 61/104 [01:13<00:51,  1.19s/batch, loss=1.054997, lr=1.25e-05][A
+Train epoch 5/5:  59%|█████▊    | 61/104 [01:14<00:51,  1.19s/batch, loss=0.569507, lr=1.25e-05][A
+Train epoch 5/5:  60%|█████▉    | 62/104 [01:14<00:50,  1.21s/batch, loss=0.569507, lr=1.25e-05][A
+Train epoch 5/5:  60%|█████▉    | 62/104 [01:15<00:50,  1.21s/batch, loss=1.057440, lr=1.25e-05][A
+Train epoch 5/5:  61%|██████    | 63/104 [01:15<00:49,  1.22s/batch, loss=1.057440, lr=1.25e-05][A
+Train epoch 5/5:  61%|██████    | 63/104 [01:16<00:49,  1.22s/batch, loss=0.595079, lr=1.25e-05][A
+Train epoch 5/5:  62%|██████▏   | 64/104 [01:17<00:47,  1.19s/batch, loss=0.595079, lr=1.25e-05][A
+Train epoch 5/5:  62%|██████▏   | 64/104 [01:18<00:47,  1.19s/batch, loss=0.597899, lr=1.25e-05][A
+Train epoch 5/5:  62%|██████▎   | 65/104 [01:18<00:46,  1.20s/batch, loss=0.597899, lr=1.25e-05][A
+Train epoch 5/5:  62%|██████▎   | 65/104 [01:19<00:46,  1.20s/batch, loss=0.742555, lr=1.25e-05][A
+Train epoch 5/5:  63%|██████▎   | 66/104 [01:19<00:44,  1.18s/batch, loss=0.742555, lr=1.25e-05][A
+Train epoch 5/5:  63%|██████▎   | 66/104 [01:20<00:44,  1.18s/batch, loss=0.637751, lr=1.25e-05][A
+Train epoch 5/5:  64%|██████▍   | 67/104 [01:20<00:43,  1.17s/batch, loss=0.637751, lr=1.25e-05][A
+Train epoch 5/5:  64%|██████▍   | 67/104 [01:21<00:43,  1.17s/batch, loss=0.526463, lr=1.25e-05][A
+Train epoch 5/5:  65%|██████▌   | 68/104 [01:21<00:42,  1.19s/batch, loss=0.526463, lr=1.25e-05][A
+Train epoch 5/5:  65%|██████▌   | 68/104 [01:22<00:42,  1.19s/batch, loss=0.611090, lr=1.25e-05][A
+Train epoch 5/5:  66%|██████▋   | 69/104 [01:23<00:42,  1.21s/batch, loss=0.611090, lr=1.25e-05][A
+Train epoch 5/5:  66%|██████▋   | 69/104 [01:24<00:42,  1.21s/batch, loss=0.597362, lr=1.25e-05][A
+Train epoch 5/5:  67%|██████▋   | 70/104 [01:24<00:41,  1.22s/batch, loss=0.597362, lr=1.25e-05][A
+Train epoch 5/5:  67%|██████▋   | 70/104 [01:25<00:41,  1.22s/batch, loss=1.096785, lr=1.25e-05][A
+Train epoch 5/5:  68%|██████▊   | 71/104 [01:25<00:40,  1.23s/batch, loss=1.096785, lr=1.25e-05][A
+Train epoch 5/5:  68%|██████▊   | 71/104 [01:26<00:40,  1.23s/batch, loss=0.621758, lr=1.25e-05][A
+Train epoch 5/5:  69%|██████▉   | 72/104 [01:26<00:38,  1.19s/batch, loss=0.621758, lr=1.25e-05][A
+Train epoch 5/5:  69%|██████▉   | 72/104 [01:27<00:38,  1.19s/batch, loss=0.996433, lr=1.25e-05][A
+Train epoch 5/5:  70%|███████   | 73/104 [01:27<00:37,  1.20s/batch, loss=0.996433, lr=1.25e-05][A
+Train epoch 5/5:  70%|███████   | 73/104 [01:29<00:37,  1.20s/batch, loss=0.638534, lr=1.25e-05][A
+Train epoch 5/5:  71%|███████   | 74/104 [01:29<00:36,  1.21s/batch, loss=0.638534, lr=1.25e-05][A
+Train epoch 5/5:  71%|███████   | 74/104 [01:30<00:36,  1.21s/batch, loss=0.591839, lr=1.25e-05][A
+Train epoch 5/5:  72%|███████▏  | 75/104 [01:30<00:35,  1.21s/batch, loss=0.591839, lr=1.25e-05][A
+Train epoch 5/5:  72%|███████▏  | 75/104 [01:31<00:35,  1.21s/batch, loss=0.666324, lr=1.25e-05][A
+Train epoch 5/5:  73%|███████▎  | 76/104 [01:31<00:34,  1.23s/batch, loss=0.666324, lr=1.25e-05][A
+Train epoch 5/5:  73%|███████▎  | 76/104 [01:32<00:34,  1.23s/batch, loss=0.964207, lr=1.25e-05][A
+Train epoch 5/5:  74%|███████▍  | 77/104 [01:32<00:33,  1.23s/batch, loss=0.964207, lr=1.25e-05][A
+Train epoch 5/5:  74%|███████▍  | 77/104 [01:33<00:33,  1.23s/batch, loss=0.728822, lr=1.25e-05][A
+Train epoch 5/5:  75%|███████▌  | 78/104 [01:33<00:31,  1.20s/batch, loss=0.728822, lr=1.25e-05][A
+Train epoch 5/5:  75%|███████▌  | 78/104 [01:34<00:31,  1.20s/batch, loss=0.714911, lr=1.25e-05][A
+Train epoch 5/5:  76%|███████▌  | 79/104 [01:35<00:29,  1.18s/batch, loss=0.714911, lr=1.25e-05][A
+Train epoch 5/5:  76%|███████▌  | 79/104 [01:36<00:29,  1.18s/batch, loss=0.660777, lr=1.25e-05][A
+Train epoch 5/5:  77%|███████▋  | 80/104 [01:36<00:28,  1.20s/batch, loss=0.660777, lr=1.25e-05][A
+Train epoch 5/5:  77%|███████▋  | 80/104 [01:37<00:28,  1.20s/batch, loss=0.832461, lr=1.25e-05][A
+Train epoch 5/5:  78%|███████▊  | 81/104 [01:37<00:28,  1.22s/batch, loss=0.832461, lr=1.25e-05][A
+Train epoch 5/5:  78%|███████▊  | 81/104 [01:38<00:28,  1.22s/batch, loss=0.565147, lr=1.25e-05][A
+Train epoch 5/5:  79%|███████▉  | 82/104 [01:38<00:27,  1.23s/batch, loss=0.565147, lr=1.25e-05][A
+Train epoch 5/5:  79%|███████▉  | 82/104 [01:39<00:27,  1.23s/batch, loss=0.846928, lr=1.25e-05][A
+Train epoch 5/5:  80%|███████▉  | 83/104 [01:39<00:25,  1.20s/batch, loss=0.846928, lr=1.25e-05][A
+Train epoch 5/5:  80%|███████▉  | 83/104 [01:41<00:25,  1.20s/batch, loss=0.619766, lr=1.25e-05][A
+Train epoch 5/5:  81%|████████  | 84/104 [01:41<00:23,  1.19s/batch, loss=0.619766, lr=1.25e-05][A
+Train epoch 5/5:  81%|████████  | 84/104 [01:42<00:23,  1.19s/batch, loss=0.774554, lr=1.25e-05][A
+Train epoch 5/5:  82%|████████▏ | 85/104 [01:42<00:23,  1.21s/batch, loss=0.774554, lr=1.25e-05][A
+Train epoch 5/5:  82%|████████▏ | 85/104 [01:43<00:23,  1.21s/batch, loss=0.621204, lr=1.25e-05][A
+Train epoch 5/5:  83%|████████▎ | 86/104 [01:43<00:21,  1.22s/batch, loss=0.621204, lr=1.25e-05][A
+Train epoch 5/5:  83%|████████▎ | 86/104 [01:44<00:21,  1.22s/batch, loss=1.184191, lr=1.25e-05][A
+Train epoch 5/5:  84%|████████▎ | 87/104 [01:44<00:20,  1.20s/batch, loss=1.184191, lr=1.25e-05][A
+Train epoch 5/5:  84%|████████▎ | 87/104 [01:45<00:20,  1.20s/batch, loss=1.078155, lr=1.25e-05][A
+Train epoch 5/5:  85%|████████▍ | 88/104 [01:46<00:19,  1.21s/batch, loss=1.078155, lr=1.25e-05][A
+Train epoch 5/5:  85%|████████▍ | 88/104 [01:47<00:19,  1.21s/batch, loss=0.667206, lr=1.25e-05][A
+Train epoch 5/5:  86%|████████▌ | 89/104 [01:47<00:18,  1.23s/batch, loss=0.667206, lr=1.25e-05][A
+Train epoch 5/5:  86%|████████▌ | 89/104 [01:48<00:18,  1.23s/batch, loss=0.615945, lr=1.25e-05][A
+Train epoch 5/5:  87%|████████▋ | 90/104 [01:48<00:17,  1.22s/batch, loss=0.615945, lr=1.25e-05][A
+Train epoch 5/5:  87%|████████▋ | 90/104 [01:49<00:17,  1.22s/batch, loss=0.972095, lr=1.25e-05][A
+Train epoch 5/5:  88%|████████▊ | 91/104 [01:49<00:16,  1.23s/batch, loss=0.972095, lr=1.25e-05][A
+Train epoch 5/5:  88%|████████▊ | 91/104 [01:50<00:16,  1.23s/batch, loss=0.637934, lr=1.25e-05][A
+Train epoch 5/5:  88%|████████▊ | 92/104 [01:50<00:14,  1.22s/batch, loss=0.637934, lr=1.25e-05][A
+Train epoch 5/5:  88%|████████▊ | 92/104 [01:52<00:14,  1.22s/batch, loss=0.706785, lr=1.25e-05][A
+Train epoch 5/5:  89%|████████▉ | 93/104 [01:52<00:13,  1.22s/batch, loss=0.706785, lr=1.25e-05][A
+Train epoch 5/5:  89%|████████▉ | 93/104 [01:53<00:13,  1.22s/batch, loss=0.563957, lr=1.25e-05][A
+Train epoch 5/5:  90%|█████████ | 94/104 [01:53<00:11,  1.20s/batch, loss=0.563957, lr=1.25e-05][A
+Train epoch 5/5:  90%|█████████ | 94/104 [01:54<00:11,  1.20s/batch, loss=0.545722, lr=1.25e-05][A
+Train epoch 5/5:  91%|█████████▏| 95/104 [01:54<00:10,  1.19s/batch, loss=0.545722, lr=1.25e-05][A
+Train epoch 5/5:  91%|█████████▏| 95/104 [01:55<00:10,  1.19s/batch, loss=0.577730, lr=1.25e-05][A
+Train epoch 5/5:  92%|█████████▏| 96/104 [01:55<00:09,  1.20s/batch, loss=0.577730, lr=1.25e-05][A
+Train epoch 5/5:  92%|█████████▏| 96/104 [01:56<00:09,  1.20s/batch, loss=0.686467, lr=1.25e-05][A
+Train epoch 5/5:  93%|█████████▎| 97/104 [01:56<00:08,  1.22s/batch, loss=0.686467, lr=1.25e-05][A
+Train epoch 5/5:  93%|█████████▎| 97/104 [01:58<00:08,  1.22s/batch, loss=0.603629, lr=1.25e-05][A
+Train epoch 5/5:  94%|█████████▍| 98/104 [01:58<00:07,  1.22s/batch, loss=0.603629, lr=1.25e-05][A
+Train epoch 5/5:  94%|█████████▍| 98/104 [01:59<00:07,  1.22s/batch, loss=0.621425, lr=1.25e-05][A
+Train epoch 5/5:  95%|█████████▌| 99/104 [01:59<00:06,  1.23s/batch, loss=0.621425, lr=1.25e-05][A
+Train epoch 5/5:  95%|█████████▌| 99/104 [02:00<00:06,  1.23s/batch, loss=0.739686, lr=1.25e-05][A
+Train epoch 5/5:  96%|█████████▌| 100/104 [02:00<00:04,  1.21s/batch, loss=0.739686, lr=1.25e-05][A
+Train epoch 5/5:  96%|█████████▌| 100/104 [02:01<00:04,  1.21s/batch, loss=0.595037, lr=1.25e-05][A
+Train epoch 5/5:  97%|█████████▋| 101/104 [02:01<00:03,  1.20s/batch, loss=0.595037, lr=1.25e-05][A
+Train epoch 5/5:  97%|█████████▋| 101/104 [02:02<00:03,  1.20s/batch, loss=0.714458, lr=1.25e-05][A
+Train epoch 5/5:  98%|█████████▊| 102/104 [02:02<00:02,  1.17s/batch, loss=0.714458, lr=1.25e-05][A
+Train epoch 5/5:  98%|█████████▊| 102/104 [02:04<00:02,  1.17s/batch, loss=0.650269, lr=1.25e-05][A
+Train epoch 5/5:  99%|█████████▉| 103/104 [02:04<00:01,  1.19s/batch, loss=0.650269, lr=1.25e-05][A
+Train epoch 5/5:  99%|█████████▉| 103/104 [02:04<00:01,  1.19s/batch, loss=1.333242, lr=1.25e-05][A
+Train epoch 5/5: 100%|██████████| 104/104 [02:04<00:00,  1.03batch/s, loss=1.333242, lr=1.25e-05][ATrain epoch 5/5: 100%|██████████| 104/104 [02:04<00:00,  1.20s/batch, loss=1.333242, lr=1.25e-05]
+
+Validate epoch 5/5:   0%|          | 0/24 [00:00<?, ?batch/s][A
+Validate epoch 5/5:   0%|          | 0/24 [00:01<?, ?batch/s, loss=0.463485][A
+Validate epoch 5/5:   4%|▍         | 1/24 [00:01<00:27,  1.21s/batch, loss=0.463485][A
+Validate epoch 5/5:   4%|▍         | 1/24 [00:02<00:27,  1.21s/batch, loss=0.547125][A
+Validate epoch 5/5:   8%|▊         | 2/24 [00:02<00:26,  1.21s/batch, loss=0.547125][A
+Validate epoch 5/5:   8%|▊         | 2/24 [00:03<00:26,  1.21s/batch, loss=0.474593][A
+Validate epoch 5/5:  12%|█▎        | 3/24 [00:03<00:23,  1.12s/batch, loss=0.474593][A
+Validate epoch 5/5:  12%|█▎        | 3/24 [00:04<00:23,  1.12s/batch, loss=0.498511][A
+Validate epoch 5/5:  17%|█▋        | 4/24 [00:04<00:23,  1.16s/batch, loss=0.498511][A
+Validate epoch 5/5:  17%|█▋        | 4/24 [00:05<00:23,  1.16s/batch, loss=0.566393][A
+Validate epoch 5/5:  21%|██        | 5/24 [00:05<00:22,  1.17s/batch, loss=0.566393][A
+Validate epoch 5/5:  21%|██        | 5/24 [00:06<00:22,  1.17s/batch, loss=0.500159][A
+Validate epoch 5/5:  25%|██▌       | 6/24 [00:06<00:20,  1.14s/batch, loss=0.500159][A
+Validate epoch 5/5:  25%|██▌       | 6/24 [00:08<00:20,  1.14s/batch, loss=0.485939][A
+Validate epoch 5/5:  29%|██▉       | 7/24 [00:08<00:19,  1.16s/batch, loss=0.485939][A
+Validate epoch 5/5:  29%|██▉       | 7/24 [00:09<00:19,  1.16s/batch, loss=0.539973][A
+Validate epoch 5/5:  33%|███▎      | 8/24 [00:09<00:18,  1.17s/batch, loss=0.539973][A
+Validate epoch 5/5:  33%|███▎      | 8/24 [00:10<00:18,  1.17s/batch, loss=0.560848][A
+Validate epoch 5/5:  38%|███▊      | 9/24 [00:10<00:17,  1.16s/batch, loss=0.560848][A
+Validate epoch 5/5:  38%|███▊      | 9/24 [00:11<00:17,  1.16s/batch, loss=0.534627][A
+Validate epoch 5/5:  42%|████▏     | 10/24 [00:11<00:16,  1.19s/batch, loss=0.534627][A
+Validate epoch 5/5:  42%|████▏     | 10/24 [00:12<00:16,  1.19s/batch, loss=0.452407][A
+Validate epoch 5/5:  46%|████▌     | 11/24 [00:12<00:15,  1.19s/batch, loss=0.452407][A
+Validate epoch 5/5:  46%|████▌     | 11/24 [00:14<00:15,  1.19s/batch, loss=0.644137][A
+Validate epoch 5/5:  50%|█████     | 12/24 [00:14<00:14,  1.18s/batch, loss=0.644137][A
+Validate epoch 5/5:  50%|█████     | 12/24 [00:15<00:14,  1.18s/batch, loss=0.465623][A
+Validate epoch 5/5:  54%|█████▍    | 13/24 [00:15<00:13,  1.19s/batch, loss=0.465623][A
+Validate epoch 5/5:  54%|█████▍    | 13/24 [00:16<00:13,  1.19s/batch, loss=0.474885][A
+Validate epoch 5/5:  58%|█████▊    | 14/24 [00:16<00:11,  1.15s/batch, loss=0.474885][A
+Validate epoch 5/5:  58%|█████▊    | 14/24 [00:17<00:11,  1.15s/batch, loss=0.501384][A
+Validate epoch 5/5:  62%|██████▎   | 15/24 [00:17<00:10,  1.15s/batch, loss=0.501384][A
+Validate epoch 5/5:  62%|██████▎   | 15/24 [00:18<00:10,  1.15s/batch, loss=0.473244][A
+Validate epoch 5/5:  67%|██████▋   | 16/24 [00:18<00:09,  1.16s/batch, loss=0.473244][A
+Validate epoch 5/5:  67%|██████▋   | 16/24 [00:19<00:09,  1.16s/batch, loss=0.562753][A
+Validate epoch 5/5:  71%|███████   | 17/24 [00:19<00:08,  1.17s/batch, loss=0.562753][A
+Validate epoch 5/5:  71%|███████   | 17/24 [00:21<00:08,  1.17s/batch, loss=0.574914][A
+Validate epoch 5/5:  75%|███████▌  | 18/24 [00:21<00:07,  1.18s/batch, loss=0.574914][A
+Validate epoch 5/5:  75%|███████▌  | 18/24 [00:22<00:07,  1.18s/batch, loss=0.525123][A
+Validate epoch 5/5:  79%|███████▉  | 19/24 [00:22<00:05,  1.19s/batch, loss=0.525123][A
+Validate epoch 5/5:  79%|███████▉  | 19/24 [00:23<00:05,  1.19s/batch, loss=0.521317][A
+Validate epoch 5/5:  83%|████████▎ | 20/24 [00:23<00:04,  1.18s/batch, loss=0.521317][A
+Validate epoch 5/5:  83%|████████▎ | 20/24 [00:24<00:04,  1.18s/batch, loss=0.535011][A
+Validate epoch 5/5:  88%|████████▊ | 21/24 [00:24<00:03,  1.15s/batch, loss=0.535011][A
+Validate epoch 5/5:  88%|████████▊ | 21/24 [00:25<00:03,  1.15s/batch, loss=0.497033][A
+Validate epoch 5/5:  92%|█████████▏| 22/24 [00:25<00:02,  1.14s/batch, loss=0.497033][A
+Validate epoch 5/5:  92%|█████████▏| 22/24 [00:26<00:02,  1.14s/batch, loss=0.530873][A
+Validate epoch 5/5:  96%|█████████▌| 23/24 [00:26<00:01,  1.16s/batch, loss=0.530873][A
+Validate epoch 5/5:  96%|█████████▌| 23/24 [00:27<00:01,  1.16s/batch, loss=0.505371][A
+Validate epoch 5/5: 100%|██████████| 24/24 [00:27<00:00,  1.06s/batch, loss=0.505371][AValidate epoch 5/5: 100%|██████████| 24/24 [00:27<00:00,  1.15s/batch, loss=0.505371]Epoch 5/5 finished: train_loss=0.726889, valid_loss=0.518155
+
+Best validation loss updated at epoch 5: 0.518155. Saving checkpoint.
+Updating learning rate to 6.25e-06
+
+Train threshold energy:   0%|          | 0/104 [00:00<?, ?batch/s][A
+Train threshold energy:   1%|          | 1/104 [00:01<02:04,  1.21s/batch][A
+Train threshold energy:   2%|▏         | 2/104 [00:02<02:03,  1.21s/batch][A
+Train threshold energy:   3%|▎         | 3/104 [00:03<01:57,  1.16s/batch][A
+Train threshold energy:   4%|▍         | 4/104 [00:04<01:57,  1.18s/batch][A
+Train threshold energy:   5%|▍         | 5/104 [00:05<01:51,  1.13s/batch][A
+Train threshold energy:   6%|▌         | 6/104 [00:06<01:52,  1.14s/batch][A
+Train threshold energy:   7%|▋         | 7/104 [00:08<01:53,  1.17s/batch][A
+Train threshold energy:   8%|▊         | 8/104 [00:09<01:53,  1.18s/batch][A
+Train threshold energy:   9%|▊         | 9/104 [00:10<01:50,  1.16s/batch][A
+Train threshold energy:  10%|▉         | 10/104 [00:11<01:50,  1.17s/batch][A
+Train threshold energy:  11%|█         | 11/104 [00:12<01:49,  1.18s/batch][A
+Train threshold energy:  12%|█▏        | 12/104 [00:14<01:49,  1.19s/batch][A
+Train threshold energy:  12%|█▎        | 13/104 [00:15<01:47,  1.18s/batch][A
+Train threshold energy:  13%|█▎        | 14/104 [00:16<01:39,  1.11s/batch][A
+Train threshold energy:  14%|█▍        | 15/104 [00:17<01:39,  1.11s/batch][A
+Train threshold energy:  15%|█▌        | 16/104 [00:18<01:40,  1.14s/batch][A
+Train threshold energy:  16%|█▋        | 17/104 [00:19<01:41,  1.16s/batch][A
+Train threshold energy:  17%|█▋        | 18/104 [00:20<01:41,  1.18s/batch][A
+Train threshold energy:  18%|█▊        | 19/104 [00:22<01:40,  1.18s/batch][A
+Train threshold energy:  19%|█▉        | 20/104 [00:23<01:39,  1.19s/batch][A
+Train threshold energy:  20%|██        | 21/104 [00:24<01:36,  1.16s/batch][A
+Train threshold energy:  21%|██        | 22/104 [00:25<01:35,  1.16s/batch][A
+Train threshold energy:  22%|██▏       | 23/104 [00:26<01:32,  1.14s/batch][A
+Train threshold energy:  23%|██▎       | 24/104 [00:27<01:32,  1.16s/batch][A
+Train threshold energy:  24%|██▍       | 25/104 [00:29<01:32,  1.17s/batch][A
+Train threshold energy:  25%|██▌       | 26/104 [00:30<01:32,  1.18s/batch][A
+Train threshold energy:  26%|██▌       | 27/104 [00:31<01:30,  1.17s/batch][A
+Train threshold energy:  27%|██▋       | 28/104 [00:32<01:29,  1.18s/batch][A
+Train threshold energy:  28%|██▊       | 29/104 [00:33<01:28,  1.17s/batch][A
+Train threshold energy:  29%|██▉       | 30/104 [00:35<01:27,  1.18s/batch][A
+Train threshold energy:  30%|██▉       | 31/104 [00:36<01:25,  1.17s/batch][A
+Train threshold energy:  31%|███       | 32/104 [00:37<01:23,  1.16s/batch][A
+Train threshold energy:  32%|███▏      | 33/104 [00:38<01:23,  1.18s/batch][A
+Train threshold energy:  33%|███▎      | 34/104 [00:39<01:23,  1.19s/batch][A
+Train threshold energy:  34%|███▎      | 35/104 [00:40<01:22,  1.19s/batch][A
+Train threshold energy:  35%|███▍      | 36/104 [00:42<01:21,  1.20s/batch][A
+Train threshold energy:  36%|███▌      | 37/104 [00:43<01:18,  1.17s/batch][A
+Train threshold energy:  37%|███▋      | 38/104 [00:44<01:16,  1.16s/batch][A
+Train threshold energy:  38%|███▊      | 39/104 [00:45<01:16,  1.18s/batch][A
+Train threshold energy:  38%|███▊      | 40/104 [00:46<01:14,  1.17s/batch][A
+Train threshold energy:  39%|███▉      | 41/104 [00:47<01:14,  1.18s/batch][A
+Train threshold energy:  40%|████      | 42/104 [00:49<01:13,  1.19s/batch][A
+Train threshold energy:  41%|████▏     | 43/104 [00:50<01:12,  1.19s/batch][A
+Train threshold energy:  42%|████▏     | 44/104 [00:51<01:06,  1.10s/batch][A
+Train threshold energy:  43%|████▎     | 45/104 [00:51<00:53,  1.11batch/s][A
+Train threshold energy:  44%|████▍     | 46/104 [00:52<00:54,  1.06batch/s][A
+Train threshold energy:  45%|████▌     | 47/104 [00:53<00:58,  1.02s/batch][A
+Train threshold energy:  46%|████▌     | 48/104 [00:55<01:00,  1.08s/batch][A
+Train threshold energy:  47%|████▋     | 49/104 [00:56<01:01,  1.12s/batch][A
+Train threshold energy:  48%|████▊     | 50/104 [00:57<01:01,  1.14s/batch][A
+Train threshold energy:  49%|████▉     | 51/104 [00:58<00:59,  1.13s/batch][A
+Train threshold energy:  50%|█████     | 52/104 [00:59<01:00,  1.15s/batch][A
+Train threshold energy:  51%|█████     | 53/104 [01:01<00:59,  1.17s/batch][A
+Train threshold energy:  52%|█████▏    | 54/104 [01:02<00:57,  1.14s/batch][A
+Train threshold energy:  53%|█████▎    | 55/104 [01:03<00:56,  1.15s/batch][A
+Train threshold energy:  54%|█████▍    | 56/104 [01:04<00:55,  1.16s/batch][A
+Train threshold energy:  55%|█████▍    | 57/104 [01:05<00:53,  1.15s/batch][A
+Train threshold energy:  56%|█████▌    | 58/104 [01:06<00:53,  1.17s/batch][A
+Train threshold energy:  57%|█████▋    | 59/104 [01:08<00:52,  1.18s/batch][A
+Train threshold energy:  58%|█████▊    | 60/104 [01:09<00:52,  1.18s/batch][A
+Train threshold energy:  59%|█████▊    | 61/104 [01:10<00:50,  1.18s/batch][A
+Train threshold energy:  60%|█████▉    | 62/104 [01:11<00:49,  1.18s/batch][A
+Train threshold energy:  61%|██████    | 63/104 [01:12<00:46,  1.13s/batch][A
+Train threshold energy:  62%|██████▏   | 64/104 [01:13<00:46,  1.15s/batch][A
+Train threshold energy:  62%|██████▎   | 65/104 [01:15<00:45,  1.17s/batch][A
+Train threshold energy:  63%|██████▎   | 66/104 [01:16<00:44,  1.18s/batch][A
+Train threshold energy:  64%|██████▍   | 67/104 [01:17<00:44,  1.19s/batch][A
+Train threshold energy:  65%|██████▌   | 68/104 [01:18<00:43,  1.20s/batch][A
+Train threshold energy:  66%|██████▋   | 69/104 [01:19<00:40,  1.16s/batch][A
+Train threshold energy:  67%|██████▋   | 70/104 [01:20<00:39,  1.17s/batch][A
+Train threshold energy:  68%|██████▊   | 71/104 [01:22<00:38,  1.18s/batch][A
+Train threshold energy:  69%|██████▉   | 72/104 [01:23<00:36,  1.15s/batch][A
+Train threshold energy:  70%|███████   | 73/104 [01:24<00:36,  1.16s/batch][A
+Train threshold energy:  71%|███████   | 74/104 [01:25<00:35,  1.17s/batch][A
+Train threshold energy:  72%|███████▏  | 75/104 [01:26<00:34,  1.17s/batch][A
+Train threshold energy:  73%|███████▎  | 76/104 [01:27<00:33,  1.19s/batch][A
+Train threshold energy:  74%|███████▍  | 77/104 [01:29<00:31,  1.15s/batch][A
+Train threshold energy:  75%|███████▌  | 78/104 [01:30<00:30,  1.17s/batch][A
+Train threshold energy:  76%|███████▌  | 79/104 [01:31<00:29,  1.18s/batch][A
+Train threshold energy:  77%|███████▋  | 80/104 [01:32<00:28,  1.18s/batch][A
+Train threshold energy:  78%|███████▊  | 81/104 [01:33<00:26,  1.14s/batch][A
+Train threshold energy:  79%|███████▉  | 82/104 [01:34<00:25,  1.16s/batch][A
+Train threshold energy:  80%|███████▉  | 83/104 [01:36<00:24,  1.17s/batch][A
+Train threshold energy:  81%|████████  | 84/104 [01:37<00:23,  1.18s/batch][A
+Train threshold energy:  82%|████████▏ | 85/104 [01:38<00:22,  1.16s/batch][A
+Train threshold energy:  83%|████████▎ | 86/104 [01:39<00:20,  1.16s/batch][A
+Train threshold energy:  84%|████████▎ | 87/104 [01:40<00:19,  1.17s/batch][A
+Train threshold energy:  85%|████████▍ | 88/104 [01:41<00:18,  1.18s/batch][A
+Train threshold energy:  86%|████████▌ | 89/104 [01:43<00:17,  1.19s/batch][A
+Train threshold energy:  87%|████████▋ | 90/104 [01:44<00:16,  1.16s/batch][A
+Train threshold energy:  88%|████████▊ | 91/104 [01:45<00:15,  1.17s/batch][A
+Train threshold energy:  88%|████████▊ | 92/104 [01:46<00:14,  1.18s/batch][A
+Train threshold energy:  89%|████████▉ | 93/104 [01:47<00:12,  1.13s/batch][A
+Train threshold energy:  90%|█████████ | 94/104 [01:48<00:11,  1.15s/batch][A
+Train threshold energy:  91%|█████████▏| 95/104 [01:50<00:10,  1.17s/batch][A
+Train threshold energy:  92%|█████████▏| 96/104 [01:51<00:09,  1.19s/batch][A
+Train threshold energy:  93%|█████████▎| 97/104 [01:52<00:08,  1.19s/batch][A
+Train threshold energy:  94%|█████████▍| 98/104 [01:53<00:07,  1.19s/batch][A
+Train threshold energy:  95%|█████████▌| 99/104 [01:54<00:05,  1.11s/batch][A
+Train threshold energy:  96%|█████████▌| 100/104 [01:55<00:04,  1.12s/batch][A
+Train threshold energy:  97%|█████████▋| 101/104 [01:56<00:03,  1.14s/batch][A
+Train threshold energy:  98%|█████████▊| 102/104 [01:58<00:02,  1.16s/batch][A
+Train threshold energy:  99%|█████████▉| 103/104 [01:59<00:01,  1.18s/batch][A
+Train threshold energy: 100%|██████████| 104/104 [01:59<00:00,  1.05batch/s][ATrain threshold energy: 100%|██████████| 104/104 [01:59<00:00,  1.15s/batch]
+
+Test energy:   0%|          | 0/31 [00:00<?, ?batch/s][A
+Test energy:   3%|▎         | 1/31 [00:01<00:35,  1.17s/batch][A
+Test energy:   6%|▋         | 2/31 [00:02<00:34,  1.18s/batch][A
+Test energy:  10%|▉         | 3/31 [00:03<00:33,  1.19s/batch][A
+Test energy:  13%|█▎        | 4/31 [00:04<00:31,  1.16s/batch][A
+Test energy:  16%|█▌        | 5/31 [00:05<00:28,  1.11s/batch][A
+Test energy:  19%|█▉        | 6/31 [00:06<00:28,  1.15s/batch][A
+Test energy:  23%|██▎       | 7/31 [00:08<00:27,  1.15s/batch][A
+Test energy:  26%|██▌       | 8/31 [00:09<00:26,  1.17s/batch][A
+Test energy:  29%|██▉       | 9/31 [00:10<00:25,  1.18s/batch][A
+Test energy:  32%|███▏      | 10/31 [00:11<00:24,  1.19s/batch][A
+Test energy:  35%|███▌      | 11/31 [00:12<00:23,  1.19s/batch][A
+Test energy:  39%|███▊      | 12/31 [00:14<00:22,  1.19s/batch][A
+Test energy:  42%|████▏     | 13/31 [00:15<00:20,  1.12s/batch][A
+Test energy:  45%|████▌     | 14/31 [00:15<00:17,  1.05s/batch][A
+Test energy:  48%|████▊     | 15/31 [00:17<00:17,  1.09s/batch][A
+Test energy:  52%|█████▏    | 16/31 [00:18<00:16,  1.13s/batch][A
+Test energy:  55%|█████▍    | 17/31 [00:19<00:16,  1.15s/batch][A
+Test energy:  58%|█████▊    | 18/31 [00:20<00:15,  1.17s/batch][A
+Test energy:  61%|██████▏   | 19/31 [00:21<00:14,  1.18s/batch][A
+Test energy:  65%|██████▍   | 20/31 [00:23<00:12,  1.15s/batch][A
+Test energy:  68%|██████▊   | 21/31 [00:24<00:11,  1.16s/batch][A
+Test energy:  71%|███████   | 22/31 [00:25<00:10,  1.17s/batch][A
+Test energy:  74%|███████▍  | 23/31 [00:26<00:09,  1.16s/batch][A
+Test energy:  77%|███████▋  | 24/31 [00:27<00:08,  1.18s/batch][A
+Test energy:  81%|████████  | 25/31 [00:28<00:07,  1.19s/batch][A
+Test energy:  84%|████████▍ | 26/31 [00:30<00:05,  1.16s/batch][A
+Test energy:  87%|████████▋ | 27/31 [00:31<00:04,  1.18s/batch][A
+Test energy:  90%|█████████ | 28/31 [00:32<00:03,  1.16s/batch][A
+Test energy:  94%|█████████▎| 29/31 [00:33<00:02,  1.18s/batch][A
+Test energy:  97%|█████████▋| 30/31 [00:34<00:01,  1.18s/batch][A
+Test energy: 100%|██████████| 31/31 [00:35<00:00,  1.05batch/s][ATest energy: 100%|██████████| 31/31 [00:35<00:00,  1.14s/batch]
+
+Threshold energy:   0%|          | 0/1 [00:00<?, ?batch/s][A
+Threshold energy: 100%|██████████| 1/1 [00:00<00:00,  1.28batch/s][AThreshold energy: 100%|██████████| 1/1 [00:00<00:00,  1.28batch/s]4
+[0.9022556390977443, 0.037037037037037035, 1.0, 0.018867924528301886, 0.9041353383458647, 0.07272727272727272, 1.0, 0.03773584905660377, 0.01363636363636364, 1.0, 0.018867924528301886, 0.02690582959641256, 0.0433001755412522, 1.0, 0.022129186602870814, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.9116541353383458, 0.2033898305084746, 1.0, 0.11320754716981132, 0.9116541353383458, 0.2033898305084746, 1.0, 0.11320754716981132, 0.11363636363636363, 1.0, 0.11320754716981132, 0.20408163265306123, 0.20408163265306123, 1.0, 0.11363636363636363, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.9097744360902256, 0.22580645161290322, 0.7777777777777778, 0.1320754716981132, 0.9097744360902256, 0.22580645161290322, 0.7777777777777778, 0.1320754716981132, 0.13636363636363638, 0.75, 0.1320754716981132, 0.2307692307692308, 0.2399300109025172, 0.7693236714975845, 0.1421277997364954, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.9116541353383458, 0.2985074626865672, 0.7142857142857143, 0.18867924528301888, 0.9116541353383458, 0.2985074626865672, 0.7142857142857143, 0.18867924528301888, 0.20454545454545456, 0.6923076923076923, 0.18867924528301888, 0.3157894736842105, 0.36552474699791504, 0.7883017465626161, 0.23792325428194996, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.9116541353383458, 0.38961038961038963, 0.625, 0.2830188679245283, 0.9116541353383458, 0.38961038961038963, 0.625, 0.2830188679245283, 0.31818181818181823, 0.626984126984127, 0.2830188679245283, 0.42213740458015275, 0.5081222685836019, 0.8274870183070031, 0.36662504491555875, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.9060150375939849, 0.3902439024390244, 0.5517241379310345, 0.3018867924528302, 0.9060150375939849, 0.3902439024390244, 0.5517241379310345, 0.3018867924528302, 0.3409090909090909, 0.5448717948717949, 0.3018867924528302, 0.41940789473684215, 0.5615646322829102, 0.8059939995229305, 0.43089076108344887, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.9022556390977443, 0.39534883720930236, 0.5151515151515151, 0.32075471698113206, 0.9022556390977443, 0.39534883720930236, 0.5151515151515151, 0.32075471698113206, 0.36363636363636365, 0.5172413793103449, 0.32075471698113206, 0.42704626334519574, 0.5789291493727287, 0.7820375217813283, 0.45957083101351875, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.900375939849624, 0.4044943820224719, 0.5, 0.33962264150943394, 0.900375939849624, 0.4044943820224719, 0.5, 0.33962264150943394, 0.38636363636363635, 0.5, 0.33962264150943394, 0.4358974358974359, 0.6009789413343875, 0.7727316628959648, 0.49169204313473097, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8890977443609023, 0.40404040404040403, 0.43478260869565216, 0.37735849056603776, 0.8890977443609023, 0.40404040404040403, 0.43478260869565216, 0.37735849056603776, 0.4318181818181818, 0.4605263157894737, 0.37735849056603776, 0.44571045576407503, 0.6634784741468912, 0.7620920884494492, 0.5874617704834058, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8872180451127819, 0.43396226415094347, 0.4339622641509434, 0.4339622641509434, 0.8890977443609023, 0.4485981308411215, 0.4444444444444444, 0.4528301886792453, 0.49090909090909096, 0.46511627906976744, 0.4339622641509434, 0.47766475011057064, 0.6963126299808181, 0.7608219813095705, 0.6418876078039798, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8853383458646616, 0.45045045045045046, 0.43103448275862066, 0.4716981132075472, 0.8890977443609023, 0.47787610619469023, 0.45, 0.5094339622641509, 0.5272727272727273, 0.4583333333333333, 0.0, 0.49039200614911616, 0.7227858495001457, 0.7675657494412709, 0.6829428614271683, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8796992481203008, 0.44827586206896547, 0.4126984126984127, 0.49056603773584906, 0.881578947368421, 0.4615384615384615, 0.421875, 0.5094339622641509, 0.5363636363636364, 0.44, 0.0, 0.48342644320297956, 0.7286118852736972, 0.7549725586369581, 0.7040299282678236, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8778195488721805, 0.47154471544715454, 0.4142857142857143, 0.5471698113207547, 0.8778195488721805, 0.47154471544715454, 0.4142857142857143, 0.5471698113207547, 0.5909090909090909, 0.4383647798742138, 0.0, 0.5033329630041107, 0.7569954301431905, 0.7639205883792171, 0.7501947009950963, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.868421052631579, 0.453125, 0.38666666666666666, 0.5471698113207547, 0.868421052631579, 0.453125, 0.38666666666666666, 0.5471698113207547, 0.5909090909090909, 0.4059523809523809, 0.0, 0.48127239170556935, 0.747337666134618, 0.7445023101251544, 0.7501947009950963, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8552631578947368, 0.43795620437956206, 0.35714285714285715, 0.5660377358490566, 0.8552631578947368, 0.43795620437956206, 0.35714285714285715, 0.5660377358490566, 0.6136363636363636, 0.36666666666666664, 0.0, 0.45904173106646057, 0.7512121486963588, 0.7227532053792274, 0.7820041415545369, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8571428571428571, 0.47222222222222227, 0.37362637362637363, 0.6415094339622641, 0.8590225563909775, 0.48275862068965514, 0.3804347826086957, 0.660377358490566, 0.6954545454545454, 0.38564102564102565, 0.0, 0.49615558765820733, 0.7905797334138356, 0.7485932468538319, 0.8375558836813318, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.849624060150376, 0.4666666666666667, 0.36082474226804123, 0.660377358490566, 0.8515037593984962, 0.4768211920529801, 0.3673469387755102, 0.6792452830188679, 0.7181818181818183, 0.3891414141414141, 0.0, 0.5047745413081788, 0.7969186565915407, 0.7431165179215895, 0.8591194888404747, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8402255639097744, 0.45161290322580644, 0.3431372549019608, 0.660377358490566, 0.8421052631578947, 0.46153846153846156, 0.34951456310679613, 0.6792452830188679, 0.7181818181818183, 0.3519607843137255, 0.0, 0.4724077621387524, 0.7906294337058611, 0.7322533056708773, 0.8591194888404747, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8383458646616542, 0.45569620253164556, 0.34285714285714286, 0.6792452830188679, 0.8421052631578947, 0.475, 0.35514018691588783, 0.7169811320754716, 0.7318181818181819, 0.3541062801932367, 0.0, 0.4772733706751866, 0.7896666105286603, 0.7296199459337417, 0.860483125204111, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8327067669172933, 0.45398773006134974, 0.33636363636363636, 0.6981132075471698, 0.8345864661654135, 0.4634146341463415, 0.34234234234234234, 0.7169811320754716, 0.740909090909091, 0.3468599033816425, 0.0, 0.47251145608333167, 0.7839120170541002, 0.7181682263570222, 0.862905605824266, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8233082706766918, 0.4404761904761904, 0.3217391304347826, 0.6981132075471698, 0.825187969924812, 0.4497041420118343, 0.3275862068965517, 0.7169811320754716, 0.740909090909091, 0.3278538812785388, 0.0, 0.4545627561027713, 0.7677800858408854, 0.6913655600475834, 0.8631853261039862, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8139097744360902, 0.42774566473988446, 0.30833333333333335, 0.6981132075471698, 0.8157894736842105, 0.4367816091954023, 0.3140495867768595, 0.7169811320754716, 0.740909090909091, 0.32663622526636227, 0.0, 0.4533910552614013, 0.7551536392892031, 0.6711553975249209, 0.8631853261039862, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.8026315789473685, 0.419889502762431, 0.296875, 0.7169811320754716, 0.8045112781954887, 0.42857142857142855, 0.3023255813953488, 0.7358490566037735, 0.7636363636363637, 0.3045045045045045, 0.0, 0.43539334457905227, 0.7589654176830286, 0.6741245632570803, 0.8682358311544912, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.793233082706767, 0.41489361702127653, 0.28888888888888886, 0.7358490566037735, 0.7951127819548872, 0.4232804232804233, 0.29411764705882354, 0.7547169811320755, 0.7863636363636364, 0.2978902953586498, 0.0, 0.43209452885925037, 0.7663383649636716, 0.6710562268229476, 0.8931560863379044, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.7857142857142857, 0.40624999999999994, 0.2805755395683453, 0.7358490566037735, 0.7875939849624061, 0.41450777202072536, 0.2857142857142857, 0.7547169811320755, 0.7863636363636364, 0.2978902953586498, 0.0, 0.43209452885925037, 0.7578202757963062, 0.6581012390387744, 0.8931560863379044, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.7819548872180451, 0.40206185567010316, 0.2765957446808511, 0.7358490566037735, 0.7838345864661654, 0.41025641025641024, 0.28169014084507044, 0.7547169811320755, 0.7863636363636364, 0.2941666666666667, 0.0, 0.4281637804108533, 0.7567187146477478, 0.6564415501705834, 0.8931560863379044, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.7650375939849624, 0.3842364532019704, 0.26, 0.7358490566037735, 0.7669172932330827, 0.3921568627450981, 0.26490066225165565, 0.7547169811320755, 0.7863636363636364, 0.27653890824622535, 0.0, 0.40918171207191995, 0.748796327320448, 0.6436260204365546, 0.8950500257318439, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.7575187969924813, 0.37681159420289856, 0.2532467532467532, 0.7358490566037735, 0.7593984962406015, 0.38461538461538464, 0.25806451612903225, 0.7547169811320755, 0.7863636363636364, 0.2732071141709696, 0.0, 0.40552297177229807, 0.7428131782851339, 0.6348355654646972, 0.8950500257318439, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.75, 0.3755868544600939, 0.25, 0.7547169811320755, 0.7518796992481203, 0.383177570093458, 0.2546583850931677, 0.7735849056603774, 0.8090909090909091, 0.272035627208041, 0.0, 0.40717075297466876, 0.7536359422685517, 0.6392994114154363, 0.9177772984591166, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.7030075187969925, 0.34710743801652894, 0.2222222222222222, 0.7924528301886793, 0.7048872180451128, 0.35390946502057613, 0.22631578947368422, 0.8113207547169812, 0.8545454545454546, 0.24176299890585604, 0.0, 0.37689661361614674, 0.7536019549356965, 0.6268718142598054, 0.9445560121696485, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.6522556390977443, 0.32727272727272727, 0.20270270270270271, 0.8490566037735849, 0.6522556390977443, 0.32727272727272727, 0.20270270270270271, 0.8490566037735849, 0.9090909090909091, 0.19667594310451456, 0.0, 0.3233888076102251, 0.7587084782399336, 0.6223038168362462, 0.9716978854478854, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.6409774436090225, 0.3250883392226149, 0.2, 0.8679245283018868, 0.6409774436090225, 0.3250883392226149, 0.2, 0.8679245283018868, 0.931818181818182, 0.20194805194805202, 0.0, 0.33195355618036043, 0.7588525991952072, 0.621337397163379, 0.9745387945387946, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.631578947368421, 0.3194444444444445, 0.19574468085106383, 0.8679245283018868, 0.631578947368421, 0.3194444444444445, 0.19574468085106383, 0.8679245283018868, 0.931818181818182, 0.19594959495949602, 0.0, 0.32380672521939147, 0.7544174092640615, 0.6154126880817578, 0.9745387945387946, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.6203007518796992, 0.3129251700680272, 0.1908713692946058, 0.8679245283018868, 0.6203007518796992, 0.3129251700680272, 0.1908713692946058, 0.8679245283018868, 0.931818181818182, 0.1905266254780818, 0.0, 0.3163665436625055, 0.7489550357675128, 0.6081760031152842, 0.9745387945387946, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.6090225563909775, 0.3066666666666667, 0.1862348178137652, 0.8679245283018868, 0.6090225563909775, 0.3066666666666667, 0.1862348178137652, 0.8679245283018868, 0.931818181818182, 0.1840541335686967, 0.0, 0.30739177902920206, 0.7439128727615617, 0.6015542476874476, 0.9745387945387946, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.6033834586466166, 0.3081967213114754, 0.1865079365079365, 0.8867924528301887, 0.6109022556390977, 0.33009708737864074, 0.19921875, 0.9622641509433962, 0.94, 0.1888023088023088, 0.0, 0.3144468591005548, 0.7459960332513854, 0.6021257319491201, 0.9802031302031303, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.5958646616541353, 0.3042071197411004, 0.18359375, 0.8867924528301887, 0.6033834586466166, 0.3258785942492013, 0.19615384615384615, 0.9622641509433962, 0.94, 0.18356421356421357, 0.0, 0.3071481961907453, 0.7450421605004903, 0.6008838486446199, 0.9802031302031303, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.5827067669172933, 0.2974683544303797, 0.17870722433460076, 0.8867924528301887, 0.5902255639097744, 0.31875, 0.19101123595505617, 0.9622641509433962, 0.94, 0.17390257717360522, 0.0, 0.29350578029538366, 0.7417366717464936, 0.5965953480729272, 0.9802031302031303, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.5601503759398496, 0.2865853658536585, 0.1709090909090909, 0.8867924528301887, 0.5676691729323309, 0.3072289156626506, 0.1827956989247312, 0.9622641509433962, 0.94, 0.15407698011864676, 0.0, 0.26475716781066294, 0.730671862166857, 0.5824077520094488, 0.9802031302031303, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.5469924812030075, 0.2805970149253731, 0.16666666666666666, 0.8867924528301887, 0.5545112781954887, 0.3008849557522124, 0.17832167832167833, 0.9622641509433962, 0.94, 0.14943156050298906, 0.0, 0.2578696486596311, 0.7293842117866368, 0.5792641340873919, 0.9845321345321346, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+
+scheduling MindTS: 1it [19:05, 1145.89s/it]scheduling MindTS: 1it [19:05, 1145.89s/it]
+[0.5281954887218046, 0.27246376811594203, 0.16095890410958905, 0.8867924528301887, 0.5357142857142857, 0.2922636103151862, 0.17229729729729729, 0.9622641509433962, 0.94, 0.14752679859822715, 0.0, 0.25502854892602106, 0.7262155736336724, 0.5752772412834415, 0.9845321345321346, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+4
+[0.5150375939849624, 0.26704545454545453, 0.15719063545150502, 0.8867924528301887, 0.5225563909774437, 0.2865168539325843, 0.16831683168316833, 0.9622641509433962, 0.94, 0.1447692883440547, 0.0, 0.25089783146635347, 0.7262648914814699, 0.5740298338495119, 0.9883899433899433, 0.8187655099066451, 0.4761190897147515, 0.7442821487017335, 0.34143173409657435, 0.7691225294012923, 0.3713603976023228]
+collecting MindTS:   0%|          | 0/1 [00:00<?, ?it/s]collecting MindTS: 100%|██████████| 1/1 [00:00<00:00, 26051.58it/s]collecting MindTS: 100%|██████████| 1/1 [00:00<00:00, 5065.58it/s] 
+2026-06-16 10:47:13 [INFO] ts_benchmark.recording(277): loading log file /home/zhangzs/pxf/Time-series/result/label_use_de_stationary_text_gaussian_nll/EWJ/MindTS.20260616_104713.bs16_dm256_df512_ep5_seq48_patch6_stride6_mask0p3_r0p5_cin1.pc-b319-X11DPi-N-T.246930.csv
