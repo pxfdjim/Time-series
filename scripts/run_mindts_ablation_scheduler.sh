@@ -42,6 +42,7 @@ GPU_MEMORY_READY_PCT="${MINDTS_SCHEDULER_GPU_MEMORY_READY_PCT:-80}"
 GPU_UTIL_READY_PCT="${MINDTS_SCHEDULER_GPU_UTIL_READY_PCT:-85}"
 MAX_TASKS_PER_GPU="${MINDTS_SCHEDULER_MAX_TASKS_PER_GPU:-1}"
 POLL_SECONDS="${MINDTS_SCHEDULER_POLL_SECONDS:-20}"
+ONE_LAUNCH_PER_GPU_PER_POLL="${MINDTS_SCHEDULER_ONE_LAUNCH_PER_GPU_PER_POLL:-true}"
 DRY_RUN="${MINDTS_SCHEDULER_DRY_RUN:-false}"
 SKIP_DONE="${MINDTS_SCHEDULER_SKIP_DONE:-true}"
 STOP_ON_FAILURE="${MINDTS_SCHEDULER_STOP_ON_FAILURE:-false}"
@@ -67,6 +68,7 @@ USE_INFORMATION_CONDENSER="$(normalize_bool "$USE_INFORMATION_CONDENSER")"
 DRY_RUN="$(normalize_bool "$DRY_RUN")"
 SKIP_DONE="$(normalize_bool "$SKIP_DONE")"
 STOP_ON_FAILURE="$(normalize_bool "$STOP_ON_FAILURE")"
+ONE_LAUNCH_PER_GPU_PER_POLL="$(normalize_bool "$ONE_LAUNCH_PER_GPU_PER_POLL")"
 RECON_LOSS_TYPE="$(normalize_bool "$RECON_LOSS_TYPE")"
 
 validate_bool "MINDTS_USE_FREQUENCY_BRANCH" "$USE_FREQUENCY_BRANCH"
@@ -74,6 +76,7 @@ validate_bool "MINDTS_USE_INFORMATION_CONDENSER" "$USE_INFORMATION_CONDENSER"
 validate_bool "MINDTS_SCHEDULER_DRY_RUN" "$DRY_RUN"
 validate_bool "MINDTS_SCHEDULER_SKIP_DONE" "$SKIP_DONE"
 validate_bool "MINDTS_SCHEDULER_STOP_ON_FAILURE" "$STOP_ON_FAILURE"
+validate_bool "MINDTS_SCHEDULER_ONE_LAUNCH_PER_GPU_PER_POLL" "$ONE_LAUNCH_PER_GPU_PER_POLL"
 
 case "$RECON_LOSS_TYPE" in
   mse|gaussian_nll) ;;
@@ -347,7 +350,7 @@ log_scheduler "Log dir: ${LOG_DIR}"
 log_scheduler "Conda env: ${MINDTS_CONDA_ENV:-<none>}; python: $(command -v python)"
 log_scheduler "GPUs: ${GPUS[*]}"
 log_scheduler "Tasks: ${total}; datasets: ${DATASETS[*]}"
-log_scheduler "GPU ready thresholds: memory<=${GPU_MEMORY_READY_PCT}%, util<=${GPU_UTIL_READY_PCT}%; max_tasks_per_gpu=${MAX_TASKS_PER_GPU}"
+log_scheduler "GPU ready thresholds: memory<=${GPU_MEMORY_READY_PCT}%, util<=${GPU_UTIL_READY_PCT}%; max_tasks_per_gpu=${MAX_TASKS_PER_GPU}; one_launch_per_gpu_per_poll=${ONE_LAUNCH_PER_GPU_PER_POLL}"
 
 if [[ "$DRY_RUN" == "true" ]]; then
   for task in "${TASKS[@]}"; do
@@ -367,6 +370,7 @@ while (( completed < total )); do
   fi
 
   launched_this_round=0
+  declare -A GPU_LAUNCHED_THIS_ROUND=()
   while (( next_task < total )); do
     task="${TASKS[$next_task]}"
     IFS='|' read -r save_root use_de_stationary exchange_text_features dataset script <<<"$task"
@@ -382,6 +386,9 @@ while (( completed < total )); do
 
     selected_gpu=""
     for gpu in "${GPUS[@]}"; do
+      if [[ "$ONE_LAUNCH_PER_GPU_PER_POLL" == "true" && -n "${GPU_LAUNCHED_THIS_ROUND[$gpu]:-}" ]]; then
+        continue
+      fi
       if (( GPU_ACTIVE["$gpu"] >= MAX_TASKS_PER_GPU )); then
         continue
       fi
@@ -396,6 +403,7 @@ while (( completed < total )); do
     fi
 
     launch_task "$task" "$selected_gpu"
+    GPU_LAUNCHED_THIS_ROUND["$selected_gpu"]=1
     next_task=$(( next_task + 1 ))
     launched_this_round=1
   done

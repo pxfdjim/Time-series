@@ -966,15 +966,15 @@ class MINDTSModel(nn.Module):
 
         # -------------------------------------------------------------Reconstruction-----------------------------------------------------------------------------
         if self.reconstruction_exchange_text_features:
-            multi_features = self.multimodal_Transformer_Block(llm_features, reconstruction_patch_features)
+            multi_features = self.multimodal_Transformer_Block(reconstruction_patch_features, llm_features)
             reconstruction_direction = (
-                "llm_features as text side; reconstruction_patch_features as query/time side; "
+                "reconstruction_patch_features as first/self-attended side; llm_features as second/query side; "
                 "reconstruction_exchange_text_features=true"
             )
         else:
-            multi_features = self.multimodal_Transformer_Block(reconstruction_patch_features, llm_features)
+            multi_features = self.multimodal_Transformer_Block(llm_features, reconstruction_patch_features)
             reconstruction_direction = (
-                "reconstruction_patch_features as text side; llm_features as query/time side; "
+                "llm_features as first/self-attended side; reconstruction_patch_features as second/query side; "
                 "reconstruction_exchange_text_features=false"
             )
         self._write_shape_log(
