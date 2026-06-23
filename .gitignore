@@ -12,7 +12,7 @@ __pycache__/
 
 # Result files
 result/
-
+result_old/
 # IDE
 .idea/
 .vscode/
@@ -22,3 +22,9 @@ result/
 # OS
 .DS_Store
 Thumbs.db
+
+# 过滤掉所有的模型权重文件夹
+models/
+
+# 如果你的 temp.txt 只是临时草稿，不想提交，也可以加进来
+temp.txt
