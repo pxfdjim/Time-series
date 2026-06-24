@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ts_benchmark.baselines.MindTS.layers.Embed import WarriorsEmbedding, DataEmbedding_inverted
 from ts_benchmark.baselines.MindTS.layers.Transformer_EncDec import Encoder, EncoderLayer
-from ts_benchmark.baselines.MindTS.layers.SelfAttention_Family import DSAttention, FullAttention, AttentionLayer
+from ts_benchmark.baselines.MindTS.layers.SelfAttention_Family import FullAttention, AttentionLayer
 from einops import rearrange
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
@@ -92,46 +92,10 @@ class MovingAverage(nn.Module):
         return self.avg(x.permute(0, 2, 1)).permute(0, 2, 1)
 
 
-class Projector(nn.Module):
-    def __init__(self, enc_in, seq_len, hidden_dims, hidden_layers, output_dim, kernel_size=3):
-        super(Projector, self).__init__()
-        padding = 1 if torch.__version__ >= "1.5.0" else 2
-        self.series_conv = nn.Conv1d(
-            in_channels=seq_len,
-            out_channels=1,
-            kernel_size=kernel_size,
-            padding=padding,
-            padding_mode="circular",
-            bias=False,
-        )
-
-        layers = [nn.Linear(2 * enc_in, hidden_dims[0]), nn.ReLU()]
-        for i in range(hidden_layers - 1):
-            layers += [nn.Linear(hidden_dims[i], hidden_dims[i + 1]), nn.ReLU()]
-        layers += [nn.Linear(hidden_dims[-1], output_dim, bias=False)]
-        self.backbone = nn.Sequential(*layers)
-
-    def forward(self, x, stats):
-        batch_size = x.shape[0]
-        x = self.series_conv(x)
-        x = torch.cat([x, stats], dim=1)
-        x = x.view(batch_size, -1)
-        return self.backbone(x)
-
-
 class TransformerBlock(nn.Module):
-    def __init__(self, embed_dim, num_heads, ff_hidden_dim, dropout=0.1,
-                 use_de_stationary=False, factor=1):
+    def __init__(self, embed_dim, num_heads, ff_hidden_dim, dropout=0.1, factor=1):
         super(TransformerBlock, self).__init__()
-        self.use_de_stationary = use_de_stationary
-        if self.use_de_stationary:
-            self.attention = AttentionLayer(
-                DSAttention(False, factor, attention_dropout=dropout, output_attention=False),
-                embed_dim,
-                num_heads,
-            )
-        else:
-            self.attention = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=True)
+        self.attention = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=True)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.norm2 = nn.LayerNorm(embed_dim)
         self.feed_forward = nn.Sequential(
@@ -141,18 +105,8 @@ class TransformerBlock(nn.Module):
         )
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, prompt, semantic_features, tau=None, delta=None):
-        if self.use_de_stationary:
-            attn_output, _ = self.attention(
-                prompt,
-                semantic_features,
-                semantic_features,
-                attn_mask=None,
-                tau=tau,
-                delta=delta,
-            )
-        else:
-            attn_output, _ = self.attention(prompt, semantic_features, semantic_features)
+    def forward(self, prompt, semantic_features):
+        attn_output, _ = self.attention(prompt, semantic_features, semantic_features)
         x = self.norm1(prompt + self.dropout(attn_output))
         ff_output = self.feed_forward(x)
         out = self.norm2(x + self.dropout(ff_output))
@@ -186,13 +140,6 @@ class MultiTransformerBlock(nn.Module):
         output = self.norm2(x + ff_output)
 
         return output
-
-
-def _config_bool(configs, name, default):
-    value = getattr(configs, name, default)
-    if isinstance(value, str):
-        return value.strip().lower() in {"1", "true", "yes", "y", "on"}
-    return bool(value)
 
 
 class MINDTSModel(nn.Module):
@@ -233,15 +180,6 @@ class MINDTSModel(nn.Module):
         self.d_model = configs.d_model
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
-        self.use_de_stationary = _config_bool(configs, "use_de_stationary", True)
-        self.use_de_stationary_cross_view = _config_bool(configs, "use_de_stationary_cross_view", False)
-        self.use_information_condenser = _config_bool(configs, "use_information_condenser", False)
-        self.exchange_text_features = _config_bool(configs, "exchange_text_features", True)
-        self.reconstruction_exchange_text_features = _config_bool(
-            configs,
-            "reconstruction_exchange_text_features",
-            self.exchange_text_features,
-        )
         self.align_loss_type = getattr(configs, "align_loss_type", "contrastive")# "text_gaussian_nll"、"symmetric_gaussian_kl"、"none"
         self.align_detach_target = getattr(configs, "align_detach_target", True)
         self.align_logvar_min = getattr(configs, "align_logvar_min", -6.0)
@@ -249,9 +187,18 @@ class MINDTSModel(nn.Module):
         self.recon_loss_type = getattr(configs, "recon_loss_type", "mse")
         self.recon_logvar_min = getattr(configs, "recon_logvar_min", -6.0)
         self.recon_logvar_max = getattr(configs, "recon_logvar_max", 2.0)
-        self.use_frequency_branch = _config_bool(configs, "use_frequency_branch", False)
-        self.frequency_keep_modes = max(0, int(getattr(configs, "frequency_keep_modes", 4)))
-        self.time_freq_align_weight = float(getattr(configs, "time_freq_align_weight", 0.2))
+        self.llm_model_path = getattr(configs, "llm_model_path", DEEPSEEK_PATH)
+        default_llm_name = os.path.basename(str(self.llm_model_path).rstrip(os.sep)) or str(self.llm_model_path)
+        self.llm_model_name = getattr(configs, "llm_model_name", default_llm_name)
+        self.llm_layers = int(getattr(configs, "llm_layers", 6))
+        self.llm_config = AutoConfig.from_pretrained(self.llm_model_path, trust_remote_code=True)
+        self.llm_hidden_size = int(
+            getattr(
+                self.llm_config,
+                "hidden_size",
+                getattr(self.llm_config, "n_embd", 1536),
+            )
+        )
         allowed_align_losses = {
             "contrastive",
             "text_gaussian_nll",
@@ -275,8 +222,8 @@ class MINDTSModel(nn.Module):
         self.windows_data_embedding = DataEmbedding_inverted(configs.seq_len, configs.d_model, configs.embed, configs.freq, configs.dropout)
         self.proj_patch = nn.Linear(self.patch_num * configs.d_model, configs.seq_len, bias=True)
         self.proj_patch_logvar = nn.Linear(self.patch_num * configs.d_model, configs.seq_len, bias=True)
-        self.prompt_proj_hidden = nn.Linear(1536, configs.d_model, bias=True)
-        self.text_proj_hidden = nn.Linear(1536, configs.d_model, bias=True)
+        self.prompt_proj_hidden = nn.Linear(self.llm_hidden_size, configs.d_model, bias=True)
+        self.text_proj_hidden = nn.Linear(self.llm_hidden_size, configs.d_model, bias=True)
         self.proj_text = nn.Linear(1024 * configs.d_model, configs.d_model, bias=True)
         self.proj_prompt = nn.Linear(128 * configs.d_model, configs.d_model, bias=True)
         self.patch_embedding = WarriorsEmbedding(configs.d_model, self.patch_size, self.stride, self.stride, configs.dropout)
@@ -289,31 +236,12 @@ class MINDTSModel(nn.Module):
             nn.Linear(4 * configs.seq_len, configs.seq_len),
         )
 
-        time_patch_attention = DSAttention if self.use_de_stationary else FullAttention
-        if self.use_de_stationary or self.use_de_stationary_cross_view:
-            p_hidden_dims = getattr(configs, "p_hidden_dims", [128, 128])
-            p_hidden_layers = getattr(configs, "p_hidden_layers", len(p_hidden_dims))
-            self.tau_learner = Projector(
-                enc_in=self.patch_size,
-                seq_len=self.patch_num,
-                hidden_dims=p_hidden_dims,
-                hidden_layers=p_hidden_layers,
-                output_dim=1,
-            )
-            self.delta_learner = Projector(
-                enc_in=self.patch_size,
-                seq_len=self.patch_num,
-                hidden_dims=p_hidden_dims,
-                hidden_layers=p_hidden_layers,
-                output_dim=self.patch_num,
-            )
-
         # Time patch encoder with stacked attention layers
         self.time_patch_encoder = Encoder(
             [
                 EncoderLayer(
                     AttentionLayer(
-                        time_patch_attention(False, configs.factor, attention_dropout=configs.dropout,
+                        FullAttention(False, configs.factor, attention_dropout=configs.dropout,
                                              output_attention=False), configs.d_model, configs.n_heads),
                     configs.d_model,
                     configs.d_ff,
@@ -323,35 +251,6 @@ class MINDTSModel(nn.Module):
             ],
             norm_layer=nn.Sequential(Transpose(1,2), nn.BatchNorm1d(configs.d_model), Transpose(1,2))
         )
-        if self.use_frequency_branch:
-            self.freq_patch_encoder = Encoder(
-                [
-                    EncoderLayer(
-                        AttentionLayer(
-                            time_patch_attention(
-                                False,
-                                configs.factor,
-                                attention_dropout=configs.dropout,
-                                output_attention=False,
-                            ),
-                            configs.d_model,
-                            configs.n_heads,
-                        ),
-                        configs.d_model,
-                        configs.d_ff,
-                        dropout=configs.dropout,
-                        activation=configs.activation,
-                    ) for l in range(configs.e_layers)
-                ],
-                norm_layer=nn.Sequential(Transpose(1, 2), nn.BatchNorm1d(configs.d_model), Transpose(1, 2)),
-            )
-            self.freq_to_time = nn.Linear(configs.d_model, configs.d_model)
-            self.time_freq_gate = nn.Sequential(
-                nn.Linear(2 * configs.d_model, configs.d_model),
-                nn.Sigmoid(),
-            )
-            nn.init.constant_(self.time_freq_gate[0].bias, -2.0)
-            self.time_freq_norm = nn.LayerNorm(configs.d_model)
         self.time_windows_encoder = Encoder(
             [
                 EncoderLayer(
@@ -372,17 +271,24 @@ class MINDTSModel(nn.Module):
         self.top_k = self.patch_size    # Top-k value for selection
         self.d_ff = configs.d_ff    # Feedforward hidden dimension
         self.num_heads = configs.n_heads    # Number of attention heads
-        self.llm_layers = 6
 
         # Load LLM config
-        self.deepseek_config = AutoConfig.from_pretrained(DEEPSEEK_PATH)
-        self.deepseek_config.num_hidden_layers = self.llm_layers
-        self.deepseek_config.output_attentions = True
-        self.deepseek_config.output_hidden_states = True
-        self.tokenizer = AutoTokenizer.from_pretrained(DEEPSEEK_PATH, trust_remote_code=True)
+        self.llm_config.num_hidden_layers = min(
+            self.llm_layers,
+            int(getattr(self.llm_config, "num_hidden_layers", self.llm_layers)),
+        )
+        self.llm_config.output_attentions = True
+        self.llm_config.output_hidden_states = True
+        self.tokenizer = AutoTokenizer.from_pretrained(self.llm_model_path, trust_remote_code=True)
+        if self.tokenizer.pad_token is None:
+            if self.tokenizer.eos_token is not None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            else:
+                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        self.llm_config.pad_token_id = self.tokenizer.pad_token_id
         model_load_kwargs = {
             "trust_remote_code": True,
-            "config": self.deepseek_config,
+            "config": self.llm_config,
             "attn_implementation": "eager",
         }
         llm_device_map_mode = str(self.llm_device_map).lower()
@@ -408,34 +314,33 @@ class MINDTSModel(nn.Module):
                     }
                 )
                 print(
-                    f"Loading DeepSeek with HuggingFace device_map={self.llm_device_map!r} "
+                    f"Loading {self.llm_model_name} with HuggingFace device_map={self.llm_device_map!r} "
                     f"across {visible_gpu_count} visible GPU(s).",
                     flush=True,
                 )
             else:
                 print(
-                    "accelerate is not installed; loading DeepSeek on a single "
+                    f"accelerate is not installed; loading {self.llm_model_name} on a single "
                     "LLM device. Install accelerate to enable automatic LLM "
                     "layer sharding across multiple GPUs.",
                     flush=True,
                 )
         self.model = AutoModel.from_pretrained(
-            DEEPSEEK_PATH,
+            self.llm_model_path,
             **model_load_kwargs,
         )
+        if len(self.tokenizer) > self.model.get_input_embeddings().num_embeddings:
+            self.model.resize_token_embeddings(len(self.tokenizer))
         self.transformer_block = TransformerBlock(
             self.d_model,
             self.num_heads,
             self.d_ff,
-            use_de_stationary=self.use_de_stationary_cross_view,
             factor=configs.factor,
         )
         self.multimodal_Transformer_Block = MultiTransformerBlock(self.d_model, self.num_heads, self.d_ff)
         if self.align_loss_type == "text_gaussian_nll":
             self.align_mu_head = nn.Linear(configs.d_model, configs.d_model)
             self.align_logvar_head = nn.Linear(configs.d_model, configs.d_model)
-        if self.use_information_condenser:
-            self.prob_net = nn.Sequential(nn.PReLU(), nn.Linear(configs.d_model, 1), nn.Sigmoid())
         for param in self.model.parameters():
             param.requires_grad_(False)
         self.register_buffer("role_prompt_embeddings", torch.empty(0), persistent=False)
@@ -550,28 +455,6 @@ class MINDTSModel(nn.Module):
     def _apply_patch_mask(self, x, mask):
         return x.masked_fill(mask.unsqueeze(-1).bool(), 0.0)
 
-    def _lowpass_frequency_signal(self, x):
-        x_freq = torch.fft.rfft(x, dim=1)
-        keep_modes = min(self.frequency_keep_modes + 1, x_freq.shape[1])
-        filtered = torch.zeros_like(x_freq)
-        filtered[:, :keep_modes, :] = x_freq[:, :keep_modes, :]
-        return torch.fft.irfft(filtered, n=x.shape[1], dim=1)
-
-    def _time_frequency_align_loss(self, time_features, freq_features):
-        time_norm = F.normalize(time_features, p=2, dim=-1)
-        freq_norm = F.normalize(freq_features, p=2, dim=-1)
-        logits_per_time = self.logit_scale.exp() * torch.bmm(
-            time_norm,
-            freq_norm.transpose(1, 2),
-        )
-        logits_per_freq = logits_per_time.transpose(1, 2)
-        return self._contrastive_align_loss(logits_per_time, logits_per_freq)
-
-    def _fuse_time_frequency(self, time_features, freq_features):
-        freq_projected = self.freq_to_time(freq_features)
-        gate = self.time_freq_gate(torch.cat([time_features, freq_features], dim=-1))
-        return self.time_freq_norm(time_features + gate * freq_projected)
-
     def calcute_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.contiguous(), dim=-1)
         k_fft = torch.fft.rfft(x_enc.contiguous(), dim=-1)
@@ -585,16 +468,6 @@ class MINDTSModel(nn.Module):
         x = x - means
         stdev = torch.sqrt(torch.var(x, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
         return x / stdev
-
-    def _de_stationary_factors(self, x):
-        x_patch = x.detach().permute(0, 2, 1).contiguous()
-        x_patch = x_patch.unfold(dimension=-1, size=self.patch_size, step=self.stride)
-        x_patch = rearrange(x_patch, "b c n p -> (b c) n p")
-        mean_patch = x_patch.mean(1, keepdim=True).detach()
-        std_patch = torch.sqrt(torch.var(x_patch, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
-        tau = self.tau_learner(x_patch, std_patch).exp()
-        delta = self.delta_learner(x_patch, mean_patch)
-        return tau, delta
 
     def _contrastive_align_loss(self, logits_per_time, logits_per_text):
         labels = torch.arange(logits_per_time.shape[1], device=logits_per_time.device).long()
@@ -784,8 +657,6 @@ class MINDTSModel(nn.Module):
     def Multimodal_Time_Series(
         self,
         x_enc_time,
-        x_enc_input_ids=None,
-        x_enc_attention_mask=None,
         trend_stl=None,
         season_stl=None,
         residual_stl=None,
@@ -799,73 +670,28 @@ class MINDTSModel(nn.Module):
         stdev = torch.sqrt(torch.var(x_enc_time, dim=1, keepdim=True, unbiased=False) + 1e-5)
         x_enc_time /= stdev
         B, T, N = x_enc_time.size()
+        self._write_shape_log(
+            "llm_model.first_batch",
+            [
+                f"llm_model_name: {self.llm_model_name}",
+                f"llm_model_path: {self.llm_model_path}",
+                f"llm_hidden_size: {self.llm_hidden_size}",
+                f"llm_layers: {self.llm_config.num_hidden_layers}",
+            ],
+        )
 
         # -------------------------------------------------------------Series patching and masking-----------------------------------------------------------------
         x_enc_time_patch_normal, _ = self.patch_embedding(x_enc_time.permute(0, 2, 1))
         x_enc_time_patch_mask, _, patch_mask, _ = self.random_masking(x_enc_time_patch_normal, self.mask_ratio)
-        if self.use_frequency_branch:
-            x_enc_freq = self._lowpass_frequency_signal(x_enc_time)
-            x_enc_freq_patch_normal, _ = self.patch_embedding(x_enc_freq.permute(0, 2, 1))
-            x_enc_freq_patch_mask = self._apply_patch_mask(x_enc_freq_patch_normal, patch_mask)
-        if self.use_de_stationary or self.use_de_stationary_cross_view:
-            tau, delta = self._de_stationary_factors(x_enc_time_raw)
-        else:
-            tau, delta = None, None
-        time_tau = tau if self.use_de_stationary else None
-        time_delta = delta if self.use_de_stationary else None
-        cross_tau = tau if self.use_de_stationary_cross_view else None
-        cross_delta = delta if self.use_de_stationary_cross_view else None
 
         # -------------------------------------------------------------Time Encoder--------------------------------------------------------------------------------
         time_features_patch_normal, attns = self.time_patch_encoder(
             x_enc_time_patch_normal,
-            tau=time_tau,
-            delta=time_delta,
         )    #[B*C, N, D]
         time_features_patch_mask, attns = self.time_patch_encoder(
             x_enc_time_patch_mask,
-            tau=time_tau,
-            delta=time_delta,
         )    #[B*C, N, D]
-        if self.use_frequency_branch:
-            freq_features_patch_normal, _ = self.freq_patch_encoder(
-                x_enc_freq_patch_normal,
-                tau=time_tau,
-                delta=time_delta,
-            )
-            freq_features_patch_mask, _ = self.freq_patch_encoder(
-                x_enc_freq_patch_mask,
-                tau=time_tau,
-                delta=time_delta,
-            )
-            reconstruction_patch_features = self._fuse_time_frequency(
-                time_features_patch_mask,
-                freq_features_patch_mask,
-            )
-            self._write_shape_log(
-                "frequency_branch.first_batch",
-                [
-                    (
-                        f"x_enc_freq shape: {self._shape_of(x_enc_freq)}; "
-                        "meaning: low-pass reconstructed normalized time-series, [batch, seq_len, channels]"
-                    ),
-                    (
-                        f"freq_features_patch_normal shape: {self._shape_of(freq_features_patch_normal)}; "
-                        "meaning: frequency-view encoded unmasked patches, [batch*channels, patches, d_model]"
-                    ),
-                    (
-                        f"freq_features_patch_mask shape: {self._shape_of(freq_features_patch_mask)}; "
-                        "meaning: frequency-view encoded patches with the same mask positions as the time branch"
-                    ),
-                    (
-                        f"reconstruction_patch_features shape: {self._shape_of(reconstruction_patch_features)}; "
-                        "meaning: gated residual fusion of time and frequency features for reconstruction"
-                    ),
-                ],
-            )
-        else:
-            freq_features_patch_normal = None
-            reconstruction_patch_features = time_features_patch_mask
+        reconstruction_patch_features = time_features_patch_mask
 
         # -------------------------------------------------------------Intrinsic prompt reasoning-------------------------------------------------------------------
         prompt_feature = self._encode_intrinsic_prompts(x_enc_time, main_device)
@@ -890,25 +716,15 @@ class MINDTSModel(nn.Module):
         )
 
         # -------------------------------------------------------------prompt and component Cross-view Attention---------------------------------------------------
-        if self.exchange_text_features:
-            cross_query_features = semantic_features
-            cross_key_value_features = prompt_feature
-            cross_direction = (
-                "semantic_features query prompt_feature as key/value; "
-                "exchange_text_features=true"
-            )
-        else:
-            cross_query_features = prompt_feature
-            cross_key_value_features = semantic_features
-            cross_direction = (
-                "prompt_feature query semantic_features as key/value; "
-                "exchange_text_features=false"
-            )
+        cross_query_features = prompt_feature
+        cross_key_value_features = semantic_features
+        cross_direction = (
+            "prompt_feature query semantic_features as key/value; "
+            "fixed best direction"
+        )
         llm_features = self.transformer_block(
             cross_query_features,
             cross_key_value_features,
-            tau=cross_tau,
-            delta=cross_delta,
         )
         self._write_shape_log(
             "cross_view_attention.first_batch",
@@ -944,39 +760,13 @@ class MINDTSModel(nn.Module):
             logits_per_time,
             logits_per_text,
         )
-        if self.use_frequency_branch and self.time_freq_align_weight != 0:
-            align_loss = align_loss + self.time_freq_align_weight * self._time_frequency_align_loss(
-                time_features_patch_normal,
-                freq_features_patch_normal,
-            )
-
-        # -------------------------------------------------------------Information Condenser----------------------------------------------------------------------
-        if self.use_information_condenser:
-            total_mask = self.prob_net(llm_features)
-            if total_mask.shape[-1] == 1:
-                inv_probs = 1 - total_mask
-                total_mask_prob = torch.cat([inv_probs, total_mask], dim=-1)
-            else:
-                total_mask_prob = total_mask.softmax(dim=-1)
-            total_mask_reparameterize = torch.nn.functional.gumbel_softmax(torch.log(total_mask_prob + 1e-6), tau = 1, hard = True)[...,1]
-            total_mask_reparameterize = total_mask_reparameterize.unsqueeze(-1)
-            llm_features = total_mask_reparameterize * llm_features
-        else:
-            total_mask = torch.ones_like(llm_features[..., :1])
 
         # -------------------------------------------------------------Reconstruction-----------------------------------------------------------------------------
-        if self.reconstruction_exchange_text_features:
-            multi_features = self.multimodal_Transformer_Block(reconstruction_patch_features, llm_features)
-            reconstruction_direction = (
-                "reconstruction_patch_features as first/self-attended side; llm_features as second/query side; "
-                "reconstruction_exchange_text_features=true"
-            )
-        else:
-            multi_features = self.multimodal_Transformer_Block(llm_features, reconstruction_patch_features)
-            reconstruction_direction = (
-                "llm_features as first/self-attended side; reconstruction_patch_features as second/query side; "
-                "reconstruction_exchange_text_features=false"
-            )
+        multi_features = self.multimodal_Transformer_Block(reconstruction_patch_features, llm_features)
+        reconstruction_direction = (
+            "reconstruction_patch_features as first/self-attended side; llm_features as second/query side; "
+            "fixed best reconstruction direction"
+        )
         self._write_shape_log(
             "reconstruction_attention.first_batch",
             [
@@ -1008,22 +798,18 @@ class MINDTSModel(nn.Module):
         output_mu = output_mu + means_repeated
         output_logvar = output_logvar + 2 * torch.log(stdev_repeated + 1e-6)
         output_logvar = torch.clamp(output_logvar, self.recon_logvar_min, self.recon_logvar_max)
-        return output_mu, output_logvar, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss
+        return output_mu, output_logvar, logits_per_time, logits_per_text, loss_stl, align_loss
 
 
     def forward(
         self,
         x_enc_time,
-        x_enc_input_ids=None,
-        x_enc_attention_mask=None,
         trend_stl=None,
         season_stl=None,
         residual_stl=None,
     ):
         return self.Multimodal_Time_Series(
             x_enc_time,
-            x_enc_input_ids,
-            x_enc_attention_mask,
             trend_stl,
             season_stl,
             residual_stl,

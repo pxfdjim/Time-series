@@ -606,15 +606,18 @@ class UnFixedDetectLabel(AnomalyDetect):
 
     def split_multi_data(self, series_name, text_name):
         data = DataPool().get_pool().get_series(series_name)
-        text = DataPool().get_pool().get_text(text_name)
         data = data.reset_index(drop=True)
-        text = text.reset_index(drop=True)
 
         train_length = int(
             DataPool().get_pool().get_series_meta_info(series_name)["train_lens"].item()
         )
         train_time, test_time = split_before(data, train_length)
-        train_text, test_text = split_before(text, train_length)
+        if text_name is None:
+            train_text, test_text = None, None
+        else:
+            text = DataPool().get_pool().get_text(text_name)
+            text = text.reset_index(drop=True)
+            train_text, test_text = split_before(text, train_length)
 
         train_data, train_label = (
             train_time.loc[:, train_time.columns != "label"],

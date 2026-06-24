@@ -322,12 +322,11 @@ def stl_decompose(data, period):
 
 
 class MultiSegLoader(object):
-    def __init__(self, data, text, win_size, step, mode="train", stl_components=None):
+    def __init__(self, data, win_size, step, mode="train", stl_components=None):
         self.mode = mode
         self.step = step
         self.win_size = win_size
         self.data = data
-        self.text = text
         self.test_labels = data
         self.stl_components = stl_components
 
@@ -363,11 +362,7 @@ class MultiSegLoader(object):
                 for component in self.stl_components
             )
 
-        # Text arguments stay in the public interface for compatibility, but
-        # exogenous text is no longer used by the model.
-        input_ids = torch.zeros(1, dtype=torch.long)
-        attention_mask = torch.ones(1, dtype=torch.long)
-        return window, input_ids, attention_mask, label, trend, seasonal, residual
+        return window, label, trend, seasonal, residual
         
 
 
@@ -447,9 +442,9 @@ def anomaly_detection_data_provider(data, batch_size, win_size=100, step=100, mo
     return data_loader
 
 
-def anomaly_detection_multi_data_provider(data, text, batch_size, win_size=100, step=100, mode='train', stl_period=None):
+def anomaly_detection_multi_data_provider(data, text=None, batch_size=32, win_size=100, step=100, mode='train', stl_period=None):
     stl_components = stl_decompose(data, stl_period)
-    dataset = MultiSegLoader(data, text, win_size, 1, mode, stl_components)
+    dataset = MultiSegLoader(data, win_size, 1, mode, stl_components)
 
     shuffle = False
     if mode == 'train' or mode == 'val':

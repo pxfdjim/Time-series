@@ -106,6 +106,10 @@ def _get_model_names(model_names: List[str]):
     ]
 
 
+def _uses_mindts_multi_path(model_factory) -> bool:
+    return model_factory.model_name in {"MindTS", "MindTS.MindTS"}
+
+
 def pipeline(
     data_config: dict,
     model_config: dict,
@@ -187,9 +191,11 @@ def pipeline(
 
     else:
         result_list = [
-            eval_model(model_factory, data_name_list, evaluation_config)
+            eval_multi_model(model_factory, data_name_list, [None] * len(data_name_list), evaluation_config)
+            if _uses_mindts_multi_path(model_factory)
+            else eval_model(model_factory, data_name_list, evaluation_config)
             for model_factory in model_factory_list
-        ]        
+        ]
     model_save_names = [
         it.split(".")[-1]
         for it in _get_model_names(

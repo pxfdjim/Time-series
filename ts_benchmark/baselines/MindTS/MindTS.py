@@ -53,20 +53,14 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "distil": True,
     "patience": 3,
     "task_name": "anomaly_detection",
-    "p_hidden_dims": [128, 128],
-    "p_hidden_layers": 2,
-    "mem_dim": 32,
     "anomaly_ratio": [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 35, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51],
     "conv_kernel": [12, 16],
     "use_norm": True,
     "parallel_strategy": "DP",
     "num_epochs": 3,
     "mask_ratio": 0.5,
-    "r": 0.5,
-    "lamda": 1.0,
     "enc_in_time": 1,
     "lamda1": 1.0,
-    "lamda2": 1.0,
     "stl_period": None,
     "stl_weight": 0.001,
     "dataset_description": "A generic time-series dataset.",
@@ -74,8 +68,9 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "llm_device": None,
     "llm_device_map": "balanced_low_0",
     "llm_prompt_batch_size": 32,
-    "use_de_stationary_cross_view": False,
-    "use_information_condenser": True,
+    "llm_model_path": "DeepSeek",
+    "llm_model_name": "DeepSeek-R1-Distill-Qwen-1.5B",
+    "llm_layers": 6,
     "align_loss_type": "contrastive",
     "align_detach_target": True,
     "align_logvar_min": -6.0,
@@ -83,9 +78,6 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "recon_loss_type": "mse",
     "recon_logvar_min": -6.0,
     "recon_logvar_max": 2.0,
-    "use_frequency_branch": False,
-    "frequency_keep_modes": 4,
-    "time_freq_align_weight": 0.2,
 }
 
 def clip_loss(logits_per_time, logits_per_text):
@@ -124,21 +116,6 @@ def reconstruction_anomaly_score(target, mu, logvar, config):
         return torch.mean(score, dim=-1)
     raise ValueError(f"Unknown recon_loss_type: {config.recon_loss_type}")
 
-def Bottleneck_loss(total_mask, r, lamda):
-    compress_loss, connect_loss = 0., 0.
-    for i in range(total_mask.shape[0]):
-        temp = total_mask[i]
-        compress_loss += (temp * torch.log(temp/(r + 1e-6) + 1e-6) + (1-temp) * torch.log((1-temp)/(1-r+1e-6) + 1e-6)).mean()
-        shift1 = temp[1:,:]
-        shift2 = temp[:-1,:]
-        connect_loss += torch.sum((shift1 - shift2).norm(p=2)) / shift1.flatten().shape[0]
-    connect_loss /= total_mask.shape[0]
-    compress_loss /= total_mask.shape[0]
-
-    mask_loss = compress_loss + lamda * connect_loss
-    return mask_loss
-
-
 class MINDTSConfig:
     def __init__(self, **kwargs):
         for key, value in DEFAULT_MINDTS_BASED_HYPER_PARAMS.items():
@@ -173,7 +150,6 @@ class MindTS:
         self.criterion = nn.MSELoss()
         self.seq_len = self.config.win_size
         self.lamda1 = self.config.lamda1
-        self.lamda2 = self.config.lamda2
         self.stl_weight = self.config.stl_weight
         self.training_logs = []
         self.check_point = None
@@ -297,11 +273,6 @@ class MindTS:
     def get_training_log(self):
         return json.dumps(self.training_logs, sort_keys=True)
 
-    def _bottleneck_loss(self, total_mask):
-        if not getattr(self.config, "use_information_condenser", True):
-            return torch.zeros((), device=total_mask.device, dtype=total_mask.dtype)
-        return Bottleneck_loss(total_mask, self.config.r, self.config.lamda)
-
     @staticmethod
     def required_hyper_params() -> dict:
         """
@@ -367,15 +338,13 @@ class MindTS:
                 leave=True,
                 dynamic_ncols=True,
             )
-            for batch_x_time, batch_input_ids, batch_attention_mask, _, trend_stl, season_stl, residual_stl in valid_progress:
+            for batch_x_time, _, trend_stl, season_stl, residual_stl in valid_progress:
                 batch_x_time = batch_x_time.float().to(self._get_main_device())
                 trend_stl = trend_stl.float().to(self._get_main_device())
                 season_stl = season_stl.float().to(self._get_main_device())
                 residual_stl = residual_stl.float().to(self._get_main_device())
-                outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
+                outputs_mu, outputs_logvar, logits_per_time, logits_per_text, loss_stl, align_loss = self.model(
                     batch_x_time,
-                    batch_input_ids,
-                    batch_attention_mask,
                     trend_stl,
                     season_stl,
                     residual_stl,
@@ -396,10 +365,7 @@ class MindTS:
                 # Comparison Loss
                 loss2 = align_loss.detach().cpu().numpy()
 
-                # Bottleneck loss
-                loss3 = self._bottleneck_loss(total_mask).detach().cpu().numpy()
-
-                loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3 + self.stl_weight*loss_stl.detach().cpu().numpy()
+                loss = loss1 + self.lamda1*loss2 + self.stl_weight*loss_stl.detach().cpu().numpy()
                 total_loss.append(loss)
                 valid_progress.set_postfix(loss=f"{float(loss):.6f}")
 
@@ -506,11 +472,13 @@ class MindTS:
         config = self.config
         if config.stl_period is None:
             raise ValueError("stl_period must be set for TEMPO-style STL supervision")
-        print("Initializing MindTS model and DeepSeek encoder...", flush=True)
+        print(
+            f"Initializing MindTS model and {self.config.llm_model_name} encoder...",
+            flush=True,
+        )
         self.model = MINDTSModel(self.config)
         print("MindTS model initialized.", flush=True)
         train_data_value, valid_data = train_val_split(train_data, 0.8, None)
-        train_data_text, valid_text = train_val_split(train_text, 0.8, None)
         self.scaler.fit(train_data_value.values)
 
         device_ids = np.arange(torch.cuda.device_count()).tolist()
@@ -529,22 +497,9 @@ class MindTS:
             index=valid_data.index,
         )
 
-        train_data_text = pd.DataFrame(
-            train_data_text,
-            columns=train_data_text.columns,
-            index=train_data_text.index,
-        )
-
-        valid_text = pd.DataFrame(
-            valid_text,
-            columns=valid_text.columns,
-            index=valid_text.index,
-        )
-
         print("Preparing validation STL windows...", flush=True)
         self.valid_data_loader = anomaly_detection_multi_data_provider(
             valid_data,
-            valid_text,
             batch_size=config.batch_size,
             win_size=config.seq_len,
             step=1,
@@ -556,7 +511,6 @@ class MindTS:
         print("Preparing training STL windows...", flush=True)
         self.train_data_loader = anomaly_detection_multi_data_provider(
             train_data_value,
-            train_data_text,
             batch_size=config.batch_size,
             win_size=config.seq_len,
             step=1,
@@ -592,16 +546,14 @@ class MindTS:
                 leave=True,
                 dynamic_ncols=True,
             )
-            for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, trend_stl, season_stl, residual_stl in train_progress:
+            for batch_x_time, batch_y, trend_stl, season_stl, residual_stl in train_progress:
                 optimizer.zero_grad()
                 batch_x_time = batch_x_time.float().to(self._get_main_device())
                 trend_stl = trend_stl.float().to(self._get_main_device())
                 season_stl = season_stl.float().to(self._get_main_device())
                 residual_stl = residual_stl.float().to(self._get_main_device())
-                outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, loss_stl, align_loss = self.model(
+                outputs_mu, outputs_logvar, logits_per_time, logits_per_text, loss_stl, align_loss = self.model(
                     batch_x_time,
-                    batch_input_ids,
-                    batch_attention_mask,
                     trend_stl,
                     season_stl,
                     residual_stl,
@@ -651,11 +603,6 @@ class MindTS:
                             logits_per_text,
                             "[batch*channels, patches, patches]; semantic-to-time similarity logits",
                         ),
-                        (
-                            "total_mask",
-                            total_mask,
-                            "[batch*channels, patches, 1]; information condenser keep probability",
-                        ),
                     ],
                 )
                 f_dim = -1 if self.config.enc_in == 1 else 0
@@ -674,10 +621,7 @@ class MindTS:
                 # Comparison Loss
                 loss2 = align_loss
 
-                # Bottleneck loss
-                loss3 = self._bottleneck_loss(total_mask)
-
-                loss = loss1 + self.lamda1*loss2 + self.lamda2*loss3 + self.stl_weight*loss_stl
+                loss = loss1 + self.lamda1*loss2 + self.stl_weight*loss_stl
                 loss_value = loss.detach().cpu().item()
                 train_loss_values.append(loss_value)
                 train_progress.set_postfix(loss=f"{loss_value:.6f}", lr=f"{epoch_lr:.2e}")
@@ -746,9 +690,6 @@ class MindTS:
         test_data = pd.DataFrame(
             self.scaler.transform(test_data.values), columns=test_data.columns, index=test_data.index
         )
-        test_text = pd.DataFrame(
-            test_text.values, columns=test_text.columns, index=test_text.index
-        )
         self._load_best_checkpoint()
 
         if self.model is None:
@@ -758,7 +699,6 @@ class MindTS:
 
         self.thre_loader = anomaly_detection_multi_data_provider(
             test_data,
-            test_text,
             batch_size=config.batch_size,
             win_size=config.seq_len,
             step=1,
@@ -771,7 +711,7 @@ class MindTS:
 
         attens_energy = []
         test_labels = []
-        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+        for batch_x_time, batch_y, _, _, _ in tqdm(
             self.thre_loader,
             desc="Score windows",
             unit="batch",
@@ -780,7 +720,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, _, _ = self.model(batch_x_time)
             # criterion
             score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             score = score.detach().cpu().numpy()
@@ -993,9 +933,6 @@ class MindTS:
             self.scaler.transform(test_data.values), columns=test_data.columns, index=test_data.index
         )
 
-        test_text = pd.DataFrame(
-            test_text.values, columns=test_text.columns, index=test_text.index
-        )
         self._load_best_checkpoint()
 
         if self.model is None:
@@ -1005,7 +942,6 @@ class MindTS:
 
         self.test_data_loader = anomaly_detection_multi_data_provider(
             test_data,
-            test_text,
             batch_size=config.batch_size,
             win_size=config.seq_len,
             step=1,
@@ -1014,7 +950,6 @@ class MindTS:
 
         self.thre_loader = anomaly_detection_multi_data_provider(
             test_data,
-            test_text,
             batch_size=config.batch_size,
             win_size=config.seq_len,
             step=1,
@@ -1027,7 +962,7 @@ class MindTS:
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
 
-        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+        for batch_x_time, batch_y, _, _, _ in tqdm(
             self.train_data_loader,
             desc="Train threshold energy",
             unit="batch",
@@ -1036,7 +971,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, _, _ = self.model(batch_x_time)
             # criterion
             score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             self._log_model_batch_shapes(
@@ -1074,11 +1009,6 @@ class MindTS:
                         logits_per_text,
                         "[batch*channels, patches, patches]; semantic-to-time similarity logits",
                     ),
-                    (
-                        "total_mask",
-                        total_mask,
-                        "[batch*channels, patches, 1]; information condenser keep probability",
-                    ),
                 ],
                 [
                     (
@@ -1097,7 +1027,7 @@ class MindTS:
         # (2) find the threshold
         attens_energy = []
         test_labels = []
-        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+        for batch_x_time, batch_y, _, _, _ in tqdm(
             self.test_data_loader,
             desc="Test energy",
             unit="batch",
@@ -1106,7 +1036,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, _, _ = self.model(batch_x_time)
             # criterion
             score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             self._log_model_batch_shapes(
@@ -1144,11 +1074,6 @@ class MindTS:
                         logits_per_text,
                         "[batch*channels, patches, patches]; semantic-to-time similarity logits",
                     ),
-                    (
-                        "total_mask",
-                        total_mask,
-                        "[batch*channels, patches, 1]; information condenser keep probability",
-                    ),
                 ],
                 [
                     (
@@ -1168,7 +1093,7 @@ class MindTS:
 
         attens_energy = []
         test_labels = []
-        for batch_x_time, batch_input_ids, batch_attention_mask, batch_y, _, _, _ in tqdm(
+        for batch_x_time, batch_y, _, _, _ in tqdm(
             self.thre_loader,
             desc="Threshold energy",
             unit="batch",
@@ -1177,7 +1102,7 @@ class MindTS:
         ):
             batch_x_time = batch_x_time.float().to(self._get_main_device())
             # reconstruction
-            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, total_mask, _, _ = self.model(batch_x_time, batch_input_ids, batch_attention_mask)
+            outputs_mu, outputs_logvar, logits_per_time, logits_per_text, _, _ = self.model(batch_x_time)
             # criterion
             score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
             self._log_model_batch_shapes(
@@ -1214,11 +1139,6 @@ class MindTS:
                         "logits_per_text",
                         logits_per_text,
                         "[batch*channels, patches, patches]; semantic-to-time similarity logits",
-                    ),
-                    (
-                        "total_mask",
-                        total_mask,
-                        "[batch*channels, patches, 1]; information condenser keep probability",
                     ),
                 ],
                 [
