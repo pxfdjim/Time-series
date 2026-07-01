@@ -129,16 +129,36 @@ class MultiTransformerBlock(nn.Module):
         )
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, llm_features, time_features_patch_mask):
-        self_attn_output, _ = self.self_attn(llm_features, llm_features, llm_features)
-        self_attn_output = self.dropout(self_attn_output)
-        cross_attn_output, _ = self.cross_attn(query=time_features_patch_mask, key=self_attn_output, value=self_attn_output)
+    # def forward(self, llm_features, time_features_patch_mask):
+    #     self_attn_output, _ = self.self_attn(llm_features, llm_features, llm_features)
+    #     self_attn_output = self.dropout(self_attn_output)
+    #     cross_attn_output, _ = self.cross_attn(query=time_features_patch_mask, key=self_attn_output, value=self_attn_output)
+    #     cross_attn_output = self.dropout(cross_attn_output)
+    #     x = self.norm1(time_features_patch_mask + cross_attn_output)
+    #     ff_output = self.ffn(x)
+    #     ff_output = self.dropout(ff_output)
+    #     output = self.norm2(x + ff_output)
+
+    #     return output
+    def forward(self, reconstruction_patch_features, llm_features):
+        # Step 1: Temporal features (reconstruction_patch_features) undergo self-attention
+        temporal_memory, _ = self.self_attn(reconstruction_patch_features, reconstruction_patch_features, reconstruction_patch_features)
+        temporal_memory = self.dropout(temporal_memory)
+        
+        # Step 2: Semantic features (llm_features) query the temporal memory
+        cross_attn_output, _ = self.cross_attn(
+            query=llm_features, 
+            key=temporal_memory, 
+            value=temporal_memory
+        )
         cross_attn_output = self.dropout(cross_attn_output)
-        x = self.norm1(time_features_patch_mask + cross_attn_output)
+        
+        # Step 3: Residual connection on semantic side
+        x = self.norm1(llm_features + cross_attn_output)
         ff_output = self.ffn(x)
         ff_output = self.dropout(ff_output)
         output = self.norm2(x + ff_output)
-
+        
         return output
 
 

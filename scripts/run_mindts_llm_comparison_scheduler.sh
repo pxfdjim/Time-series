@@ -44,6 +44,7 @@ DRY_RUN="${MINDTS_LLM_SCHEDULER_DRY_RUN:-false}"
 SKIP_DONE="${MINDTS_LLM_SCHEDULER_SKIP_DONE:-true}"
 STOP_ON_FAILURE="${MINDTS_LLM_SCHEDULER_STOP_ON_FAILURE:-false}"
 SAVE_SUFFIX="${MINDTS_LLM_SAVE_SUFFIX:-}"
+NUM_EPOCHS="${MINDTS_LLM_NUM_EPOCHS:-5}"
 
 normalize_bool() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
@@ -80,6 +81,13 @@ esac
 case "$POLL_SECONDS" in
   ''|*[!0-9]*|0)
     echo "Invalid MINDTS_LLM_SCHEDULER_POLL_SECONDS=${POLL_SECONDS}. Use a positive integer." >&2
+    exit 1
+    ;;
+esac
+
+case "$NUM_EPOCHS" in
+  ''|*[!0-9]*|0)
+    echo "Invalid MINDTS_LLM_NUM_EPOCHS=${NUM_EPOCHS}. Use a positive integer." >&2
     exit 1
     ;;
 esac
@@ -125,6 +133,7 @@ candidate_model_rows=(
   "qwen3_1p7b|models/Qwen3-1.7B|Qwen3-1.7B"
   "smollm2_1p7b|models/SmolLM2-1.7B-Instruct|SmolLM2-1.7B-Instruct"
   "tinyllama_1p1b|models/TinyLlama-1.1B-Chat-v1.0|TinyLlama-1.1B-Chat-v1.0"
+  "mobilellama_1p4b|models/MobileLLaMA-1.4B-Base|MobileLLaMA-1.4B-Base"
   "phi_1p5|models/phi-1_5|phi-1_5"
   "olmo1b_0724|models/OLMo-1B-0724-hf|OLMo-1B-0724-hf"
 )
@@ -222,13 +231,14 @@ task_id_for() {
 build_overrides() {
   local model_path="$1"
   local model_name="$2"
-  printf '{"align_loss_type": "%s", "recon_loss_type": "%s", "recon_logvar_min": %s, "recon_logvar_max": %s, "llm_model_path": "%s", "llm_model_name": "%s"}' \
+  printf '{"align_loss_type": "%s", "recon_loss_type": "%s", "recon_logvar_min": %s, "recon_logvar_max": %s, "llm_model_path": "%s", "llm_model_name": "%s", "num_epochs": %s}' \
     "$ALIGN_LOSS_TYPE" \
     "$RECON_LOSS_TYPE" \
     "$RECON_LOGVAR_MIN" \
     "$RECON_LOGVAR_MAX" \
     "$model_path" \
-    "$model_name"
+    "$model_name" \
+    "$NUM_EPOCHS"
 }
 
 write_config_snapshot() {
@@ -396,7 +406,7 @@ log_scheduler "Log dir: ${LOG_DIR}"
 log_scheduler "Conda env: ${MINDTS_CONDA_ENV:-<none>}; python: $(command -v python)"
 log_scheduler "GPUs: ${GPUS[*]}"
 log_scheduler "Tasks: ${total}; datasets: ${DATASETS[*]}"
-log_scheduler "Fixed best config: align=${ALIGN_LOSS_TYPE}, recon=${RECON_LOSS_TYPE}, cross_view=${CROSS_VIEW_DIRECTION}, reconstruction=${RECONSTRUCTION_DIRECTION}"
+log_scheduler "Fixed best config: align=${ALIGN_LOSS_TYPE}, recon=${RECON_LOSS_TYPE}, cross_view=${CROSS_VIEW_DIRECTION}, reconstruction=${RECONSTRUCTION_DIRECTION}, num_epochs=${NUM_EPOCHS}"
 log_scheduler "GPU ready thresholds: memory<=${GPU_MEMORY_READY_PCT}%, util<=${GPU_UTIL_READY_PCT}%; max_tasks_per_gpu=${MAX_TASKS_PER_GPU}; one_launch_per_gpu_per_poll=${ONE_LAUNCH_PER_GPU_PER_POLL}"
 
 if [[ "$DRY_RUN" == "true" ]]; then
