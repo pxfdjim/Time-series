@@ -62,7 +62,7 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "enc_in_time": 1,
     "lamda1": 1.0,
     "stl_period": None,
-    "stl_weight": 0.001,
+    "stl_weight": 0.0,
     "dataset_description": "A generic time-series dataset.",
     "main_device": None,
     "llm_device": None,
@@ -78,6 +78,9 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "recon_loss_type": "mse",
     "recon_logvar_min": -6.0,
     "recon_logvar_max": 2.0,
+    "model_impl": "default",
+    "ablation_variant": "full",
+    "export_intermediate": False,
 }
 
 def clip_loss(logits_per_time, logits_per_text):
@@ -157,6 +160,7 @@ class MindTS:
         self.best_checkpoint_epoch = None
         self.shape_log_path = None
         self._shape_log_events = set()
+        self.last_detection_artifacts = {}
 
     def configure_shape_logging(self, series_name, log_dir="result/shape_logs"):
         safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(series_name)).strip("_")
@@ -203,6 +207,22 @@ class MindTS:
 
     def _base_model(self):
         return self.model.module if isinstance(self.model, nn.DataParallel) else self.model
+
+    def _build_model(self):
+        model_impl = str(getattr(self.config, "model_impl", "default")).lower()
+        if model_impl == "ablation":
+            from ts_benchmark.baselines.MindTS.models.MindTS_model_ablation import MINDTSAblationModel
+
+            return MINDTSAblationModel(self.config)
+        if model_impl not in {"default", "mindts"}:
+            raise ValueError(f"Unknown MindTS model_impl={model_impl!r}")
+        return MINDTSModel(self.config)
+
+    def _config_bool(self, name, default=False):
+        value = getattr(self.config, name, default)
+        if isinstance(value, bool):
+            return value
+        return str(value).lower() in {"1", "true", "yes", "y", "on"}
 
     def _get_main_device(self):
         model = self._base_model()
@@ -258,6 +278,7 @@ class MindTS:
         self.check_point = None
         self.best_valid_loss = None
         self.best_checkpoint_epoch = None
+        self.last_detection_artifacts = {}
 
     def _record_training_log(self, epoch, train_loss, valid_loss, learning_rate, epoch_time):
         self.training_logs.append(
@@ -365,7 +386,7 @@ class MindTS:
                 # Comparison Loss
                 loss2 = align_loss.detach().cpu().numpy()
 
-                loss = loss1 + self.lamda1*loss2 + self.stl_weight*loss_stl.detach().cpu().numpy()
+                loss = loss1 + self.lamda1 * loss2
                 total_loss.append(loss)
                 valid_progress.set_postfix(loss=f"{float(loss):.6f}")
 
@@ -376,7 +397,7 @@ class MindTS:
     def detect_fit(self, train_data: pd.DataFrame, train_label: pd.DataFrame):
         self.detect_hyper_param_tune(train_data)
         setattr(self.config, "task_name", "anomaly_detection")
-        self.model = MINDTSModel(self.config)
+        self.model = self._build_model()
 
         device_ids = np.arange(torch.cuda.device_count()).tolist()
         if len(device_ids) > 1 and self.config.parallel_strategy == "DP" and not self.model.manual_device_split:
@@ -476,7 +497,7 @@ class MindTS:
             f"Initializing MindTS model and {self.config.llm_model_name} encoder...",
             flush=True,
         )
-        self.model = MINDTSModel(self.config)
+        self.model = self._build_model()
         print("MindTS model initialized.", flush=True)
         train_data_value, valid_data = train_val_split(train_data, 0.8, None)
         self.scaler.fit(train_data_value.values)
@@ -621,7 +642,7 @@ class MindTS:
                 # Comparison Loss
                 loss2 = align_loss
 
-                loss = loss1 + self.lamda1*loss2 + self.stl_weight*loss_stl
+                loss = loss1 + self.lamda1 * loss2
                 loss_value = loss.detach().cpu().item()
                 train_loss_values.append(loss_value)
                 train_progress.set_postfix(loss=f"{loss_value:.6f}", lr=f"{epoch_lr:.2e}")
@@ -682,6 +703,12 @@ class MindTS:
 
         attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
         test_energy = np.array(attens_energy)
+        self.last_detection_artifacts = {
+            "mode": "score",
+            "test_energy": test_energy,
+            "final_score": test_energy,
+            "thresholds": {},
+        }
 
         return test_energy, test_energy
 
@@ -729,6 +756,12 @@ class MindTS:
 
         attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
         test_energy = np.array(attens_energy)
+        self.last_detection_artifacts = {
+            "mode": "multi_score",
+            "test_energy": test_energy,
+            "final_score": test_energy,
+            "thresholds": {},
+        }
 
         return test_energy, test_energy
 
@@ -863,8 +896,8 @@ class MindTS:
             test_labels.append(batch_y)
 
         attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
-        test_energy = np.array(attens_energy)
-        combined_energy = np.concatenate([train_energy, test_energy], axis=0)
+        calibration_test_energy = np.array(attens_energy)
+        combined_energy = np.concatenate([train_energy, calibration_test_energy], axis=0)
 
         attens_energy = []
         test_labels = []
@@ -921,9 +954,19 @@ class MindTS:
             self.config.anomaly_ratio = [self.config.anomaly_ratio]
 
         preds = {}
+        thresholds = {}
         for ratio in self.config.anomaly_ratio:
             threshold = np.percentile(combined_energy, 100 - ratio)
+            thresholds[ratio] = float(threshold)
             preds[ratio] = (test_energy > threshold).astype(int)
+        self.last_detection_artifacts = {
+            "mode": "label",
+            "train_energy": train_energy,
+            "calibration_test_energy": calibration_test_energy,
+            "combined_energy": combined_energy,
+            "final_score": test_energy,
+            "thresholds": thresholds,
+        }
 
         return preds, test_energy
 
@@ -961,6 +1004,15 @@ class MindTS:
         self._prepare_model_for_device()
         self.model.eval()
         self.anomaly_criterion = nn.MSELoss(reduce=False)
+        collect_intermediate = self._config_bool("export_intermediate", False)
+        intermediate_buffers = {
+            "threshold_inputs": [],
+            "threshold_outputs_mu": [],
+            "threshold_outputs_logvar": [],
+            "threshold_logits_per_time": [],
+            "threshold_logits_per_text": [],
+            "threshold_window_labels": [],
+        } if collect_intermediate else None
 
         for batch_x_time, batch_y, _, _, _ in tqdm(
             self.train_data_loader,
@@ -1088,8 +1140,8 @@ class MindTS:
             test_labels.append(batch_y)
 
         attens_energy = np.concatenate(attens_energy, axis=0).reshape(-1)
-        test_energy = np.array(attens_energy)
-        combined_energy = np.concatenate([train_energy, test_energy], axis=0)
+        calibration_test_energy = np.array(attens_energy)
+        combined_energy = np.concatenate([train_energy, calibration_test_energy], axis=0)
 
         attens_energy = []
         test_labels = []
@@ -1105,6 +1157,13 @@ class MindTS:
             outputs_mu, outputs_logvar, logits_per_time, logits_per_text, _, _ = self.model(batch_x_time)
             # criterion
             score = reconstruction_anomaly_score(batch_x_time, outputs_mu, outputs_logvar, self.config)
+            if collect_intermediate:
+                intermediate_buffers["threshold_inputs"].append(batch_x_time.detach().cpu().numpy().astype(np.float32))
+                intermediate_buffers["threshold_outputs_mu"].append(outputs_mu.detach().cpu().numpy().astype(np.float32))
+                intermediate_buffers["threshold_outputs_logvar"].append(outputs_logvar.detach().cpu().numpy().astype(np.float32))
+                intermediate_buffers["threshold_logits_per_time"].append(logits_per_time.detach().cpu().numpy().astype(np.float32))
+                intermediate_buffers["threshold_logits_per_text"].append(logits_per_text.detach().cpu().numpy().astype(np.float32))
+                intermediate_buffers["threshold_window_labels"].append(batch_y.detach().cpu().numpy().astype(np.float32))
             self._log_model_batch_shapes(
                 "detect_multi_label.threshold_first_batch",
                 [
@@ -1160,9 +1219,28 @@ class MindTS:
             self.config.anomaly_ratio = [self.config.anomaly_ratio]
 
         preds = {}
+        thresholds = {}
         for ratio in self.config.anomaly_ratio:
             threshold = np.percentile(combined_energy, 100 - ratio)
+            thresholds[ratio] = float(threshold)
             preds[ratio] = (test_energy > threshold).astype(int)
+        intermediate_payload = {}
+        if collect_intermediate:
+            for key, value in intermediate_buffers.items():
+                if value:
+                    intermediate_payload[key] = np.concatenate(value, axis=0)
+                else:
+                    intermediate_payload[key] = np.empty((0,), dtype=np.float32)
+            intermediate_payload["patch_num"] = np.asarray([self.config.seq_len, self.config.patch_size, self.config.stride], dtype=np.int32)
+        self.last_detection_artifacts = {
+            "mode": "multi_label",
+            "train_energy": train_energy,
+            "calibration_test_energy": calibration_test_energy,
+            "combined_energy": combined_energy,
+            "final_score": test_energy,
+            "thresholds": thresholds,
+            "intermediate": intermediate_payload,
+        }
 
         return preds, test_energy
 

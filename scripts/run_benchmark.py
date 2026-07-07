@@ -97,11 +97,14 @@ def build_evaluation_config(args: argparse.Namespace, config_data: Dict) -> Dict
         evaluation_config["metrics"] = metric_list
 
     default_strategy_args = evaluation_config["strategy_args"]
-    strategy_args_updates = (
-        json.loads(args.strategy_args) if args.strategy_args else None
-    )
+    strategy_args_updates = {}
+    env_strategy_args = os.environ.get("MINDTS_STRATEGY_ARGS")
+    if env_strategy_args:
+        strategy_args_updates.update(json.loads(env_strategy_args))
+    if args.strategy_args:
+        strategy_args_updates.update(json.loads(args.strategy_args))
 
-    if strategy_args_updates is not None:
+    if strategy_args_updates:
         default_strategy_args.update(strategy_args_updates)
 
     if args.seed is not None:

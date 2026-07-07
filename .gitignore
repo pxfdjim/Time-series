@@ -14,6 +14,7 @@ __pycache__/
 result/
 result_table/
 result_old/
+anomaly_segment_visualization/
 # IDE
 .idea/
 .vscode/

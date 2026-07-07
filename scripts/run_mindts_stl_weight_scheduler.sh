@@ -4,44 +4,47 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-MINDTS_ABLATION_CONDA_ENV="${MINDTS_ABLATION_CONDA_ENV:-mind_qwen3}"
-if [[ -n "$MINDTS_ABLATION_CONDA_ENV" ]]; then
+MINDTS_STL_CONDA_ENV="${MINDTS_STL_CONDA_ENV:-mind_qwen3}"
+if [[ -n "$MINDTS_STL_CONDA_ENV" ]]; then
   if ! command -v conda >/dev/null 2>&1; then
-    echo "conda is required to activate ${MINDTS_ABLATION_CONDA_ENV}, but conda was not found." >&2
+    echo "conda is required to activate ${MINDTS_STL_CONDA_ENV}, but conda was not found." >&2
     exit 1
   fi
   CONDA_BASE="$(conda info --base)"
   # shellcheck disable=SC1091
   source "${CONDA_BASE}/etc/profile.d/conda.sh"
-  conda activate "$MINDTS_ABLATION_CONDA_ENV"
+  conda activate "$MINDTS_STL_CONDA_ENV"
 fi
 
 if ! python -c "import torch" >/dev/null 2>&1; then
-  echo "The active python cannot import torch. Activate the MindTS environment first or set MINDTS_ABLATION_CONDA_ENV." >&2
+  echo "The active python cannot import torch. Activate the MindTS environment first or set MINDTS_STL_CONDA_ENV." >&2
+  echo "python: $(command -v python)" >&2
   exit 1
 fi
 
-RUN_ID="${MINDTS_ABLATION_SCHEDULER_RUN_ID:-$(date '+%Y%m%d_%H%M%S')}"
-LOG_DIR="${ROOT_DIR}/result/mindts_ablation_scheduler_logs/${RUN_ID}"
+RUN_ID="${MINDTS_STL_SCHEDULER_RUN_ID:-$(date '+%Y%m%d_%H%M%S')}"
+LOG_DIR="${ROOT_DIR}/result/mindts_stl_weight_scheduler_logs/${RUN_ID}"
 STATE_DIR="${LOG_DIR}/state"
 mkdir -p "$LOG_DIR" "$STATE_DIR"
 
-LLM_MODEL_TAG="qwen3_1p7b"
-LLM_MODEL_PATH="models/Qwen3-1.7B"
-LLM_MODEL_NAME="Qwen3-1.7B"
 ALIGN_LOSS_TYPE="text_gaussian_nll"
 RECON_LOSS_TYPE="mse"
 RECON_LOGVAR_MIN="-6.0"
 RECON_LOGVAR_MAX="2.0"
-NUM_EPOCHS="${MINDTS_ABLATION_NUM_EPOCHS:-5}"
-MAX_TASKS_PER_GPU="${MINDTS_ABLATION_MAX_TASKS_PER_GPU:-3}"
-POLL_SECONDS="${MINDTS_ABLATION_POLL_SECONDS:-20}"
-GPU_MEMORY_READY_PCT="${MINDTS_ABLATION_GPU_MEMORY_READY_PCT:-100}"
-GPU_UTIL_READY_PCT="${MINDTS_ABLATION_GPU_UTIL_READY_PCT:-100}"
-DRY_RUN="${MINDTS_ABLATION_DRY_RUN:-false}"
-SKIP_DONE="${MINDTS_ABLATION_SKIP_DONE:-true}"
-STOP_ON_FAILURE="${MINDTS_ABLATION_STOP_ON_FAILURE:-false}"
-VIS_EXPORT_ROOT="${MINDTS_ABLATION_VIS_EXPORT_ROOT:-anomaly_segment_visualization/exports/qwen3_1p7b_ablation}"
+LLM_MODEL_TAG="qwen3_1p7b"
+LLM_MODEL_PATH="models/Qwen3-1.7B"
+LLM_MODEL_NAME="Qwen3-1.7B"
+
+STL_WEIGHT_VALUES="${MINDTS_STL_WEIGHT_VALUES:-0.01 0.05 0.1 0.5 1}"
+NUM_EPOCHS="${MINDTS_STL_NUM_EPOCHS:-5}"
+MAX_TASKS_PER_GPU="${MINDTS_STL_MAX_TASKS_PER_GPU:-3}"
+POLL_SECONDS="${MINDTS_STL_POLL_SECONDS:-20}"
+GPU_MEMORY_READY_PCT="${MINDTS_STL_GPU_MEMORY_READY_PCT:-100}"
+GPU_UTIL_READY_PCT="${MINDTS_STL_GPU_UTIL_READY_PCT:-100}"
+ONE_LAUNCH_PER_GPU_PER_POLL="${MINDTS_STL_ONE_LAUNCH_PER_GPU_PER_POLL:-false}"
+DRY_RUN="${MINDTS_STL_DRY_RUN:-false}"
+SKIP_DONE="${MINDTS_STL_SKIP_DONE:-true}"
+STOP_ON_FAILURE="${MINDTS_STL_STOP_ON_FAILURE:-false}"
 
 normalize_bool() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
@@ -59,26 +62,55 @@ validate_bool() {
   esac
 }
 
+slug_float() {
+  local value="$1"
+  value="${value//./p}"
+  value="${value//- /m}"
+  value="${value//-/m}"
+  printf '%s' "$value"
+}
+
 DRY_RUN="$(normalize_bool "$DRY_RUN")"
 SKIP_DONE="$(normalize_bool "$SKIP_DONE")"
 STOP_ON_FAILURE="$(normalize_bool "$STOP_ON_FAILURE")"
-validate_bool "MINDTS_ABLATION_DRY_RUN" "$DRY_RUN"
-validate_bool "MINDTS_ABLATION_SKIP_DONE" "$SKIP_DONE"
-validate_bool "MINDTS_ABLATION_STOP_ON_FAILURE" "$STOP_ON_FAILURE"
+ONE_LAUNCH_PER_GPU_PER_POLL="$(normalize_bool "$ONE_LAUNCH_PER_GPU_PER_POLL")"
+validate_bool "MINDTS_STL_DRY_RUN" "$DRY_RUN"
+validate_bool "MINDTS_STL_SKIP_DONE" "$SKIP_DONE"
+validate_bool "MINDTS_STL_STOP_ON_FAILURE" "$STOP_ON_FAILURE"
+validate_bool "MINDTS_STL_ONE_LAUNCH_PER_GPU_PER_POLL" "$ONE_LAUNCH_PER_GPU_PER_POLL"
 
 case "$MAX_TASKS_PER_GPU" in
   ''|*[!0-9]*|0)
-    echo "Invalid MINDTS_ABLATION_MAX_TASKS_PER_GPU=${MAX_TASKS_PER_GPU}. Use a positive integer." >&2
+    echo "Invalid MINDTS_STL_MAX_TASKS_PER_GPU=${MAX_TASKS_PER_GPU}. Use a positive integer." >&2
     exit 1
     ;;
 esac
 
-if [[ -n "${MINDTS_ABLATION_GPUS:-}" ]]; then
-  read -r -a GPUS <<<"${MINDTS_ABLATION_GPUS}"
+case "$POLL_SECONDS" in
+  ''|*[!0-9]*|0)
+    echo "Invalid MINDTS_STL_POLL_SECONDS=${POLL_SECONDS}. Use a positive integer." >&2
+    exit 1
+    ;;
+esac
+
+case "$NUM_EPOCHS" in
+  ''|*[!0-9]*|0)
+    echo "Invalid MINDTS_STL_NUM_EPOCHS=${NUM_EPOCHS}. Use a positive integer." >&2
+    exit 1
+    ;;
+esac
+
+if [[ -n "${MINDTS_STL_GPUS:-}" ]]; then
+  read -r -a GPUS <<<"${MINDTS_STL_GPUS}"
 elif command -v nvidia-smi >/dev/null 2>&1; then
   mapfile -t GPUS < <(nvidia-smi --query-gpu=index --format=csv,noheader,nounits)
 else
   GPUS=("")
+fi
+
+if (( ${#GPUS[@]} == 0 )); then
+  echo "No GPU candidates found. Set MINDTS_STL_GPUS, e.g. '0 1'." >&2
+  exit 1
 fi
 
 declare -A DATASET_SCRIPT=(
@@ -91,17 +123,10 @@ declare -A DATASET_SCRIPT=(
 )
 
 default_datasets=(Energy Weather EWJ Environment MDT KR)
-if [[ -n "${MINDTS_ABLATION_DATASETS:-}" ]]; then
-  read -r -a DATASETS <<<"${MINDTS_ABLATION_DATASETS}"
+if [[ -n "${MINDTS_STL_DATASETS:-}" ]]; then
+  read -r -a DATASETS <<<"${MINDTS_STL_DATASETS}"
 else
   DATASETS=("${default_datasets[@]}")
-fi
-
-default_variants=(full wo_text_branch wo_semantic_reconstruction wo_component_semantics)
-if [[ -n "${MINDTS_ABLATION_VARIANTS:-}" ]]; then
-  read -r -a VARIANTS <<<"${MINDTS_ABLATION_VARIANTS}"
-else
-  VARIANTS=("${default_variants[@]}")
 fi
 
 for dataset in "${DATASETS[@]}"; do
@@ -121,17 +146,29 @@ log_scheduler() {
   printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$message" | tee -a "${LOG_DIR}/scheduler.log"
 }
 
+TASKS=()
+for value in $STL_WEIGHT_VALUES; do
+  save_root="label_hparam_${LLM_MODEL_TAG}_stl_weight_s$(slug_float "$value")"
+  for dataset in "${DATASETS[@]}"; do
+    TASKS+=("stl_weight|${value}|${save_root}|${dataset}|${DATASET_SCRIPT[$dataset]}")
+  done
+done
+
+task_id_for() {
+  local hparam="$1"
+  local value="$2"
+  local dataset="$3"
+  printf '%s_%s__%s' "$hparam" "$(slug_float "$value")" "$dataset"
+}
+
 build_overrides() {
-  local variant="$1"
-  python - "$variant" "$ALIGN_LOSS_TYPE" "$RECON_LOSS_TYPE" "$RECON_LOGVAR_MIN" "$RECON_LOGVAR_MAX" "$LLM_MODEL_PATH" "$LLM_MODEL_NAME" "$NUM_EPOCHS" <<'PY'
+  local value="$1"
+  python - "$value" "$ALIGN_LOSS_TYPE" "$RECON_LOSS_TYPE" "$RECON_LOGVAR_MIN" "$RECON_LOGVAR_MAX" "$LLM_MODEL_PATH" "$LLM_MODEL_NAME" "$NUM_EPOCHS" <<'PY'
 import json
 import sys
 
-variant = sys.argv[1]
+value = float(sys.argv[1])
 overrides = {
-    "model_impl": "ablation",
-    "ablation_variant": variant,
-    "export_intermediate": True,
     "use_information_condenser": False,
     "align_loss_type": sys.argv[2],
     "recon_loss_type": sys.argv[3],
@@ -148,26 +185,16 @@ overrides = {
     "llm_model_name": sys.argv[7],
     "num_epochs": int(sys.argv[8]),
     "lamda1": 1.0,
+    "stl_weight": value,
 }
 print(json.dumps(overrides, separators=(",", ":")))
 PY
 }
 
-save_root_for() {
-  local variant="$1"
-  printf 'label_ablation_%s_%s' "$LLM_MODEL_TAG" "$variant"
-}
-
-task_id_for() {
-  local variant="$1"
-  local dataset="$2"
-  printf '%s__%s' "$variant" "$dataset"
-}
-
 write_config_snapshot() {
   local config_file="$1"
   local save_root="$2"
-  local variant="$3"
+  local value="$3"
   local dataset="$4"
   local gpu="$5"
   local script="$6"
@@ -179,13 +206,15 @@ write_config_snapshot() {
     printf '  "run_id": "%s",\n' "$RUN_ID"
     printf '  "save_root": "%s",\n' "$save_root"
     printf '  "dataset": "%s",\n' "$dataset"
-    printf '  "variant": "%s",\n' "$variant"
     printf '  "script": "%s",\n' "$script"
     printf '  "gpu": "%s",\n' "$gpu"
+    printf '  "hparam": "stl_weight",\n'
+    printf '  "hparam_value": %s,\n' "$value"
     printf '  "llm_model_tag": "%s",\n' "$LLM_MODEL_TAG"
     printf '  "llm_model_name": "%s",\n' "$LLM_MODEL_NAME"
     printf '  "llm_model_path": "%s",\n' "$LLM_MODEL_PATH"
-    printf '  "visual_export_dir": "%s/%s",\n' "$VIS_EXPORT_ROOT" "$save_root"
+    printf '  "align_loss_type": "%s",\n' "$ALIGN_LOSS_TYPE"
+    printf '  "recon_loss_type": "%s",\n' "$RECON_LOSS_TYPE"
     printf '  "model_hyper_param_overrides": %s\n' "$overrides"
     printf '}\n'
   } >"$config_file"
@@ -196,6 +225,7 @@ gpu_ready() {
   if [[ -z "$gpu" ]] || ! command -v nvidia-smi >/dev/null 2>&1; then
     return 0
   fi
+
   local line used total util mem_pct
   line="$(nvidia-smi --query-gpu=memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits -i "$gpu" 2>/dev/null | head -n 1 || true)"
   if [[ -z "$line" ]]; then
@@ -212,18 +242,11 @@ gpu_ready() {
   (( mem_pct <= GPU_MEMORY_READY_PCT && util <= GPU_UTIL_READY_PCT ))
 }
 
-TASKS=()
-for variant in "${VARIANTS[@]}"; do
-  save_root="$(save_root_for "$variant")"
-  for dataset in "${DATASETS[@]}"; do
-    TASKS+=("${variant}|${save_root}|${dataset}|${DATASET_SCRIPT[$dataset]}")
-  done
-done
-
 declare -A GPU_ACTIVE=()
 for gpu in "${GPUS[@]}"; do
   GPU_ACTIVE["$gpu"]=0
 done
+
 declare -A PID_STATUS_FILE=()
 declare -A PID_GPU=()
 declare -A PID_TASK=()
@@ -266,22 +289,21 @@ poll_finished() {
 launch_task() {
   local task="$1"
   local gpu="$2"
-  local variant save_root dataset script
-  IFS='|' read -r variant save_root dataset script <<<"$task"
+  local hparam value save_root dataset script
+  IFS='|' read -r hparam value save_root dataset script <<<"$task"
 
-  local task_id task_dir config_file overrides log_file status_file done_file failed_file gpu_args export_dir
-  task_id="$(task_id_for "$variant" "$dataset")"
+  local task_id task_dir config_file overrides log_file status_file done_file failed_file gpu_args
+  task_id="$(task_id_for "$hparam" "$value" "$dataset")"
   task_dir="${ROOT_DIR}/result/${save_root}/${dataset}"
   config_file="${task_dir}/experiment_config.json"
-  overrides="$(build_overrides "$variant")"
+  overrides="$(build_overrides "$value")"
   log_file="${LOG_DIR}/${task_id}.log"
   status_file="${STATE_DIR}/${task_id}.exit"
   done_file="${STATE_DIR}/${task_id}.done"
   failed_file="${STATE_DIR}/${task_id}.failed"
-  export_dir="${VIS_EXPORT_ROOT}/${save_root}"
   rm -f "$status_file" "$failed_file"
   mkdir -p "$task_dir"
-  write_config_snapshot "$config_file" "$save_root" "$variant" "$dataset" "$gpu" "$script" "$overrides"
+  write_config_snapshot "$config_file" "$save_root" "$value" "$dataset" "$gpu" "$script" "$overrides"
 
   if [[ -n "$gpu" ]]; then
     gpu_args="--gpus ${gpu}"
@@ -289,7 +311,7 @@ launch_task() {
     gpu_args=""
   fi
 
-  log_scheduler "START ${task_id} on GPU ${gpu:-none}; result/${save_root}/${dataset}; variant=${variant}"
+  log_scheduler "START ${task_id} on GPU ${gpu:-none}; result/${save_root}/${dataset}; stl_weight=${value}"
   (
     set +e
     {
@@ -297,8 +319,9 @@ launch_task() {
       printf 'GPU: %s\n' "${gpu:-none}"
       printf 'Save root: %s\n' "$save_root"
       printf 'Dataset: %s\n' "$dataset"
-      printf 'Variant: %s\n' "$variant"
-      printf 'Visual export: %s\n' "$export_dir"
+      printf 'Hyperparameter: stl_weight=%s\n' "$value"
+      printf 'LLM model name: %s\n' "$LLM_MODEL_NAME"
+      printf 'LLM model path: %s\n' "$LLM_MODEL_PATH"
       printf 'Overrides: %s\n' "$overrides"
       printf 'Script: %s\n\n' "$script"
     } >>"$log_file"
@@ -306,8 +329,6 @@ launch_task() {
     export MINDTS_SAVE_ROOT="$save_root"
     export MINDTS_MODEL_HYPER_PARAM_OVERRIDES="$overrides"
     export MINDTS_GPU_CLI_ARGS="$gpu_args"
-    export MINDTS_VIS_EXPORT_DIR="$export_dir"
-    export MINDTS_SAVE_CHECKPOINT=true
     bash "$script" >>"$log_file" 2>&1
     status=$?
     printf '[%s] EXIT %s status=%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$task_id" "$status" >>"$log_file"
@@ -330,17 +351,17 @@ launch_task() {
 
 log_scheduler "Run id: ${RUN_ID}"
 log_scheduler "Log dir: ${LOG_DIR}"
-log_scheduler "Conda env: ${MINDTS_ABLATION_CONDA_ENV:-<none>}; python: $(command -v python)"
+log_scheduler "Conda env: ${MINDTS_STL_CONDA_ENV:-<none>}; python: $(command -v python)"
 log_scheduler "GPUs: ${GPUS[*]}"
 log_scheduler "Datasets: ${DATASETS[*]}"
-log_scheduler "Variants: ${VARIANTS[*]}"
-log_scheduler "Tasks: ${total}; fixed LLM=${LLM_MODEL_NAME}; epochs=${NUM_EPOCHS}; max_tasks_per_gpu=${MAX_TASKS_PER_GPU}"
-log_scheduler "Visual export root: ${VIS_EXPORT_ROOT}"
+log_scheduler "stl_weight values: ${STL_WEIGHT_VALUES}"
+log_scheduler "Tasks: ${total}; fixed LLM=${LLM_MODEL_NAME}; align=${ALIGN_LOSS_TYPE}; recon=${RECON_LOSS_TYPE}; num_epochs=${NUM_EPOCHS}"
+log_scheduler "GPU ready thresholds: memory<=${GPU_MEMORY_READY_PCT}%, util<=${GPU_UTIL_READY_PCT}%; max_tasks_per_gpu=${MAX_TASKS_PER_GPU}; one_launch_per_gpu_per_poll=${ONE_LAUNCH_PER_GPU_PER_POLL}"
 
 if [[ "$DRY_RUN" == "true" ]]; then
   for task in "${TASKS[@]}"; do
-    IFS='|' read -r variant save_root dataset script <<<"$task"
-    printf 'variant=%s | dataset=%s | save_root=%s | script=%s\n' "$variant" "$dataset" "$save_root" "$script"
+    IFS='|' read -r hparam value save_root dataset script <<<"$task"
+    printf '%s=%s | dataset=%s | save_root=%s | script=%s\n' "$hparam" "$value" "$dataset" "$save_root" "$script"
   done | tee -a "${LOG_DIR}/scheduler.log"
   exit 0
 fi
@@ -354,11 +375,13 @@ while (( completed < total )); do
   fi
 
   launched_this_round=0
+  declare -A GPU_LAUNCHED_THIS_ROUND=()
   while (( next_task < total )); do
     task="${TASKS[$next_task]}"
-    IFS='|' read -r variant save_root dataset script <<<"$task"
-    task_id="$(task_id_for "$variant" "$dataset")"
+    IFS='|' read -r hparam value save_root dataset script <<<"$task"
+    task_id="$(task_id_for "$hparam" "$value" "$dataset")"
     done_file="${STATE_DIR}/${task_id}.done"
+
     if [[ "$SKIP_DONE" == "true" && -f "$done_file" ]]; then
       completed=$(( completed + 1 ))
       next_task=$(( next_task + 1 ))
@@ -368,6 +391,9 @@ while (( completed < total )); do
 
     selected_gpu=""
     for gpu in "${GPUS[@]}"; do
+      if [[ "$ONE_LAUNCH_PER_GPU_PER_POLL" == "true" && -n "${GPU_LAUNCHED_THIS_ROUND[$gpu]:-}" ]]; then
+        continue
+      fi
       if (( GPU_ACTIVE["$gpu"] >= MAX_TASKS_PER_GPU )); then
         continue
       fi
@@ -382,6 +408,7 @@ while (( completed < total )); do
     fi
 
     launch_task "$task" "$selected_gpu"
+    GPU_LAUNCHED_THIS_ROUND["$selected_gpu"]=1
     next_task=$(( next_task + 1 ))
     launched_this_round=1
   done

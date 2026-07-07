@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
+import json
 import pickle
 import time
 import traceback
@@ -10,6 +11,7 @@ import pandas as pd
 import torch
 import re
 
+from ts_benchmark.common.constant import ROOT_PATH
 from ts_benchmark.data.data_pool import DataPool
 from ts_benchmark.evaluation.evaluator import Evaluator
 from ts_benchmark.evaluation.metrics import classification_metrics_label
@@ -38,6 +40,192 @@ class AnomalyDetect(Strategy):
         super().__init__(strategy_config, evaluator)
         self.model = None
         self.data_lens = None
+
+    def _visual_export_root(self):
+        export_dir = self.strategy_config.get("visual_export_dir") or os.environ.get(
+            "MINDTS_VIS_EXPORT_DIR"
+        )
+        if not export_dir:
+            return None
+        if os.path.isabs(export_dir):
+            return export_dir
+        return os.path.join(ROOT_PATH, export_dir)
+
+    def _should_save_checkpoint(self):
+        value = self.strategy_config.get(
+            "save_checkpoint",
+            os.environ.get("MINDTS_SAVE_CHECKPOINT", "false"),
+        )
+        if isinstance(value, bool):
+            return value
+        return str(value).lower() in {"1", "true", "yes", "y", "on"}
+
+    def _safe_name(self, value):
+        safe = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(value)).strip("_")
+        return safe or "unknown"
+
+    def _series_export_dir(self, series_name, model_factory=None):
+        root = self._visual_export_root()
+        if root is None:
+            return None
+        model_name = self._safe_name(getattr(model_factory, "model_name", "model"))
+        series = self._safe_name(series_name).replace(".csv", "")
+        export_dir = os.path.join(root, model_name, series)
+        os.makedirs(export_dir, exist_ok=True)
+        return export_dir
+
+    def _align_to_length(self, values, target_length, fill_value=0):
+        arr = np.asarray(values).reshape(-1)
+        if arr.shape[0] < target_length:
+            return np.pad(
+                arr,
+                (0, target_length - arr.shape[0]),
+                mode="constant",
+                constant_values=fill_value,
+            )
+        if arr.shape[0] > target_length:
+            return arr[:target_length]
+        return arr.copy()
+
+    def _model_artifacts(self):
+        if self.model is None:
+            return {}
+        return getattr(self.model, "last_detection_artifacts", {}) or {}
+
+    def _export_checkpoint(self, series_name, model_factory):
+        if not self._should_save_checkpoint():
+            return
+        export_dir = self._series_export_dir(series_name, model_factory)
+        if export_dir is None or self.model is None:
+            return
+        checkpoint = getattr(self.model, "check_point", None)
+        if checkpoint is None:
+            return
+        payload = {
+            "series_name": series_name,
+            "model_name": getattr(model_factory, "model_name", None),
+            "model_hyper_params": getattr(model_factory, "model_hyper_params", {}),
+            "best_valid_loss": getattr(self.model, "best_valid_loss", None),
+            "best_checkpoint_epoch": getattr(self.model, "best_checkpoint_epoch", None),
+            "trainable_state_dict": checkpoint,
+        }
+        scaler = getattr(self.model, "scaler", None)
+        if scaler is not None and hasattr(scaler, "mean_"):
+            payload["scaler_mean"] = scaler.mean_
+            payload["scaler_scale"] = scaler.scale_
+        torch.save(payload, os.path.join(export_dir, "checkpoint_trainable.pt"))
+
+    def _simple_point_metrics(self, actual_label, predict_label):
+        actual = np.asarray(actual_label).reshape(-1).astype(bool)
+        pred = np.asarray(predict_label).reshape(-1).astype(bool)
+        tp = int(np.logical_and(actual, pred).sum())
+        fp = int(np.logical_and(~actual, pred).sum())
+        fn = int(np.logical_and(actual, ~pred).sum())
+        precision = tp / (tp + fp) if tp + fp else 0.0
+        recall = tp / (tp + fn) if tp + fn else 0.0
+        f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+        return {
+            "tp": tp,
+            "fp": fp,
+            "fn": fn,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+        }
+
+    def _export_visual_artifacts(
+        self,
+        series_name,
+        model_factory,
+        test_data,
+        test_label,
+        predict_labels,
+        score_raw,
+    ):
+        export_dir = self._series_export_dir(series_name, model_factory)
+        if export_dir is None:
+            return
+
+        actual_label = np.asarray(test_label).reshape(-1).astype(float)
+        target_length = len(actual_label)
+        score_raw = np.asarray(score_raw).reshape(-1).astype(float)
+        score = self._align_to_length(score_raw, target_length, fill_value=0).astype(float)
+
+        ratio_values = list(predict_labels.keys())
+        ratio_names = [str(ratio) for ratio in ratio_values]
+        aligned_predictions = []
+        raw_prediction_lengths = []
+        summary_rows = []
+        for ratio in ratio_values:
+            raw_pred = np.asarray(predict_labels[ratio]).reshape(-1).astype(int)
+            aligned_pred = self._align_to_length(raw_pred, target_length, fill_value=0).astype(int)
+            aligned_predictions.append(aligned_pred)
+            raw_prediction_lengths.append(len(raw_pred))
+            row = {
+                "series_name": series_name,
+                "threshold_ratio": ratio,
+                "raw_prediction_length": len(raw_pred),
+                "aligned_length": target_length,
+                "score_raw_length": len(score_raw),
+                "actual_anomaly_points": int(actual_label.sum()),
+                "predicted_anomaly_points": int(aligned_pred.sum()),
+            }
+            row.update(self._simple_point_metrics(actual_label, aligned_pred))
+            summary_rows.append(row)
+
+        pred_matrix = (
+            np.vstack(aligned_predictions)
+            if aligned_predictions
+            else np.empty((0, target_length), dtype=int)
+        )
+        test_values = test_data.to_numpy(dtype=float, copy=True)
+        test_columns = np.asarray(test_data.columns.astype(str), dtype=str)
+        test_index = np.asarray(test_data.index.astype(str), dtype=str)
+
+        artifacts = self._model_artifacts()
+        intermediate = artifacts.get("intermediate", {})
+        npz_payload = {
+            "test_values": test_values,
+            "test_columns": test_columns,
+            "test_index": test_index,
+            "actual_label": actual_label,
+            "score": score,
+            "score_raw": score_raw,
+            "ratios": np.asarray(ratio_names, dtype=str),
+            "predictions": pred_matrix,
+            "raw_prediction_lengths": np.asarray(raw_prediction_lengths, dtype=int),
+        }
+        intermediate_shapes = {}
+        for key, value in intermediate.items():
+            arr = np.asarray(value)
+            npz_payload[f"intermediate_{key}"] = arr
+            intermediate_shapes[key] = list(arr.shape)
+        np.savez_compressed(os.path.join(export_dir, "anomaly_trace.npz"), **npz_payload)
+
+        trace_df = pd.DataFrame({"time_index": test_index, "label": actual_label, "score": score})
+        for col_idx, col_name in enumerate(test_columns):
+            trace_df[f"value_{col_name}"] = test_values[:, col_idx]
+        for ratio_name, aligned_pred in zip(ratio_names, aligned_predictions):
+            trace_df[f"pred_T{ratio_name}"] = aligned_pred
+        trace_df.to_csv(os.path.join(export_dir, "anomaly_trace.csv"), index=False)
+        pd.DataFrame(summary_rows).to_csv(os.path.join(export_dir, "threshold_summary.csv"), index=False)
+
+        thresholds = artifacts.get("thresholds", {})
+        metadata = {
+            "series_name": series_name,
+            "model_name": getattr(model_factory, "model_name", None),
+            "model_hyper_params": getattr(model_factory, "model_hyper_params", {}),
+            "strategy_config": self.strategy_config,
+            "test_length": target_length,
+            "score_raw_length": len(score_raw),
+            "ratios": ratio_names,
+            "thresholds": {str(k): float(v) for k, v in thresholds.items()},
+            "best_valid_loss": getattr(self.model, "best_valid_loss", None),
+            "best_checkpoint_epoch": getattr(self.model, "best_checkpoint_epoch", None),
+            "intermediate_shapes": intermediate_shapes,
+        }
+        with open(os.path.join(export_dir, "metadata.json"), "w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2, sort_keys=True, default=str)
 
     def _configure_model_shape_logging(self, series_name: str):
         if self.model is None:
@@ -144,6 +332,7 @@ class AnomalyDetect(Strategy):
                 self.model.fit(train_data, train_label)  # 在训练数据上拟合模型
 
             end_fit_time = time.time()
+            self._export_checkpoint(series_name, model_factory)
             predict_labels, another = self.detect(test_data)
 
             # 模型打label保存到本地
@@ -160,13 +349,24 @@ class AnomalyDetect(Strategy):
 
             actual_label = test_label.to_numpy().flatten()
             end_inference_time = time.time()
+            score_raw = np.asarray(another).reshape(-1).copy()
+            self._export_visual_artifacts(
+                series_name,
+                model_factory,
+                test_data,
+                test_label,
+                predict_labels,
+                score_raw,
+            )
 
             single_series_results_list = []
             for ratio, predict_label in predict_labels.items():
-                predict_label_before = predict_label.copy()
-                another_before = another.copy()
+                predict_label_before = np.asarray(predict_label).reshape(-1).copy()
+                another_before = score_raw.copy()
+                predict_label = predict_label_before.copy()
+                another_eval = score_raw.copy()
                 remaining_length = len(actual_label) - len(predict_label)
-                remaining_length_another = len(actual_label) - len(another)
+                remaining_length_another = len(actual_label) - len(another_eval)
                 print(remaining_length)
                 # Pad the predict_label array with zeros at the end
                 if remaining_length > 0:
@@ -178,8 +378,8 @@ class AnomalyDetect(Strategy):
                     )
 
                 if remaining_length_another > 0:
-                    another = np.pad(
-                        another,
+                    another_eval = np.pad(
+                        another_eval,
                         (0, remaining_length_another),
                         mode="constant",
                         constant_values=0,
@@ -192,7 +392,7 @@ class AnomalyDetect(Strategy):
                     predict_label_before,
                     another_before,
                     predict_label,
-                    another,
+                    another_eval,
                     remaining_length,
                     remaining_length_another,
                 )
@@ -200,11 +400,11 @@ class AnomalyDetect(Strategy):
                 single_series_results, log_info = self.evaluator.evaluate_with_log(
                     actual=actual_label.astype(float),
                     predicted=predict_label.astype(float),
-                    another=another.astype(float),
+                    another=another_eval.astype(float),
                 )
                 print(single_series_results)
 
-                inference_data = [predict_label, another]
+                inference_data = [predict_label, another_eval]
                 actual_data_pickle = pickle.dumps(test_label)
                 actual_data_pickle = base64.b64encode(actual_data_pickle).decode("utf-8")
 
@@ -262,6 +462,7 @@ class AnomalyDetect(Strategy):
             self.model.detect_multi_fit(train_data, train_text, train_label)
 
             end_fit_time = time.time()
+            self._export_checkpoint(series_name, model_factory)
 
             for i in range(torch.cuda.device_count()):
                 allocated = torch.cuda.memory_allocated(i) / 1024**3
@@ -280,13 +481,24 @@ class AnomalyDetect(Strategy):
 
             actual_label = test_label.to_numpy().flatten()
             end_inference_time = time.time()
+            score_raw = np.asarray(another).reshape(-1).copy()
+            self._export_visual_artifacts(
+                series_name,
+                model_factory,
+                test_data,
+                test_label,
+                predict_labels,
+                score_raw,
+            )
 
             single_series_results_list = []
             for ratio, predict_label in predict_labels.items():
-                predict_label_before = predict_label.copy()
-                another_before = another.copy()
+                predict_label_before = np.asarray(predict_label).reshape(-1).copy()
+                another_before = score_raw.copy()
+                predict_label = predict_label_before.copy()
+                another_eval = score_raw.copy()
                 remaining_length = len(actual_label) - len(predict_label)
-                remaining_length_another = len(actual_label) - len(another)
+                remaining_length_another = len(actual_label) - len(another_eval)
                 print(remaining_length)
                 # Pad the predict_label array with zeros at the end
                 if remaining_length > 0:
@@ -298,8 +510,8 @@ class AnomalyDetect(Strategy):
                     )
 
                 if remaining_length_another > 0:
-                    another = np.pad(
-                        another,
+                    another_eval = np.pad(
+                        another_eval,
                         (0, remaining_length_another),
                         mode="constant",
                         constant_values=0,
@@ -312,7 +524,7 @@ class AnomalyDetect(Strategy):
                     predict_label_before,
                     another_before,
                     predict_label,
-                    another,
+                    another_eval,
                     remaining_length,
                     remaining_length_another,
                 )
@@ -320,11 +532,11 @@ class AnomalyDetect(Strategy):
                 single_series_results, log_info = self.evaluator.evaluate_with_log(
                     actual=actual_label.astype(float),
                     predicted=predict_label.astype(float),
-                    another=another.astype(float),
+                    another=another_eval.astype(float),
                 )
                 print(single_series_results)
 
-                inference_data = [predict_label, another]
+                inference_data = [predict_label, another_eval]
                 actual_data_pickle = pickle.dumps(test_label)
                 actual_data_pickle = base64.b64encode(actual_data_pickle).decode("utf-8")
 
@@ -376,6 +588,7 @@ class AnomalyDetect(Strategy):
             self.model.detect_timeMMD_fit(train_data, train_text, train_label)
 
             end_fit_time = time.time()
+            self._export_checkpoint(series_name, model_factory)
             predict_labels, another = self.mmd_detect(test_data, test_text)
 
             # 模型打label保存到本地
@@ -395,13 +608,24 @@ class AnomalyDetect(Strategy):
 
             actual_label = test_label.to_numpy().flatten()
             end_inference_time = time.time()
+            score_raw = np.asarray(another).reshape(-1).copy()
+            self._export_visual_artifacts(
+                series_name,
+                model_factory,
+                test_data,
+                test_label,
+                predict_labels,
+                score_raw,
+            )
 
             single_series_results_list = []
             for ratio, predict_label in predict_labels.items():
-                predict_label_before = predict_label.copy()
-                another_before = another.copy()
+                predict_label_before = np.asarray(predict_label).reshape(-1).copy()
+                another_before = score_raw.copy()
+                predict_label = predict_label_before.copy()
+                another_eval = score_raw.copy()
                 remaining_length = len(actual_label) - len(predict_label)
-                remaining_length_another = len(actual_label) - len(another)
+                remaining_length_another = len(actual_label) - len(another_eval)
                 print(remaining_length)
                 # Pad the predict_label array with zeros at the end
                 if remaining_length > 0:
@@ -413,8 +637,8 @@ class AnomalyDetect(Strategy):
                     )
 
                 if remaining_length_another > 0:
-                    another = np.pad(
-                        another,
+                    another_eval = np.pad(
+                        another_eval,
                         (0, remaining_length_another),
                         mode="constant",
                         constant_values=0,
@@ -427,7 +651,7 @@ class AnomalyDetect(Strategy):
                     predict_label_before,
                     another_before,
                     predict_label,
-                    another,
+                    another_eval,
                     remaining_length,
                     remaining_length_another,
                 )
@@ -435,11 +659,11 @@ class AnomalyDetect(Strategy):
                 single_series_results, log_info = self.evaluator.evaluate_with_log(
                     actual=actual_label.astype(float),
                     predicted=predict_label.astype(float),
-                    another=another.astype(float),
+                    another=another_eval.astype(float),
                 )
                 print(single_series_results)
 
-                inference_data = [predict_label, another]
+                inference_data = [predict_label, another_eval]
                 actual_data_pickle = pickle.dumps(test_label)
                 actual_data_pickle = base64.b64encode(actual_data_pickle).decode("utf-8")
 
