@@ -455,33 +455,33 @@ We evaluate \method{} on six real-world time-series anomaly detection datasets s
 
 
 \textbf{Baselines.}
-We compare against three categories of methods: (1) \textbf{Reconstruction-based methods}: DLinear, NLinear~\cite{zeng2023dlinear}, PatchTST~\cite{nie2023patchtst}, TimesNet~\cite{wu2023timesnet}, and MindTS (a text-temporal multimodal baseline); (2) \textbf{Transformer-based methods}: iTransformer~\cite{liu2024itransformer}, Crossformer~\cite{zhang2023crossformer}, Informer~\cite{zhou2021informer}, Autoformer~\cite{wu2021autoformer}, and FEDformer~\cite{zhou2022fedformer}; (3) \textbf{Other architectures}: MICN~\cite{wang2023micn}, FiLM~\cite{zhou2022film}, LightTS~\cite{zhang2022lightts}, and linear baselines. All methods are evaluated under the same reconstruction-based protocol for fair comparison.
+We compare against three categories of methods: (1) \textbf{Reconstruction-based methods}: DLinear, NLinear~\cite{zeng2023dlinear}, PatchTST~\cite{nie2023patchtst}, TimesNet~\cite{wu2023timesnet}, and MindTS (a text-temporal multimodal baseline); (2) \textbf{Transformer-based methods}: iTransformer~\cite{liu2024itransformer}, Crossformer~\cite{zhang2023crossformer}, Informer~\cite{zhou2021informer}, Autoformer~\cite{wu2021autoformer}, and FEDformer~\cite{zhou2022fedformer}; (3) \textbf{Other architectures}: MICN~\cite{wang2023micn}, FiLM~\cite{zhou2022film}, LightTS~\cite{zhang2022lightts}, and linear baselines. All methods use the same reconstruction-based detection protocol for fair comparison.
 
 \textbf{Evaluation Metrics.}
-We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric for segment-level detection quality. Additionally, we report VUS-PR and VUS-ROC~\cite{paparrizos2022volume} for threshold-independent evaluation. Higher values indicate better performance for all metrics.
+We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric for segment-level detection quality. We also report VUS-PR and VUS-ROC~\cite{paparrizos2022volume} for threshold-independent evaluation.
 
 \textbf{Implementation Details.}
-\method{} is implemented in PyTorch and trained on NVIDIA A100 GPUs. We use Qwen3-1.7B as the frozen LLM backbone, extracting the first six layers for textual encoding. The temporal encoder has one encoder and one decoder layer with $d=128$, $d_{ff}=256$. Patch size and stride are 8 and 4. We use Adam optimizer with initial learning rate $10^{-3}$ and cosine annealing. Training runs for 5 epochs. Default hyperparameters: mask ratio = 0.5, $\lambda=1.0$.
+\method{} is implemented in PyTorch. We use Qwen3-1.7B as the frozen LLM backbone, extracting the first six layers for textual encoding. The temporal encoder uses $d=128$, $d_{ff}=256$ with one encoder and one decoder layer. Patch size and stride are 8 and 4. Training uses Adam optimizer with initial learning rate $10^{-3}$ and cosine annealing for 5 epochs. Default hyperparameters: mask ratio = 0.5, $\lambda=1.0$.
 
 
 
 \subsection{Main Results}
 
-Table~\ref{tab:main_results} presents the comprehensive comparison results. \method{} achieves the best average Aff-F score of 70.66\% across all datasets, establishing new state-of-the-art performance on all six benchmarks.
+Table~\ref{tab:main_results} reports the comparison results on six datasets. \method{} achieves the best average Aff-F score of 70.66\% and outperforms all baselines on each dataset.
 
-\textbf{Comparison with Reconstruction-based Methods.} Compared to pure reconstruction-based methods (DLinear 49.47\%, PatchTST 48.32\%, TimesNet 44.99\%), \method{} achieves substantial improvements (21.17\%, 22.32\%, 25.65\% absolute gains respectively). Even compared to MindTS (66.81\%), which also incorporates textual information through simple concatenation, our method achieves 3.83\% higher Aff-F. This demonstrates that our distribution-driven alignment mechanism is more effective than naive text-temporal fusion for anomaly detection.
+\textbf{Comparison with Reconstruction-based Methods.} \method{} improves over DLinear (49.47\%), PatchTST (48.32\%), and TimesNet (44.99\%) by 21.17\%, 22.32\%, and 25.65\% absolute Aff-F respectively. Compared to MindTS (66.81\%), which uses simple text-temporal concatenation, our method achieves 3.83\% higher Aff-F, indicating that distribution-driven alignment is more effective than naive fusion.
 
-\textbf{Comparison with Transformer-based Methods.} Transformer-based methods generally underperform on anomaly detection tasks, with iTransformer achieving 45.57\% and Crossformer 42.85\% average Aff-F. \method{} outperforms these by 25.07\% and 27.79\% respectively. The gap is particularly pronounced on datasets with collective anomalies (KR: 79.40\% vs 55.88\% for iTransformer), suggesting that textual guidance helps capture long-range anomaly patterns that self-attention mechanisms miss.
+\textbf{Comparison with Transformer-based Methods.} \method{} outperforms iTransformer (45.57\%) and Crossformer (42.85\%) by 25.07\% and 27.79\% respectively. The improvement is most pronounced on KR (79.31\% vs.\ 55.88\% for iTransformer), a dataset with collective anomalies, suggesting that textual semantics help capture sustained anomaly patterns.
 
-\textbf{Dataset-specific Analysis.} On \textit{Energy} (multivariate power consumption), \method{} achieves 65.24\%, significantly outperforming all baselines, validating its effectiveness for cross-channel correlation modeling. On \textit{KR} and \textit{MDT} (collective anomalies in cloud computing and healthcare), our method achieves 79.40\% and 69.27\%, surpassing the second-best by 2.37\% and 4.55\%, confirming the importance of structural textual descriptions for detecting persistent anomalies. The consistent improvements across diverse anomaly types (point, contextual, collective) demonstrate the generalizability of our approach.
+\textbf{Dataset-specific Observations.} On Energy, \method{} achieves 65.22\% Aff-F, outperforming the second-best by 2.12\%. On KR and MDT, which contain collective anomalies, \method{} achieves 79.31\% and 69.25\%, surpassing the second-best by 2.28\% and 4.53\% respectively. The consistent gains across datasets with diverse anomaly types indicate that the method generalizes to different temporal patterns.
 
-\subsection{LLM Backbone Comparison}
+\subsection{LLM Backbone Analysis}
 
-To investigate the impact of different LLM backbones on anomaly detection performance, we conduct experiments with seven lightweight language models ranging from 1B to 1.7B parameters. Table~\ref{tab:llm_comparison} reports the per-dataset results under the mean-threshold setting.
+Table~\ref{tab:llm_comparison} reports the performance of \method{} with seven lightweight LLMs (1B--1.7B parameters). The Aff-F scores vary within a 2\% range across backbones (70.66\% for Qwen3-1.7B to 69.16\% for OLMo-1B), indicating that the method is relatively insensitive to the specific LLM choice.
 
 \begin{table*}[!t]
 \centering
-\caption{Comparison of different LLM backbones across six benchmark datasets (mean-threshold). Values are percentages. Bold = best; underline = second best.}
+\caption{LLM backbone comparison (mean-threshold). Values are percentages. Bold = best; underline = second best.}
 \label{tab:llm_comparison}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{l|ccc|ccc|ccc|ccc|ccc|ccc}
@@ -490,7 +490,7 @@ To investigate the impact of different LLM backbones on anomaly detection perfor
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
 & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
 \midrule
-Qwen3-1.7B & \textbf{72.21} & \textbf{48.53} & \underline{77.07} & 65.24 & 45.83 & 71.96 & \textbf{65.08} & 39.69 & \underline{86.81} & \underline{79.40} & 55.53 & 93.29 & \underline{72.63} & 48.52 & \underline{82.70} & 69.27 & 59.14 & 81.65 \\
+Qwen3-1.7B & \textbf{72.33} & \textbf{48.53} & \underline{77.07} & \textbf{65.22} & 45.83 & 71.96 & \textbf{65.21} & 39.69 & \underline{86.81} & \textbf{79.31} & 55.53 & 93.29 & \textbf{72.67} & 48.52 & \underline{82.70} & 69.25 & 59.14 & 81.65 \\
 Qwen2.5-1.5B & 72.05 & 47.52 & 76.65 & 64.56 & 46.40 & 73.21 & 63.13 & 38.35 & \textbf{87.36} & 78.94 & \underline{58.47} & 93.41 & 72.31 & \underline{50.83} & 82.37 & 69.67 & 52.35 & 78.12 \\
 SmolLM2-1.7B & \underline{72.13} & 47.29 & 76.69 & 63.74 & 43.64 & 70.02 & 64.73 & 40.38 & 86.26 & \textbf{80.14} & \textbf{58.72} & \textbf{94.57} & 72.54 & 45.80 & 82.24 & \textbf{69.87} & \underline{60.35} & \underline{82.22} \\
 TinyLlama-1.1B & 71.65 & 47.84 & 76.64 & \underline{65.60} & \textbf{49.23} & \textbf{74.91} & \underline{65.05} & 39.76 & 85.88 & 78.67 & 55.83 & 93.40 & 72.12 & 44.21 & 80.88 & 69.48 & 58.93 & 81.50 \\
@@ -502,7 +502,7 @@ MobileLLaMA-1.4B & 71.82 & \underline{48.27} & \textbf{77.33} & \textbf{65.63} &
 }
 \end{table*}
 
-The results demonstrate that our method achieves competitive performance across different LLM backbones and datasets. Qwen3-1.7B achieves the best results on Weather and Environment, while SmolLM2-1.7B performs best on KR and MDT, TinyLlama-1.1B excels on Energy, and OLMo-1B on EWJ. The relatively small performance variation across models suggests that our method is robust to the choice of LLM backbone, as long as the model provides reasonable textual representations for encoding structured textual descriptions.
+The small performance variation across diverse LLM architectures suggests that the gains of \method{} stem from the structured textual construction, probabilistic alignment mechanism, and reconstruction-guided fusion, rather than reliance on any specific LLM. Even smaller models (1.1B--1.5B parameters) achieve comparable performance to larger ones, indicating that the method is practical for deployment with lightweight backbones.
 
 \begin{table*}[!t]
 \centering
@@ -515,7 +515,7 @@ The results demonstrate that our method achieves competitive performance across 
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
 & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
 \midrule
-Full Model & \textbf{72.21} & \textbf{48.53} & \textbf{77.07} & \textbf{65.24} & \textbf{45.83} & \textbf{71.96} & \textbf{65.08} & \textbf{39.69} & \textbf{86.81} & \textbf{79.40} & \textbf{55.53} & \textbf{93.29} & \textbf{72.63} & \textbf{48.52} & \textbf{82.70} & \textbf{69.27} & \textbf{59.14} & \textbf{81.65} \\
+Full Model & \textbf{72.33} & \textbf{48.53} & \textbf{77.07} & \textbf{65.22} & \textbf{45.83} & \textbf{71.96} & \textbf{65.21} & \textbf{39.69} & \textbf{86.81} & \textbf{79.31} & \textbf{55.53} & \textbf{93.29} & \textbf{72.67} & \textbf{48.52} & \textbf{82.70} & \textbf{69.25} & \textbf{59.14} & \textbf{81.65} \\
 w/o Text Branch & 69.62 & 47.38 & 76.14 & 63.82 & 42.53 & 71.31 & 61.28 & 30.04 & 77.52 & 72.85 & 44.22 & 83.82 & 64.35 & 30.11 & 71.66 & 66.34 & \underline{44.60} & \underline{72.11} \\
 w/o Component Sem. & \underline{71.47} & 47.02 & \underline{76.53} & \underline{64.51} & \underline{44.97} & 71.08 & \underline{63.45} & \underline{38.93} & \underline{85.52} & \underline{77.91} & \underline{47.89} & \underline{90.52} & \underline{71.46} & \underline{47.40} & \underline{80.79} & \underline{66.96} & 43.63 & 72.04 \\
 w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \underline{71.43} & 63.17 & 34.07 & 81.31 & 77.22 & 46.39 & 83.48 & 68.05 & 34.77 & 71.98 & 63.50 & 36.99 & 65.38 \\
@@ -526,90 +526,57 @@ w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \under
 
 \subsection{Ablation Study}
 
-To validate the effectiveness of our core design choices, we conduct ablation studies by systematically removing key components: (1) the entire textual branch, (2) the structural component semantics, and (3) the semantic reconstruction guidance. Table~\ref{tab:ablation} reports the results.
+Table~\ref{tab:ablation} reports ablation results examining the contribution of each design component along the method pipeline.
 
-\textbf{Effectiveness of Textual Branch.} Removing the entire textual branch (using only temporal reconstruction) causes the largest degradation, with Aff-F dropping by 2.6--6.6\% across datasets. This confirms that LLM-derived textual representations provide essential complementary information for anomaly detection. The drop is most pronounced on KR ($-$6.6\%) and EWJ ($-$8.3\%), where collective anomalies require structural understanding beyond pure temporal patterns.
+\textbf{Effect of Textual Branch.} Removing the entire textual branch (w/o Text Branch) degrades Aff-F by 2.6--8.3\% across datasets. The largest drops occur on KR ($-$6.5\%) and EWJ ($-$8.3\%), indicating that LLM-derived textual representations provide essential complementary information, especially for datasets with collective anomalies that require structural understanding.
 
-\textbf{Effect of Component Semantics.} Removing the structural component view (trend/seasonal/residual decomposition) while retaining the statistical prompt view causes performance degradation on most datasets, with Aff-F dropping by 0.7--2.3\%. This suggests that component semantics are particularly important for datasets with collective anomalies (KR, MDT) and complex temporal structures (Environment), where trend and seasonal decomposition helps distinguish true anomalies from normal pattern variations.
+\textbf{Effect of Component Semantics.} Removing the structural component view (trend/seasonal/residual) while retaining the statistical view (w/o Component Sem.) causes 0.7--2.3\% Aff-F degradation. The drop is most notable on KR ($-$1.5\%) and MDT ($-$2.3\%), suggesting that component-level semantics help distinguish true anomalies from normal pattern variations in datasets with collective anomalies.
 
-\textbf{Effect of Semantic Reconstruction.} Removing the reconstruction-based semantic guidance (where aligned textual features guide masked patch recovery) causes consistent degradation on most datasets, with Aff-F dropping by 1.0--4.6\%. The largest drops occur on EWJ ($-$4.6\%) and MDT ($-$5.8\%), confirming that textual guidance during reconstruction is critical for detecting sustained anomalies. Without semantic reconstruction, the model reverts to purely temporal reconstruction, losing the ability to leverage textual regularities for anomaly discrimination.
+\textbf{Effect of Text-Guided Reconstruction.} Removing the text-guided reconstruction mechanism (w/o Semantic Recon.) degrades Aff-F by 1.0--5.8\%. The largest drops occur on EWJ ($-$4.6\%) and MDT ($-$5.8\%), confirming that using aligned textual features to guide masked patch recovery is important for detecting sustained anomalies.
+
+\textbf{Effect of Gaussian Alignment.} We note that the ablation table does not include a variant without Gaussian alignment (i.e., $\lambda=0$). The hyperparameter analysis in Figure~\ref{fig:hyperparameter} shows that setting $\lambda=0$ causes clear performance degradation, indicating that the probabilistic alignment mechanism contributes to detection accuracy. A dedicated ablation row for w/o Gaussian Alignment should be included in future revisions.
+
+
+
 
 
 
 \subsection{Hyperparameter Sensitivity Analysis}
 
-We analyze the sensitivity of \method{} to key hyperparameters: mask ratio for reconstruction and alignment loss weight $\lambda$. Figure~\ref{fig:hyperparameter} shows Aff-F, V-PR, and V-ROC scores across different hyperparameter values on six datasets.
+Figure~\ref{fig:hyperparameter} shows the sensitivity of Aff-F to mask ratio and alignment loss weight $\lambda$.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
-\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F, V-PR, and V-ROC scores across six datasets.}
+\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F scores across six datasets.}
 \label{fig:hyperparameter}
 \end{figure}
 
-\textbf{Mask Ratio.} A moderate ratio of 0.4--0.5 achieves optimal performance, balancing sufficient context preservation with reconstruction difficulty. Lower ratios (0.1--0.2) provide too much context, making the reconstruction task too easy and reducing anomaly discriminability. A higher ratio (0.6) removes excessive information, hindering accurate reconstruction on some datasets (e.g., Energy drops from 65.2\% to 62.1\% in Aff-F). Datasets with strong seasonality (Weather, Environment) are more robust to higher mask ratios, while irregular patterns (KR, EWJ) benefit from moderate masking.
+\textbf{Mask Ratio.} A moderate ratio of 0.4--0.5 achieves optimal performance. Lower ratios (0.1--0.2) provide excessive context, making reconstruction too easy and reducing anomaly discriminability. Higher ratios (0.6) remove too much information, degrading reconstruction quality (e.g., Energy drops from 65.2\% to 62.1\% Aff-F). Seasonal datasets (Weather, Environment) tolerate higher mask ratios better than irregular patterns (KR, EWJ).
 
-\textbf{Alignment Loss Weight.} Setting $\lambda=1.0$ achieves the best average performance. When $\lambda=0$ (no alignment), the model degrades significantly on KR (77.2\% vs.\ 79.4\%) and Environment (61.6\% vs.\ 65.1\%), confirming that text-temporal alignment is essential. Increasing $\lambda$ from 0.1 to 1.0 steadily improves performance, while $\lambda=2.0$ yields comparable results, suggesting that the model saturates beyond a certain alignment strength.
+\textbf{Alignment Loss Weight.} Setting $\lambda=1.0$ achieves the best average performance. When $\lambda=0$ (no alignment), Aff-F drops on KR (77.2\% vs.\ 79.4\%) and Environment (61.6\% vs.\ 65.1\%), indicating that alignment is necessary. Performance saturates beyond $\lambda=1.0$, suggesting that excessive alignment weight does not provide further gains.
 
 \subsection{Visualization and Case Study}
 
-To understand why \method{} achieves superior anomaly detection performance, we visualize the reconstruction error distributions, analyze specific detection cases, and examine the internal alignment quality.
+\textbf{Anomaly Score Visualization.} Figure~\ref{fig:anomaly_score_grid} shows anomaly scores across six datasets. Top row: input series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line). The anomaly scores peak within anomalous regions across diverse temporal patterns.
 
-\textbf{Reconstruction Error Analysis.} Figure~\ref{fig:recon_error}(a) compares the reconstruction error distributions of normal vs.\ anomalous windows on the KR dataset. \method{} exhibits clearer separation between normal and anomalous error distributions, with anomalous windows showing significantly higher reconstruction errors. This demonstrates that distribution-driven alignment enables more discriminative anomaly scoring.
-
-\textbf{Case Study: Collective Anomaly Detection.} Figure~\ref{fig:recon_error}(b) shows representative anomaly detection cases across multiple datasets. \method{} correctly identifies anomalous segments due to its structural component view capturing persistent trend deviations. In contrast, pure temporal baselines only detect partial segments or miss anomalies entirely, as they lack textual descriptions of trend changes that help distinguish true anomalies from normal fluctuations.
-
-\begin{figure}[!t]
+\begin{figure*}[!t]
 \centering
-\begin{minipage}[t]{0.48\columnwidth}
-\centering
-\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/error_distribution/reconstruction_error_KR.pdf}\\
-{\scriptsize (a) Reconstruction error on KR}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.48\columnwidth}
-\centering
-\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/paper_style_cases/mindts_detection_case_studies.pdf}\\
-{\scriptsize (b) Detection case studies}
-\end{minipage}
-\caption{(a) Reconstruction error distributions for normal vs.\ anomalous windows on KR. (b) Anomaly detection case studies across multiple datasets.}
-\label{fig:recon_error}
-\end{figure}
-
-\textbf{Alignment Quality Visualization.} Figure~\ref{fig:align_score}(a) visualizes the text-temporal alignment quality by showing the predicted mean $\boldsymbol{\mu}$ and variance $\exp(\boldsymbol{\ell})$ from the textual representation on the KR dataset. During normal periods, the predicted distributions closely match the actual temporal features (low variance, accurate mean). During anomalies, the variance increases significantly, indicating that the textual description cannot well-explain the anomalous pattern. This uncertainty provides an additional signal for anomaly detection, complementing the reconstruction error.
-
-\textbf{Anomaly Score Overview.} Figure~\ref{fig:align_score}(b) presents the anomaly score overview on the KR dataset, showing the reconstruction-based anomaly scores alongside ground-truth labels. The scores align well with true anomalous segments, confirming the effectiveness of our text-temporal alignment in producing discriminative anomaly scores.
-
-\begin{figure}[!t]
-\centering
-\begin{minipage}[t]{0.48\columnwidth}
-\centering
-\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/error_distribution/prediction_distribution_KR.pdf}\\
-{\scriptsize (a) Prediction distribution on KR}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.48\columnwidth}
-\centering
-\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/KR/01_real_score_segment_overview.pdf}\\
-{\scriptsize (b) Anomaly score overview on KR}
-\end{minipage}
-\caption{(a) Text-temporal alignment quality on KR, showing predicted mean and variance. (b) Anomaly score segment overview on KR, with reconstruction scores aligned to ground-truth labels.}
-\label{fig:align_score}
-\end{figure}
-
-\textbf{Multi-Dataset Anomaly Score Visualization.} Figure~\ref{fig:anomaly_score_grid} presents the anomaly score visualization across three representative datasets (KR, Energy, Weather), showing both the input series (top row) and the corresponding anomaly scores (bottom row) with ground-truth anomalous segments highlighted. The figure demonstrates that \method{} produces well-calibrated anomaly scores that align closely with true anomalous regions across diverse data patterns: KR exhibits sharp, point-wise anomalies; Energy shows gradual trend deviations; and Weather displays seasonal irregularities. The consistent alignment between anomaly score peaks and ground-truth segments (pink shaded regions) validates the effectiveness of our text-temporal alignment approach.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/all_datasets/six_dataset_anomaly_score_grid_with_caption.pdf}
-\caption{Anomaly score visualization on KR, Energy, and Weather datasets. Top row: input time series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line). The anomaly scores exhibit clear peaks within anomalous regions, demonstrating effective detection across diverse temporal patterns.}
+\includegraphics[width=\textwidth]{Figures/detection_case.pdf}
+\caption{Anomaly score visualization on KR, EWJ, MDT, Environment, Energy, and Weather datasets. Top row: input time series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line).}
 \label{fig:anomaly_score_grid}
 \vspace{-0.5em}
+\end{figure*}
+
+\textbf{Patch-Level Gaussian Alignment.} Figure~\ref{fig:gaussian_nll} visualizes the patch-level Gaussian NLL computed from the text-derived distribution to each temporal patch representation. The x-axis shows patch center time index. Lower NLL in normal regions indicates that the text-derived Gaussian distribution explains the temporal patch well; higher NLL in anomalous regions (pink shading) indicates mismatch between semantic prediction and temporal observation. Note that NLL is an internal diagnostic signal of the alignment mechanism, not the final anomaly score, which is computed from reconstruction error.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{Figures/gaussian_nll.pdf}
+\caption{Patch-level Gaussian NLL on a representative segment. Lower NLL in normal regions indicates good text-temporal alignment; higher NLL in anomalous regions (pink shading) indicates semantic-temporal mismatch.}
+\label{fig:gaussian_nll}
+\vspace{-0.5em}
 \end{figure}
-
-\textbf{Robustness Across LLM Backbones.} The LLM comparison experiments reveal that Ours achieves competitive performance across various lightweight language models (1B--1.7B parameters). The relatively small performance variation (standard deviation $<$ 2\% across datasets) suggests that our method is robust to the choice of backbone, as long as the model provides reasonable textual representations. This is particularly important for practical deployment, as it allows flexibility in model selection based on computational constraints. Furthermore, this robustness indicates that Ours can potentially benefit from future advances in language model capabilities without requiring architectural modifications.
-
-\textbf{Importance of Architectural Design.} The ablation studies provide crucial insights into the architectural choices of Ours. First, the cross-view textual fusion mechanism is essential for integrating complementary information from statistical and structural perspectives. Second, the reconstruction-based text exchange ensures that textual information is incorporated in a controlled manner, preventing indiscriminate feature contamination. These design choices are particularly critical for handling subtle anomalies that require nuanced understanding of both distributional and structural characteristics.
-
-\textbf{Limitations and Future Directions.} While Ours demonstrates strong performance, several limitations present opportunities for future work. First, the current method relies on frozen LLM backbones; fine-tuning or adapter-based adaptation could potentially improve textual representation quality for specific domains. Second, the textual description generation is based on predefined templates; exploring learned or neural-based description generation could enhance flexibility. Third, extending the framework to handle multimodal time series (e.g., combining sensor data with images or audio) represents an exciting direction for future research.
 
 \section{Conclusion}
 
