@@ -6,7 +6,6 @@ import torch.nn as nn
 import json
 from sklearn.preprocessing import StandardScaler
 from torch.optim import lr_scheduler
-import torch.nn.functional as F
 from ts_benchmark.baselines.MindTS.models.MindTS_model import MINDTSModel
 from ts_benchmark.baselines.utils import anomaly_detection_data_provider, anomaly_detection_multi_data_provider, anomaly_detection_timeMMD_data_provider
 from ts_benchmark.baselines.utils import train_val_split
@@ -71,7 +70,7 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "llm_model_path": "DeepSeek",
     "llm_model_name": "DeepSeek-R1-Distill-Qwen-1.5B",
     "llm_layers": 6,
-    "align_loss_type": "contrastive",
+    "align_loss_type": "text_gaussian_nll",
     "align_detach_target": True,
     "align_logvar_min": -6.0,
     "align_logvar_max": 2.0,
@@ -82,14 +81,6 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "ablation_variant": "full",
     "export_intermediate": False,
 }
-
-def clip_loss(logits_per_time, logits_per_text):
-    loss_device = logits_per_time.device
-    labels = torch.arange(logits_per_time.shape[1], device=loss_device).long()
-    total_loss = torch.zeros((), device=loss_device, dtype=logits_per_time.dtype)
-    for i in range(logits_per_time.shape[0]):
-        total_loss += (F.cross_entropy(logits_per_time[i], labels) + F.cross_entropy(logits_per_text[i], labels)) / 2
-    return total_loss / logits_per_time.shape[0]
 
 def gaussian_nll_reconstruction_loss(target, mu, logvar, logvar_min=-6.0, logvar_max=2.0):
     logvar = torch.clamp(logvar, logvar_min, logvar_max)
@@ -223,6 +214,13 @@ class MindTS:
         if isinstance(value, bool):
             return value
         return str(value).lower() in {"1", "true", "yes", "y", "on"}
+
+    def _append_alignment_intermediates(self, buffers):
+        debug = getattr(self._base_model(), "last_alignment_debug", {}) or {}
+        for key in ("align_nll_patch", "align_sigma_patch", "align_abs_error_patch"):
+            value = debug.get(key)
+            if value is not None:
+                buffers[f"threshold_{key}"].append(value.detach().cpu().numpy().astype(np.float32))
 
     def _get_main_device(self):
         model = self._base_model()
@@ -383,7 +381,7 @@ class MindTS:
                     criterion,
                 ).detach().cpu().numpy()
 
-                # Comparison Loss
+                # Text-temporal alignment loss
                 loss2 = align_loss.detach().cpu().numpy()
 
                 loss = loss1 + self.lamda1 * loss2
@@ -639,7 +637,7 @@ class MindTS:
                     criterion,
                 )
 
-                # Comparison Loss
+                # Text-temporal alignment loss
                 loss2 = align_loss
 
                 loss = loss1 + self.lamda1 * loss2
@@ -1011,6 +1009,9 @@ class MindTS:
             "threshold_outputs_logvar": [],
             "threshold_logits_per_time": [],
             "threshold_logits_per_text": [],
+            "threshold_align_nll_patch": [],
+            "threshold_align_sigma_patch": [],
+            "threshold_align_abs_error_patch": [],
             "threshold_window_labels": [],
         } if collect_intermediate else None
 
@@ -1163,6 +1164,7 @@ class MindTS:
                 intermediate_buffers["threshold_outputs_logvar"].append(outputs_logvar.detach().cpu().numpy().astype(np.float32))
                 intermediate_buffers["threshold_logits_per_time"].append(logits_per_time.detach().cpu().numpy().astype(np.float32))
                 intermediate_buffers["threshold_logits_per_text"].append(logits_per_text.detach().cpu().numpy().astype(np.float32))
+                self._append_alignment_intermediates(intermediate_buffers)
                 intermediate_buffers["threshold_window_labels"].append(batch_y.detach().cpu().numpy().astype(np.float32))
             self._log_model_batch_shapes(
                 "detect_multi_label.threshold_first_batch",

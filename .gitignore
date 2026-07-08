@@ -31,4 +31,4 @@ models/
 # 如果你的 temp.txt 只是临时草稿，不想提交，也可以加进来
 temp.txt
 Labels/
-paper.tex
+# paper.tex

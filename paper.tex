@@ -1,0 +1,620 @@
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+% The serif, sans-serif, and monospaced fonts are loaded automatically by
+% aaai2027.sty (newtxtext, helvet, courier). DO NOT add \usepackage{times},
+% \usepackage{helvet}, \usepackage{courier}, or any other font package.
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{adjustbox}
+%
+% Keep the \pdfinfo as shown here. There's no need
+% for you to add the /Title and /Author tags.
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+% DISALLOWED PACKAGES
+% \usepackage{authblk} -- This package is specifically forbidden
+% \usepackage{balance} -- This package is specifically forbidden
+% \usepackage{CJK} -- This package is specifically forbidden
+% \usepackage{float} -- This package is specifically forbidden
+% \usepackage{flushend} -- This package is specifically forbidden
+% \usepackage{fullpage} -- This package is specifically forbidden
+% \usepackage{geometry} -- This package is specifically forbidden
+% \usepackage{hyperref} -- This package is specifically forbidden
+% \usepackage{navigator} -- This package is specifically forbidden
+% (or any other package that embeds links such as navigator or hyperref)
+% \usepackage{indentfirst} -- This package is specifically forbidden
+% \usepackage{layout} -- This package is specifically forbidden
+% \usepackage{multicol} -- This package is specifically forbidden
+% \usepackage{nameref} -- This package is specifically forbidden
+% \usepackage{savetrees} -- This package is specifically forbidden
+% \usepackage{setspace} -- This package is specifically forbidden
+% \usepackage{stfloats} -- This package is specifically forbidden
+% \usepackage{tabu} -- This package is specifically forbidden
+% \usepackage{titlesec} -- This package is specifically forbidden
+% \usepackage{tocbibind} -- This package is specifically forbidden
+% \usepackage{ulem} -- This package is specifically forbidden
+% \usepackage{wrapfig} -- This package is specifically forbidden
+% DISALLOWED COMMANDS
+% \nocopyright -- Your paper will not be published if you use this command
+% \addtolength -- This command may not be used
+% \balance -- This command may not be used
+% \baselinestretch -- Your paper will not be published if you use this command
+% \clearpage -- No page breaks of any kind may be used for the final version of your paper
+% \columnsep -- This command may not be used
+% \newpage -- No page breaks of any kind may be used for the final version of your paper
+% \pagebreak -- No page breaks of any kind may be used for the final version of your paper
+% \pagestyle -- This command may not be used
+% \tiny -- This is not an acceptable font size.
+% \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
+% \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
+
+\newcommand{\method}{Ours}
+
+\setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
+
+% The file aaai2027.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+
+% Title
+
+% Your title must be in mixed case, not sentence case.
+% That means all verbs (including short verbs like be, is, using,and go),
+% nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
+% articles, conjunctions, and prepositions are lower case unless they
+% directly follow a colon or long dash
+\title{Title Placeholder}
+\author{
+    Anonymous Submission
+}
+\affiliations{
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Time-series anomaly detection aims to identify abnormal segments that deviate from normal temporal behaviors. Recent multimodal methods have shown the potential of incorporating textual information for anomaly detection. However, external textual sources, such as logs, events, or manual descriptions, are often noisy, weakly aligned with numerical signals, and mixed with task-irrelevant semantics, which may interfere with reconstruction-based anomaly scoring. To address this issue, we propose a text-temporal multimodal reconstruction framework for time-series anomaly detection. Instead of relying on external textual annotations or directly asking language models to judge anomalies, our framework derives textual descriptions from the time series itself to summarize segment-level temporal behaviors. The descriptions are encoded by a frozen large language model and aligned with numerical patch representations through a probabilistic text-temporal alignment objective. The aligned textual features are then incorporated into a cross-modal masked reconstruction module to guide temporal patch recovery. During inference, reconstruction errors are used as anomaly scores. Experiments on benchmark datasets demonstrate that our framework consistently improves anomaly detection performance.
+\end{abstract}
+
+% Uncomment the following to link to your code, datasets, an extended version or similar.
+% You must keep this block between (not within) the abstract and the main body of the paper.
+% Make sure that you do not de-anonymize yourself with these links.
+% \begin{links}
+%     \link{Code}{https://aaai.org/example/code}
+%     \link{Datasets}{https://aaai.org/example/datasets}
+%     \link{Extended version}{https://aaai.org/example/extended-version}
+% \end{links}\section{Introduction}
+
+\section{Introduction}
+
+Time-series anomaly detection (TSAD) aims to identify observations or segments that deviate from expected temporal behaviors, and has been widely studied in anomaly detection research \cite{chandola2009anomaly,blazquez2021review}. It plays a critical role in real-world monitoring scenarios such as spacecraft telemetry, industrial systems, cloud services, cyber-physical systems, and large-scale sensor networks \cite{hundman2018detecting,zhong2023survey}. Since abnormal events are usually rare, diverse, and expensive to annotate, unsupervised reconstruction-based methods have become a widely adopted paradigm. Representative studies learn normal temporal patterns through density estimation, reconstruction, or hierarchical representation learning, such as DAGMM \cite{zong2018deep}, MSCRED \cite{zhang2019mscred}, and THOC \cite{shen2020time}. These methods show that modeling regular temporal dynamics from historical observations is effective for detecting abnormal deviations.
+
+Despite their progress, most reconstruction-based TSAD methods still operate mainly in the numerical space. They recover raw values or latent representations from corrupted inputs, while the high-level behaviors behind a time-series window are usually learned only implicitly. In practice, anomalies may not only appear as point-wise deviations, but also as abnormal local variation, trend evolution, periodic dependency, lag dependency, or component-level changes. Prior time-series modeling studies have shown that decomposition, periodicity, frequency-domain structures, and temporal dependencies are essential for understanding sequential data \cite{wu2021autoformer,zhou2022fedformer,gao2020robusttad}. However, these temporal structures are rarely transformed into explicit textual representations for reconstruction-based anomaly detection. As a result, existing methods may overlook useful behavioral cues that are difficult to capture from numerical reconstruction alone.
+
+Recent advances in foundation models, language models, and multimodal learning provide new opportunities for introducing textual information into time-series modeling. TimeGPT, MOMENT, and Lag-Llama demonstrate the potential of large-scale pretraining for general time-series analysis \cite{garza2023timegpt,goswami2024moment,rasul2024lagllama}, while recent studies also begin to investigate whether language models can understand time-series anomalies \cite{zhou2024can}. However, existing attempts to incorporate textual information still face several limitations. Directly serializing raw numerical values into text usually produces lengthy inputs with limited behavioral abstraction, while methods relying on external textual information may suffer from noise, redundancy, and weak alignment with the target time-series window. More importantly, textual information is often used as auxiliary prompts or decision-level cues, which is insufficient for reconstruction-based TSAD where anomaly scoring depends on temporal recovery. Therefore, textual information should be derived from the time series itself and transformed into reconstruction-compatible signals that can interact with numerical patch representations.
+
+
+To bridge the gap between textual temporal information and numerical temporal recovery, we propose a text-temporal reconstruction framework for time-series anomaly detection. Given an input window, we divide the time series into local patches and construct dual-view textual information directly from the time series itself. The behavior description view summarizes segment-level temporal patterns, while the distribution prediction view transforms textual information into reconstruction-oriented predictive distributions. These text-derived distributions are then aligned with numerical patch representations to guide masked temporal reconstruction. In this way, our method converts time-series-derived textual information into reconstruction-compatible signals, allowing textual information to directly contribute to reconstruction-based anomaly scoring.
+
+Our main contributions are summarized as follows:
+
+\begin{itemize}
+\item We propose a text-temporal reconstruction framework for TSAD that incorporates time-series-derived textual information into masked temporal reconstruction, moving beyond purely numerical patch recovery.
+
+
+\item We design a dual-view text construction strategy from the input time-series window, where the behavior description view summarizes segment-level temporal patterns and the distribution prediction view converts textual information into reconstruction-oriented predictive distributions.
+
+\item We develop a distribution-guided fusion mechanism that aligns text-derived predictive distributions with numerical patch representations, enabling textual information to guide masked patch recovery and improve reconstruction-based anomaly scoring.
+
+
+\end{itemize}
+
+
+
+
+
+
+
+\section{Related Work}
+
+\subsection{Time-Series Anomaly Detection}
+
+Time-series anomaly detection (TSAD) aims to identify observations or segments that deviate from normal temporal patterns, and has been widely studied in industrial monitoring, cloud systems, cyber-physical systems, and sensor networks. Deep TSAD methods commonly follow reconstruction-, prediction-, density-estimation-, or representation-learning-based paradigms. OmniAnomaly models multivariate temporal dynamics with stochastic recurrent networks and detects anomalies using reconstruction probability \cite{su2019robust}, while USAD introduces adversarially trained autoencoders for efficient unsupervised anomaly detection \cite{audibert2020usad}. To better capture dependencies among variables, MTAD-GAT combines forecasting and reconstruction with temporal and feature-oriented graph attention \cite{zhao2020mtadgat}, and GDN learns sensor relationships to detect deviations from graph-based normal behavior \cite{deng2021graph}. InterFusion further models inter-metric and temporal dependencies through hierarchical latent variables \cite{li2021interfusion}. More recently, Transformer-based methods have improved long-range dependency modeling. Anomaly Transformer proposes association discrepancy to distinguish abnormal temporal associations \cite{xu2022anomaly}, TranAD adopts self-conditioning and adversarial training for multivariate anomaly detection \cite{tuli2022tranad}, and DCdetector explores dual-attention contrastive representation learning for anomaly discrimination \cite{yang2023dcdetector}.
+
+Another relevant line of work is patch-based and masked time-series modeling. PatchTST represents time series as local patches, reducing attention cost while preserving local temporal semantics \cite{nie2023time}. TimesNet transforms one-dimensional series into two-dimensional temporal variations to capture multi-periodic patterns \cite{wu2023timesnet}. Ti-MAE and SimMTM show that masked reconstruction can encourage models to learn informative temporal representations from corrupted time-series inputs \cite{li2023timae,dong2023simmtm}. These studies suggest that local patches, temporal variations, periodic structures, and masked recovery are important for time-series representation learning. However, most existing TSAD methods still operate mainly in the numerical space. Segment-level behaviors such as local variation, trend evolution, periodic dependency, lag dependency, and component-level changes are usually learned implicitly by neural networks rather than explicitly represented. This motivates our work to construct textual behavioral descriptions from the time series itself and use them to assist reconstruction-based anomaly detection.
+\subsection{Multimodal Time-Series Analysis}
+
+Recent studies have explored modeling time series beyond purely numerical representations by introducing language models and multimodal learning. Some methods reformulate time-series forecasting into language-compatible tasks, such as sentence-to-sentence prediction or numerical value serialization \cite{xue2024promptcast,gruver2023large}. Others tokenize time series or adapt pretrained foundation models through alignment and reprogramming, enabling language-model architectures to process temporal data \cite{ansari2024chronos,zhou2023one,sun2024test,jin2024timellm}. In addition, decomposition-aware prompting and temporal structure modeling have been introduced to better adapt language models to time-series analysis \cite{cao2024tempo}. These studies show the potential of language-model priors for temporal modeling, but they mainly focus on forecasting or general representation learning rather than reconstruction-based anomaly detection.
+
+Multimodal time-series analysis further investigates how numerical signals interact with auxiliary modalities such as text, images, events, and domain knowledge \cite{jia2024gpt4mts,zhang2024large,jiang2024empowering}. For TSAD, recent works convert time series into textual or visual forms for LLM/MLLM-based anomaly detection, or explore time-text alignment for multimodal anomaly modeling \cite{alnegheimish2024large,xu2025can,hu2026towards}. However, these methods often rely on raw-value serialization, visualized inputs, external textual cues, or decision-level reasoning. In contrast, our method derives textual descriptions directly from the input time-series window and transforms them into predictive distributions aligned with numerical patch representations, allowing textual temporal information to participate in masked reconstruction and anomaly scoring.
+
+
+
+\section{Methodology}
+
+\begin{figure*}[!t]
+\centering
+\fbox{\parbox{0.95\textwidth}{\centering\vspace{3cm}\textbf{Figure~\ref{fig:architecture}:} Overview of \method{} Framework\\\vspace{0.3cm}
+\small
+\textbf{Left:} Input window normalization, patching, and masking\\
+\textbf{Middle:} Dual-view textual modality construction (Statistical prompt view + Structural component view)\\
+\textbf{Right:} Text-temporal alignment and masked reconstruction\vspace{3cm}}}
+\vspace{-0.3cm}
+\caption{Overview of the proposed \method{} framework for multi-view time series anomaly detection with textual fusion.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{Problem Statement}
+
+Given an input window $\mathbf{X}\in \mathbb{R}^{L\times C}$, where $L$
+denotes the window length and $C$ represents the number of variables, the
+model learns a reconstruction mapping
+$\widehat{\mathbf{X}}=f_{\theta}(\mathbf{X})$. During inference, the
+reconstruction error serves as the anomaly score. Let $x_{t,c}$ and
+$\hat{x}_{t,c}$ denote the $c$-th variable at timestamp $t$ of the input
+and its reconstruction, respectively. The anomaly score is computed as
+the channel-averaged reconstruction error:
+\begin{equation}
+    s_t =
+    \frac{1}{C}
+    \sum_{c=1}^{C}
+    (x_{t,c}-\hat{x}_{t,c})^2 .
+\end{equation}
+A larger $s_t$ indicates that the observation is harder to reconstruct
+under the learned normal patterns, and is therefore more likely to be
+anomalous.
+
+\subsection{Overview}
+
+The proposed framework reconstructs each input window by jointly modeling numerical temporal patterns and structured textual descriptions derived from the time series itself. As illustrated in Figure~\ref{fig:architecture}, \method{} consists of three main stages: (1) temporal patch encoding with masking, (2) dual-view textual modality construction, and (3) text-temporal alignment for masked reconstruction.
+
+Given an input window $\mathbf{X}\in \mathbb{R}^{L\times C}$, we first apply window-level normalization:
+\begin{equation}
+    \bar{\mathbf{X}} = \frac{\mathbf{X}-\mathbf{m}}{\boldsymbol{\sigma}}, \quad \boldsymbol{\sigma} = \sqrt{\mathrm{Var}(\mathbf{X})+\epsilon},
+\end{equation}
+where $\mathbf{m}$ and $\boldsymbol{\sigma}$ are computed along the temporal dimension and $\epsilon$ is a small constant for numerical stability. The normalized sequence is divided into patches with size $p$ and stride $r$, yielding $N_p = \lfloor(L-p)/r\rfloor + 1$ patches. Each patch is projected to dimension $d$ via a learnable linear projection $\mathbf{W}_{\mathrm{patch}} \in \mathbb{R}^{p \times d}$, followed by additive positional encoding. The resulting patch representation is $\mathbf{P}\in \mathbb{R}^{BC\times N_p\times d}$, where $B$ is the batch size and $d$ is the hidden dimension. A random patch mask is applied to construct incomplete temporal evidence. Both the complete and masked patch sequences are encoded by a shared Transformer encoder $E_t$, where $\mathrm{Mask}(\cdot)$ randomly zeros out a fraction of patch tokens:
+\begin{equation}
+    \mathbf{H}^{t}=E_t(\mathbf{P}), \quad \widetilde{\mathbf{H}}^{t} = E_t(\mathrm{Mask}(\mathbf{P})),
+\end{equation}
+where $\mathbf{H}^{t}$ serves as the complete temporal representation for alignment and $\widetilde{\mathbf{H}}^{t}$ serves as the masked temporal representation for reconstruction.
+
+\subsection{Textual Modality Construction}
+
+The textual modality is constructed from two complementary views of the
+input window.
+
+\textbf{Statistical prompt view.}
+For each channel-wise patch, the model extracts statistical descriptors
+including the minimum, maximum, and median values, and dominant lags
+computed via autocorrelation. It also estimates a coarse window-level
+trend direction from first-order differences across patches and inserts
+this trend descriptor into each patch prompt. These descriptors are
+formatted with dataset context into a natural-language prompt and encoded
+by a frozen large language model. Let $\mathbf{H}^{\mathrm{llm}} \in
+\mathbb{R}^{BCN_p \times M \times d_{\mathrm{llm}}}$ denote the
+LLM hidden states, where $M$ is the maximum prompt length.
+These are first projected to the temporal latent space via
+$\mathbf{W}_{h} \in \mathbb{R}^{d_{\mathrm{llm}} \times d}$,
+flattened over the token dimension, and then projected to dimension $d$
+via $\mathbf{W}_{\mathrm{prompt}} \in \mathbb{R}^{(M \cdot d) \times d}$:
+\begin{equation}
+\begin{aligned}
+    \mathbf{U}'
+    &=
+    \operatorname{flatten}\left(\Phi(\bar{\mathbf{X}})\mathbf{W}_{h}\right)
+    \mathbf{W}_{\mathrm{prompt}}, \\
+    \mathbf{U}
+    &=
+    \operatorname{reshape}_{BC\times N_p\times d}(\mathbf{U}').
+\end{aligned}
+\end{equation}
+where $\Phi(\cdot)$ denotes the prompt construction function that
+returns $\mathbf{H}^{\mathrm{llm}}$, and $\operatorname{flatten}(\cdot)$
+reshapes $\mathbb{R}^{BCN_p \times M \times d}$ to
+$\mathbb{R}^{BCN_p \times (M \cdot d)}$. Accordingly,
+$\mathbf{U}\in\mathbb{R}^{BC\times N_p\times d}$. Since the LLM
+parameters are frozen, the language model serves as a text encoder
+rather than a trainable anomaly detector.
+
+\textbf{Structural component view.}
+The raw input window is decomposed into trend, seasonal, and residual
+components:
+\begin{equation}
+    \mathbf{X}
+    =
+    \mathbf{X}^{tr}
+    +
+    \mathbf{X}^{se}
+    +
+    \mathbf{X}^{re}.
+\end{equation}
+The trend component is obtained by a moving-average filter followed by
+a linear temporal mapping; the seasonal component is estimated from the
+detrended signal via a feed-forward network; and the residual component
+is the remaining signal. Each component is independently normalized and
+patch-embedded. Let $\mathbf{R}^{q} \in \mathbb{R}^{M\times d}$ denote the
+LLM-encoded role prompt for component $q \in \{tr, se, re\}$. The
+component patch embeddings are concatenated with their respective role
+prompts and encoded by a component encoder $E_c$ shared across components:
+\begin{equation}
+    \mathbf{V}^{q}
+    =
+    \Pi_{\mathrm{patch}}
+    \left(E_c\left([\mathbf{R}^{q}; \mathbf{P}^{q}]\right)\right),
+\end{equation}
+where $[\cdot;\cdot]$ denotes concatenation along the patch dimension,
+and $\Pi_{\mathrm{patch}}(\cdot)$ selects the $N_p$ output tokens
+corresponding to component patches after removing the role prompt tokens.
+The encoded representations of the trend, seasonal, and residual
+components are denoted as $\mathbf{V}^{tr}$,
+$\mathbf{V}^{se}$, and $\mathbf{V}^{re}$, respectively. These are fused
+via a learnable linear projection $\mathbf{W}_{c} \in \mathbb{R}^{3d \times d}$:
+\begin{equation}
+    \mathbf{V}
+    =
+    [\mathbf{V}^{tr};\mathbf{V}^{se};\mathbf{V}^{re}]
+    \mathbf{W}_{c},
+\end{equation}
+where $[\cdot;\cdot;\cdot]$ denotes concatenation along the feature
+dimension. Accordingly, $\mathbf{U}$ captures prompt-level statistical
+features and $\mathbf{V}$ captures structure-aware temporal
+features.
+
+\subsection{Text-Temporal Alignment}
+
+The two textual views are integrated via a cross-attention layer
+followed by a feed-forward network. Denoting multi-head attention as
+$\mathcal{A}(Q,K,V)$, layer normalization as $\mathrm{LN}(\cdot)$, and
+a feed-forward network as $\mathrm{FFN}(\cdot)$, the fusion is
+formulated as a standard Transformer block:
+\begin{align}
+    \mathbf{Z}_1 &= \mathrm{LN}\left(\mathbf{U} + \mathcal{A}(\mathbf{U},\mathbf{V},\mathbf{V})\right), \\
+    \mathbf{Z} &= \mathrm{LN}\left(\mathbf{Z}_1 + \mathrm{FFN}(\mathbf{Z}_1)\right),
+\end{align}
+where $\mathbf{U}$ serves as the query and $\mathbf{V}$ serves as the
+key and value. The output $\mathbf{Z} \in \mathbb{R}^{BC\times N_p\times d}$
+is the fused textual representation of the input window.
+
+To align the textual representation with the temporal representation,
+we model the conditional distribution of the temporal patches given
+the textual representation as a diagonal Gaussian distribution. The
+textual representation predicts the mean and log-variance tensors:
+\begin{equation}
+    \boldsymbol{\mu}=f_{\mu}(\mathbf{Z}), \quad
+    \boldsymbol{\ell}=\operatorname{clip}(f_{\sigma}(\mathbf{Z})).
+\end{equation}
+where $f_{\mu}$ and $f_{\sigma}$ are linear projections and
+$\boldsymbol{\ell}=\log\boldsymbol{\sigma}^{2}$. For each training
+window, let $c\in\{1,\ldots,C\}$ index the channel dimension,
+$i\in\{1,\ldots,N_p\}$ index the patch dimension, and
+$j\in\{1,\ldots,d\}$ index the feature dimension. The conditional
+distribution of each temporal patch is
+\begin{equation}
+    p(\mathbf{h}_{c,i}^{t} \mid \mathbf{z}_{c,i})
+    =
+    \mathcal{N}\left(
+    \mathbf{h}_{c,i}^{t};
+    \boldsymbol{\mu}_{c,i},
+    \mathrm{diag}(\exp(\boldsymbol{\ell}_{c,i}))
+    \right).
+\end{equation}
+The alignment objective minimizes the Gaussian negative log-likelihood
+up to an additive constant:
+\begin{equation}
+\begin{aligned}
+    \mathcal{L}_{\mathrm{align}}
+    &=
+    \mathbb{E}_{\mathbf{X}\sim\mathcal{D}}
+    \Bigg[
+    \frac{1}{2 C N_p d}
+    \sum_{c=1}^{C}
+    \sum_{i=1}^{N_p}
+    \sum_{j=1}^{d}
+    \Big(
+    \ell_{c,i,j} \\
+    &\quad+
+    \big(\mathrm{sg}(h_{c,i,j}^{t})-\mu_{c,i,j}\big)^2
+    \exp(-\ell_{c,i,j})
+    \Big)
+    \Bigg].
+\end{aligned}
+\end{equation}
+where $\mathrm{sg}(\cdot)$ denotes the stop-gradient operator that
+prevents gradients from flowing into the temporal encoder. The operator
+$\operatorname{clip}(\cdot)$ constrains each log-variance element to a
+stable range. This probabilistic formulation
+encourages the textual representation to predict both the location and
+the uncertainty of the temporal representation, thereby accommodating the inherent
+variability in text-temporal correspondences.
+
+\subsection{Reconstruction Module}
+
+The reconstruction module leverages the textual representation to guide
+the recovery of masked temporal features. The masked temporal features
+first undergo self-attention to aggregate partial temporal context:
+\begin{equation}
+    \widetilde{\mathbf{H}}'^{t}
+    =
+    \mathcal{A}(
+    \widetilde{\mathbf{H}}^{t}, \widetilde{\mathbf{H}}^{t}, \widetilde{\mathbf{H}}^{t}
+    ).
+\end{equation}
+The textual representation then queries this self-attended temporal
+memory via cross-attention, followed by a feed-forward network:
+\begin{align}
+    \mathbf{G}_1 &= \mathrm{LN}\left(\mathbf{Z} + \mathcal{A}(\mathbf{Z}, \widetilde{\mathbf{H}}'^{t}, \widetilde{\mathbf{H}}'^{t})\right), \\
+    \mathbf{G} &= \mathrm{LN}\left(\mathbf{G}_1 + \mathrm{FFN}(\mathbf{G}_1)\right),
+\end{align}
+where $\widetilde{\mathbf{H}}'^{t}$ serves as the key and value, and
+$\mathbf{Z}$ serves as the query. This design enables reconstruction to
+benefit from both textual regularities and partial temporal evidence.
+
+Finally, $\mathbf{G}$ is flattened over patches and projected back to
+the input space:
+\begin{equation}
+    \widehat{\mathbf{X}}
+    =
+    \operatorname{reshape}_{B\times L\times C}
+    \left(\operatorname{flatten}(\mathbf{G})\mathbf{W}_{o}\right),
+\end{equation}
+where $\mathbf{W}_{o} \in \mathbb{R}^{(N_p \cdot d) \times L}$ is a
+learnable output projection, and $\operatorname{flatten}(\cdot)$ reshapes
+$\mathbf{G} \in \mathbb{R}^{BC\times N_p\times d}$ to
+$\mathbb{R}^{BC\times (N_p \cdot d)}$. After inverse normalization, the
+reconstruction is compared with the original input for anomaly scoring.
+
+\subsection{Training Objective}
+
+The reconstruction loss is the mean squared error between the input
+and its reconstruction:
+\begin{equation}
+    \mathcal{L}_{\mathrm{rec}}
+    =
+    \mathbb{E}_{\mathbf{X}\sim\mathcal{D}}
+    \left[
+    \frac{1}{LC}
+    \left\lVert
+    \mathbf{X}-\widehat{\mathbf{X}}
+    \right\rVert_F^2
+    \right],
+\end{equation}
+where $\mathcal{D}$ denotes the training-window distribution and
+$\lVert\cdot\rVert_F$ denotes the Frobenius norm over the temporal and
+channel dimensions.
+The alignment loss $\mathcal{L}_{\mathrm{align}}$ is the Gaussian
+negative log-likelihood defined in the previous subsection.
+The total loss combines reconstruction and alignment:
+\begin{equation}
+    \mathcal{L}
+    =
+    \mathcal{L}_{\mathrm{rec}}
+    +
+    \lambda\mathcal{L}_{\mathrm{align}},
+\end{equation}
+where $\lambda$ is the weighting coefficient for alignment loss.
+By jointly optimizing these terms, the model learns normal temporal
+reconstruction and probabilistic text-temporal alignment. During inference, timestamps
+with larger reconstruction errors are assigned higher anomaly scores.
+
+\subsection{Experimental Setup}
+
+\textbf{Datasets.}
+We evaluate \method{} on six real-world time-series anomaly detection datasets spanning diverse domains: \textit{Weather} (meteorological measurements), \textit{Energy} (power consumption), \textit{Environment} (air quality), \textit{KR} (cloud computing metrics), \textit{EWJ} (financial ETF data), and \textit{MDT} (medical device telemetry). Weather, Energy, and Environment are collected from Time-MMD~\cite{liu2024timemmd}, while KR, EWJ, and MDT are derived from FNSPID~\cite{dong2024fnspid}. These datasets exhibit varied anomaly patterns including point anomalies, contextual anomalies, and collective anomalies. Following the reconstruction-based anomaly detection protocol, all datasets are standardized channel-wise with sliding windows of length $L=100$. Dataset statistics are provided in Appendix~\ref{app:datasets}.
+
+
+\begin{table*}[!t]
+\centering
+\caption{Main results on six benchmark datasets (mean-threshold Aff-F). Values are percentages. Bold = best; underline = second best.}
+\label{tab:main_results}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+\toprule
+\textbf{Dataset} & \textbf{Metric} & \textbf{Ours} & \textbf{MindTS} & \textbf{DLinear} & \textbf{PatchTST} & \textbf{iTrans.} & \textbf{Cross.} & \textbf{LightTS} & \textbf{NLinear} & \textbf{Linear} & \textbf{TimesNet} & \textbf{FiLM} & \textbf{Informer} & \textbf{Reformer} & \textbf{Trans.} & \textbf{MICN} & \textbf{FEDformer} \\
+\midrule
+\multirow{3}{*}{Weather} & Aff-F & \textbf{72.33} & \underline{69.86} & 47.72 & 50.32 & 49.84 & 43.03 & 38.61 & 39.23 & 37.97 & 50.20 & 39.78 & 40.01 & 36.36 & 35.39 & 39.82 & 27.75 \\
+& V-PR & \textbf{48.53} & 47.91 & 45.37 & 47.18 & \underline{48.46} & 44.63 & 42.15 & 39.46 & 42.81 & 47.87 & 46.43 & 47.09 & 46.52 & 47.03 & 42.29 & 34.73 \\
+& V-ROC & \textbf{77.07} & 76.41 & 74.28 & 76.13 & \underline{77.00} & 73.62 & 71.17 & 71.78 & 72.88 & 76.08 & 71.37 & 76.22 & 75.49 & 76.11 & 69.96 & 52.52 \\
+\midrule
+\multirow{3}{*}{Energy} & Aff-F & \textbf{65.22} & \underline{63.10} & 48.92 & 45.29 & 44.53 & 37.94 & 45.57 & 45.23 & 41.13 & 47.65 & 42.56 & 39.81 & 36.90 & 35.63 & 44.64 & 35.64 \\
+& V-PR & \textbf{45.83} & 41.10 & \underline{44.73} & 40.80 & 36.62 & 39.87 & 34.99 & 31.77 & 31.66 & 41.99 & 39.60 & 35.33 & 35.09 & 34.82 & 37.88 & 32.40 \\
+& V-ROC & \textbf{71.96} & 67.16 & \underline{71.43} & 68.48 & 65.36 & 68.39 & 63.82 & 58.87 & 56.70 & 67.71 & 63.87 & 58.51 & 57.79 & 58.24 & 63.53 & 54.21 \\
+\midrule
+\multirow{3}{*}{Environment} & Aff-F & \textbf{65.21} & \underline{63.46} & 37.19 & 36.54 & 31.17 & 26.99 & 31.52 & 31.13 & 30.76 & 35.84 & 22.93 & 36.37 & 37.87 & 43.55 & 25.58 & 31.15 \\
+& V-PR & \textbf{39.69} & 36.91 & 37.48 & 38.36 & \underline{39.23} & 22.76 & 31.25 & 36.45 & 34.49 & 21.76 & 19.51 & 10.17 & 14.51 & 10.90 & 10.24 & 7.98 \\
+& V-ROC & \textbf{86.81} & 83.49 & 85.13 & 82.28 & \underline{85.47} & 72.48 & 81.59 & 84.97 & 84.31 & 65.73 & 72.49 & 51.26 & 59.98 & 55.56 & 48.45 & 42.21 \\
+\midrule
+\multirow{3}{*}{KR} & Aff-F & \textbf{79.31} & \underline{77.03} & 59.02 & 61.54 & 55.88 & 57.32 & 56.05 & 52.30 & 49.72 & 50.39 & 56.04 & 46.91 & 44.22 & 42.34 & 49.88 & 40.26 \\
+& V-PR & \textbf{55.53} & \underline{54.82} & 54.37 & 47.05 & 29.71 & 36.03 & 42.26 & 34.70 & 38.73 & 19.75 & 38.06 & 21.60 & 14.44 & 14.33 & 19.63 & 16.23 \\
+& V-ROC & \textbf{93.29} & 90.53 & \underline{91.13} & 87.96 & 75.43 & 73.96 & 85.70 & 78.04 & 83.87 & 69.74 & 80.34 & 54.52 & 62.49 & 55.45 & 59.92 & 65.02 \\
+\midrule
+\multirow{3}{*}{EWJ} & Aff-F & \textbf{72.67} & \underline{62.69} & 56.01 & 48.12 & 50.81 & 49.58 & 51.00 & 45.63 & 51.04 & 49.83 & 31.21 & 46.30 & 39.69 & 43.06 & 38.01 & 33.36 \\
+& V-PR & \textbf{48.52} & 25.60 & \underline{47.36} & 37.01 & 37.87 & 29.65 & 35.84 & 33.56 & 30.25 & 31.46 & 15.28 & 30.52 & 20.64 & 19.37 & 15.99 & 16.41 \\
+& V-ROC & \textbf{82.70} & 65.33 & \underline{81.08} & 74.82 & 76.56 & 68.49 & 73.52 & 74.39 & 71.20 & 63.33 & 51.91 & 73.29 & 53.70 & 55.73 & 50.85 & 56.00 \\
+\midrule
+\multirow{3}{*}{MDT} & Aff-F & \textbf{69.25} & \underline{64.72} & 47.95 & 48.13 & 41.17 & 42.26 & 38.60 & 37.18 & 36.49 & 36.08 & 39.78 & 38.76 & 36.39 & 42.56 & 38.86 & 36.51 \\
+& V-PR & \textbf{59.14} & 48.31 & \underline{53.44} & 51.46 & 38.62 & 32.47 & 24.92 & 27.96 & 21.41 & 28.01 & 40.16 & 23.02 & 16.91 & 19.47 & 27.13 & 19.14 \\
+& V-ROC & \textbf{81.65} & 75.33 & 77.17 & \underline{78.14} & 72.56 & 62.57 & 59.20 & 61.17 & 50.79 & 65.82 & 70.16 & 51.75 & 41.19 & 47.60 & 57.50 & 51.18 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+
+
+\textbf{Baselines.}
+We compare against three categories of methods: (1) \textbf{Reconstruction-based methods}: DLinear, NLinear~\cite{zeng2023dlinear}, PatchTST~\cite{nie2023patchtst}, TimesNet~\cite{wu2023timesnet}, and MindTS (a text-temporal multimodal baseline); (2) \textbf{Transformer-based methods}: iTransformer~\cite{liu2024itransformer}, Crossformer~\cite{zhang2023crossformer}, Informer~\cite{zhou2021informer}, Autoformer~\cite{wu2021autoformer}, and FEDformer~\cite{zhou2022fedformer}; (3) \textbf{Other architectures}: MICN~\cite{wang2023micn}, FiLM~\cite{zhou2022film}, LightTS~\cite{zhang2022lightts}, and linear baselines. All methods are evaluated under the same reconstruction-based protocol for fair comparison.
+
+\textbf{Evaluation Metrics.}
+We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric for segment-level detection quality. Additionally, we report VUS-PR and VUS-ROC~\cite{paparrizos2022volume} for threshold-independent evaluation. Higher values indicate better performance for all metrics.
+
+\textbf{Implementation Details.}
+\method{} is implemented in PyTorch and trained on NVIDIA A100 GPUs. We use Qwen3-1.7B as the frozen LLM backbone, extracting the first six layers for textual encoding. The temporal encoder has one encoder and one decoder layer with $d=128$, $d_{ff}=256$. Patch size and stride are 8 and 4. We use Adam optimizer with initial learning rate $10^{-3}$ and cosine annealing. Training runs for 5 epochs. Default hyperparameters: mask ratio = 0.5, $\lambda=1.0$.
+
+
+
+\subsection{Main Results}
+
+Table~\ref{tab:main_results} presents the comprehensive comparison results. \method{} achieves the best average Aff-F score of 70.66\% across all datasets, establishing new state-of-the-art performance on all six benchmarks.
+
+\textbf{Comparison with Reconstruction-based Methods.} Compared to pure reconstruction-based methods (DLinear 49.47\%, PatchTST 48.32\%, TimesNet 44.99\%), \method{} achieves substantial improvements (21.17\%, 22.32\%, 25.65\% absolute gains respectively). Even compared to MindTS (66.81\%), which also incorporates textual information through simple concatenation, our method achieves 3.83\% higher Aff-F. This demonstrates that our distribution-driven alignment mechanism is more effective than naive text-temporal fusion for anomaly detection.
+
+\textbf{Comparison with Transformer-based Methods.} Transformer-based methods generally underperform on anomaly detection tasks, with iTransformer achieving 45.57\% and Crossformer 42.85\% average Aff-F. \method{} outperforms these by 25.07\% and 27.79\% respectively. The gap is particularly pronounced on datasets with collective anomalies (KR: 79.40\% vs 55.88\% for iTransformer), suggesting that textual guidance helps capture long-range anomaly patterns that self-attention mechanisms miss.
+
+\textbf{Dataset-specific Analysis.} On \textit{Energy} (multivariate power consumption), \method{} achieves 65.24\%, significantly outperforming all baselines, validating its effectiveness for cross-channel correlation modeling. On \textit{KR} and \textit{MDT} (collective anomalies in cloud computing and healthcare), our method achieves 79.40\% and 69.27\%, surpassing the second-best by 2.37\% and 4.55\%, confirming the importance of structural textual descriptions for detecting persistent anomalies. The consistent improvements across diverse anomaly types (point, contextual, collective) demonstrate the generalizability of our approach.
+
+\subsection{LLM Backbone Comparison}
+
+To investigate the impact of different LLM backbones on anomaly detection performance, we conduct experiments with seven lightweight language models ranging from 1B to 1.7B parameters. Table~\ref{tab:llm_comparison} reports the per-dataset results under the mean-threshold setting.
+
+\begin{table*}[!t]
+\centering
+\caption{Comparison of different LLM backbones across six benchmark datasets (mean-threshold). Values are percentages. Bold = best; underline = second best.}
+\label{tab:llm_comparison}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|ccc|ccc|ccc|ccc|ccc|ccc}
+\toprule
+\multirow{2}{*}{\textbf{Model}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
+& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
+\midrule
+Qwen3-1.7B & \textbf{72.21} & \textbf{48.53} & \underline{77.07} & 65.24 & 45.83 & 71.96 & \textbf{65.08} & 39.69 & \underline{86.81} & \underline{79.40} & 55.53 & 93.29 & \underline{72.63} & 48.52 & \underline{82.70} & 69.27 & 59.14 & 81.65 \\
+Qwen2.5-1.5B & 72.05 & 47.52 & 76.65 & 64.56 & 46.40 & 73.21 & 63.13 & 38.35 & \textbf{87.36} & 78.94 & \underline{58.47} & 93.41 & 72.31 & \underline{50.83} & 82.37 & 69.67 & 52.35 & 78.12 \\
+SmolLM2-1.7B & \underline{72.13} & 47.29 & 76.69 & 63.74 & 43.64 & 70.02 & 64.73 & 40.38 & 86.26 & \textbf{80.14} & \textbf{58.72} & \textbf{94.57} & 72.54 & 45.80 & 82.24 & \textbf{69.87} & \underline{60.35} & \underline{82.22} \\
+TinyLlama-1.1B & 71.65 & 47.84 & 76.64 & \underline{65.60} & \textbf{49.23} & \textbf{74.91} & \underline{65.05} & 39.76 & 85.88 & 78.67 & 55.83 & 93.40 & 72.12 & 44.21 & 80.88 & 69.48 & 58.93 & 81.50 \\
+Phi-1.5 & 71.54 & 47.77 & 77.04 & 65.31 & 47.08 & 73.32 & 64.53 & 39.02 & 86.59 & 78.74 & 53.62 & 93.44 & 71.13 & 46.49 & 81.84 & 69.63 & 58.31 & 80.40 \\
+OLMo-1B & 71.35 & 46.67 & 76.58 & 65.17 & \underline{47.32} & \underline{74.61} & 64.07 & \underline{40.47} & 86.73 & 77.06 & 46.79 & 89.98 & \textbf{73.06} & \textbf{51.35} & \textbf{84.69} & \underline{69.76} & \textbf{60.95} & \textbf{82.84} \\
+MobileLLaMA-1.4B & 71.82 & \underline{48.27} & \textbf{77.33} & \textbf{65.63} & 45.43 & 72.77 & 64.54 & \textbf{41.03} & 86.57 & 78.32 & 52.44 & \underline{93.56} & 70.55 & 44.52 & 80.91 & 69.57 & 59.32 & 81.33 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+The results demonstrate that our method achieves competitive performance across different LLM backbones and datasets. Qwen3-1.7B achieves the best results on Weather and Environment, while SmolLM2-1.7B performs best on KR and MDT, TinyLlama-1.1B excels on Energy, and OLMo-1B on EWJ. The relatively small performance variation across models suggests that our method is robust to the choice of LLM backbone, as long as the model provides reasonable textual representations for encoding structured textual descriptions.
+
+\begin{table*}[!t]
+\centering
+\caption{Ablation study on key components (mean-threshold). Values are percentages. Bold = best; underline = second best.}
+\label{tab:ablation}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|ccc|ccc|ccc|ccc|ccc|ccc}
+\toprule
+\multirow{2}{*}{\textbf{Config}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
+& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
+\midrule
+Full Model & \textbf{72.21} & \textbf{48.53} & \textbf{77.07} & \textbf{65.24} & \textbf{45.83} & \textbf{71.96} & \textbf{65.08} & \textbf{39.69} & \textbf{86.81} & \textbf{79.40} & \textbf{55.53} & \textbf{93.29} & \textbf{72.63} & \textbf{48.52} & \textbf{82.70} & \textbf{69.27} & \textbf{59.14} & \textbf{81.65} \\
+w/o Text Branch & 69.62 & 47.38 & 76.14 & 63.82 & 42.53 & 71.31 & 61.28 & 30.04 & 77.52 & 72.85 & 44.22 & 83.82 & 64.35 & 30.11 & 71.66 & 66.34 & \underline{44.60} & \underline{72.11} \\
+w/o Component Sem. & \underline{71.47} & 47.02 & \underline{76.53} & \underline{64.51} & \underline{44.97} & 71.08 & \underline{63.45} & \underline{38.93} & \underline{85.52} & \underline{77.91} & \underline{47.89} & \underline{90.52} & \underline{71.46} & \underline{47.40} & \underline{80.79} & \underline{66.96} & 43.63 & 72.04 \\
+w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \underline{71.43} & 63.17 & 34.07 & 81.31 & 77.22 & 46.39 & 83.48 & 68.05 & 34.77 & 71.98 & 63.50 & 36.99 & 65.38 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\subsection{Ablation Study}
+
+To validate the effectiveness of our core design choices, we conduct ablation studies by systematically removing key components: (1) the entire textual branch, (2) the structural component semantics, and (3) the semantic reconstruction guidance. Table~\ref{tab:ablation} reports the results.
+
+\textbf{Effectiveness of Textual Branch.} Removing the entire textual branch (using only temporal reconstruction) causes the largest degradation, with Aff-F dropping by 2.6--6.6\% across datasets. This confirms that LLM-derived textual representations provide essential complementary information for anomaly detection. The drop is most pronounced on KR ($-$6.6\%) and EWJ ($-$8.3\%), where collective anomalies require structural understanding beyond pure temporal patterns.
+
+\textbf{Effect of Component Semantics.} Removing the structural component view (trend/seasonal/residual decomposition) while retaining the statistical prompt view causes performance degradation on most datasets, with Aff-F dropping by 0.7--2.3\%. This suggests that component semantics are particularly important for datasets with collective anomalies (KR, MDT) and complex temporal structures (Environment), where trend and seasonal decomposition helps distinguish true anomalies from normal pattern variations.
+
+\textbf{Effect of Semantic Reconstruction.} Removing the reconstruction-based semantic guidance (where aligned textual features guide masked patch recovery) causes consistent degradation on most datasets, with Aff-F dropping by 1.0--4.6\%. The largest drops occur on EWJ ($-$4.6\%) and MDT ($-$5.8\%), confirming that textual guidance during reconstruction is critical for detecting sustained anomalies. Without semantic reconstruction, the model reverts to purely temporal reconstruction, losing the ability to leverage textual regularities for anomaly discrimination.
+
+
+
+\subsection{Hyperparameter Sensitivity Analysis}
+
+We analyze the sensitivity of \method{} to key hyperparameters: mask ratio for reconstruction and alignment loss weight $\lambda$. Figure~\ref{fig:hyperparameter} shows Aff-F, V-PR, and V-ROC scores across different hyperparameter values on six datasets.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
+\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F, V-PR, and V-ROC scores across six datasets.}
+\label{fig:hyperparameter}
+\end{figure}
+
+\textbf{Mask Ratio.} A moderate ratio of 0.4--0.5 achieves optimal performance, balancing sufficient context preservation with reconstruction difficulty. Lower ratios (0.1--0.2) provide too much context, making the reconstruction task too easy and reducing anomaly discriminability. A higher ratio (0.6) removes excessive information, hindering accurate reconstruction on some datasets (e.g., Energy drops from 65.2\% to 62.1\% in Aff-F). Datasets with strong seasonality (Weather, Environment) are more robust to higher mask ratios, while irregular patterns (KR, EWJ) benefit from moderate masking.
+
+\textbf{Alignment Loss Weight.} Setting $\lambda=1.0$ achieves the best average performance. When $\lambda=0$ (no alignment), the model degrades significantly on KR (77.2\% vs.\ 79.4\%) and Environment (61.6\% vs.\ 65.1\%), confirming that text-temporal alignment is essential. Increasing $\lambda$ from 0.1 to 1.0 steadily improves performance, while $\lambda=2.0$ yields comparable results, suggesting that the model saturates beyond a certain alignment strength.
+
+\subsection{Visualization and Case Study}
+
+To understand why \method{} achieves superior anomaly detection performance, we visualize the reconstruction error distributions, analyze specific detection cases, and examine the internal alignment quality.
+
+\textbf{Reconstruction Error Analysis.} Figure~\ref{fig:recon_error}(a) compares the reconstruction error distributions of normal vs.\ anomalous windows on the KR dataset. \method{} exhibits clearer separation between normal and anomalous error distributions, with anomalous windows showing significantly higher reconstruction errors. This demonstrates that distribution-driven alignment enables more discriminative anomaly scoring.
+
+\textbf{Case Study: Collective Anomaly Detection.} Figure~\ref{fig:recon_error}(b) shows representative anomaly detection cases across multiple datasets. \method{} correctly identifies anomalous segments due to its structural component view capturing persistent trend deviations. In contrast, pure temporal baselines only detect partial segments or miss anomalies entirely, as they lack textual descriptions of trend changes that help distinguish true anomalies from normal fluctuations.
+
+\begin{figure}[!t]
+\centering
+\begin{minipage}[t]{0.48\columnwidth}
+\centering
+\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/error_distribution/reconstruction_error_KR.pdf}\\
+{\scriptsize (a) Reconstruction error on KR}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\columnwidth}
+\centering
+\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/paper_style_cases/mindts_detection_case_studies.pdf}\\
+{\scriptsize (b) Detection case studies}
+\end{minipage}
+\caption{(a) Reconstruction error distributions for normal vs.\ anomalous windows on KR. (b) Anomaly detection case studies across multiple datasets.}
+\label{fig:recon_error}
+\end{figure}
+
+\textbf{Alignment Quality Visualization.} Figure~\ref{fig:align_score}(a) visualizes the text-temporal alignment quality by showing the predicted mean $\boldsymbol{\mu}$ and variance $\exp(\boldsymbol{\ell})$ from the textual representation on the KR dataset. During normal periods, the predicted distributions closely match the actual temporal features (low variance, accurate mean). During anomalies, the variance increases significantly, indicating that the textual description cannot well-explain the anomalous pattern. This uncertainty provides an additional signal for anomaly detection, complementing the reconstruction error.
+
+\textbf{Anomaly Score Overview.} Figure~\ref{fig:align_score}(b) presents the anomaly score overview on the KR dataset, showing the reconstruction-based anomaly scores alongside ground-truth labels. The scores align well with true anomalous segments, confirming the effectiveness of our text-temporal alignment in producing discriminative anomaly scores.
+
+\begin{figure}[!t]
+\centering
+\begin{minipage}[t]{0.48\columnwidth}
+\centering
+\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/error_distribution/prediction_distribution_KR.pdf}\\
+{\scriptsize (a) Prediction distribution on KR}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\columnwidth}
+\centering
+\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/KR/01_real_score_segment_overview.pdf}\\
+{\scriptsize (b) Anomaly score overview on KR}
+\end{minipage}
+\caption{(a) Text-temporal alignment quality on KR, showing predicted mean and variance. (b) Anomaly score segment overview on KR, with reconstruction scores aligned to ground-truth labels.}
+\label{fig:align_score}
+\end{figure}
+
+\textbf{Multi-Dataset Anomaly Score Visualization.} Figure~\ref{fig:anomaly_score_grid} presents the anomaly score visualization across three representative datasets (KR, Energy, Weather), showing both the input series (top row) and the corresponding anomaly scores (bottom row) with ground-truth anomalous segments highlighted. The figure demonstrates that \method{} produces well-calibrated anomaly scores that align closely with true anomalous regions across diverse data patterns: KR exhibits sharp, point-wise anomalies; Energy shows gradual trend deviations; and Weather displays seasonal irregularities. The consistent alignment between anomaly score peaks and ground-truth segments (pink shaded regions) validates the effectiveness of our text-temporal alignment approach.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{anomaly_segment_visualization/figures/qwen3_1p7b/all_datasets/six_dataset_anomaly_score_grid_with_caption.pdf}
+\caption{Anomaly score visualization on KR, Energy, and Weather datasets. Top row: input time series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line). The anomaly scores exhibit clear peaks within anomalous regions, demonstrating effective detection across diverse temporal patterns.}
+\label{fig:anomaly_score_grid}
+\vspace{-0.5em}
+\end{figure}
+
+\textbf{Robustness Across LLM Backbones.} The LLM comparison experiments reveal that Ours achieves competitive performance across various lightweight language models (1B--1.7B parameters). The relatively small performance variation (standard deviation $<$ 2\% across datasets) suggests that our method is robust to the choice of backbone, as long as the model provides reasonable textual representations. This is particularly important for practical deployment, as it allows flexibility in model selection based on computational constraints. Furthermore, this robustness indicates that Ours can potentially benefit from future advances in language model capabilities without requiring architectural modifications.
+
+\textbf{Importance of Architectural Design.} The ablation studies provide crucial insights into the architectural choices of Ours. First, the cross-view textual fusion mechanism is essential for integrating complementary information from statistical and structural perspectives. Second, the reconstruction-based text exchange ensures that textual information is incorporated in a controlled manner, preventing indiscriminate feature contamination. These design choices are particularly critical for handling subtle anomalies that require nuanced understanding of both distributional and structural characteristics.
+
+\textbf{Limitations and Future Directions.} While Ours demonstrates strong performance, several limitations present opportunities for future work. First, the current method relies on frozen LLM backbones; fine-tuning or adapter-based adaptation could potentially improve textual representation quality for specific domains. Second, the textual description generation is based on predefined templates; exploring learned or neural-based description generation could enhance flexibility. Third, extending the framework to handle multimodal time series (e.g., combining sensor data with images or audio) represents an exciting direction for future research.
+
+\section{Conclusion}
+
+
+
+\bibliography{aaai2027}
+
+\end{document}

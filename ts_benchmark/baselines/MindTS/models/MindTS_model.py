@@ -200,7 +200,7 @@ class MINDTSModel(nn.Module):
         self.d_model = configs.d_model
         self.channel_time = configs.enc_in_time    # Number of input time channels
         self.mask_ratio = configs.mask_ratio   # Masking ratio for sequence
-        self.align_loss_type = getattr(configs, "align_loss_type", "contrastive")# "text_gaussian_nll"、"symmetric_gaussian_kl"、"none"
+        self.align_loss_type = getattr(configs, "align_loss_type", "text_gaussian_nll")
         self.align_detach_target = getattr(configs, "align_detach_target", True)
         self.align_logvar_min = getattr(configs, "align_logvar_min", -6.0)
         self.align_logvar_max = getattr(configs, "align_logvar_max", 2.0)
@@ -220,9 +220,7 @@ class MINDTSModel(nn.Module):
             )
         )
         allowed_align_losses = {
-            "contrastive",
             "text_gaussian_nll",
-            "symmetric_gaussian_kl",
             "none",
         }
         if self.align_loss_type not in allowed_align_losses:
@@ -232,6 +230,7 @@ class MINDTSModel(nn.Module):
             )
         self.shape_log_path = getattr(configs, "shape_log_path", None)
         self._shape_log_events = set()
+        self.last_alignment_debug = {}
         self.description = getattr(
             configs,
             "dataset_description",
@@ -287,7 +286,11 @@ class MINDTSModel(nn.Module):
         )
         self.layer = configs.e_layers    # Number of encoder layers
         self.layer_norm = nn.LayerNorm(configs.d_model)    # Layer normalization
-        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))    # Logit scaling factor
+        self.register_buffer(
+            "logit_scale",
+            torch.tensor(np.log(1 / 0.07), dtype=torch.float32),
+            persistent=True,
+        )
         self.top_k = self.patch_size    # Top-k value for selection
         self.d_ff = configs.d_ff    # Feedforward hidden dimension
         self.num_heads = configs.n_heads    # Number of attention heads
@@ -489,16 +492,6 @@ class MINDTSModel(nn.Module):
         stdev = torch.sqrt(torch.var(x, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
         return x / stdev
 
-    def _contrastive_align_loss(self, logits_per_time, logits_per_text):
-        labels = torch.arange(logits_per_time.shape[1], device=logits_per_time.device).long()
-        total_loss = torch.zeros((), device=logits_per_time.device, dtype=logits_per_time.dtype)
-        for i in range(logits_per_time.shape[0]):
-            total_loss = total_loss + (
-                F.cross_entropy(logits_per_time[i], labels)
-                + F.cross_entropy(logits_per_text[i], labels)
-            ) / 2
-        return total_loss / logits_per_time.shape[0]
-
     def _text_gaussian_nll_align_loss(self, time_features, llm_features):
         target = time_features.detach() if self.align_detach_target else time_features
         mu_txt = self.align_mu_head(llm_features)
@@ -508,43 +501,18 @@ class MINDTSModel(nn.Module):
         )
         inv_var = torch.exp(-logvar_txt)
         nll = 0.5 * (logvar_txt + (target - mu_txt).pow(2) * inv_var)
+        sigma = torch.exp(0.5 * logvar_txt)
+        self.last_alignment_debug = {
+            "align_nll_patch": nll.mean(dim=-1).detach(),
+            "align_sigma_patch": sigma.mean(dim=-1).detach(),
+            "align_abs_error_patch": (target - mu_txt).abs().mean(dim=-1).detach(),
+        }
         return nll.mean()
 
-    def _symmetric_gaussian_kl_align_loss(self, time_features, llm_features):
-        eps = 1e-5
-        time_norm = F.layer_norm(time_features, (time_features.shape[-1],))
-        llm_norm = F.layer_norm(llm_features, (llm_features.shape[-1],))
-
-        mu_t = time_norm.mean(dim=1)
-        mu_x = llm_norm.mean(dim=1)
-        var_t = time_norm.var(dim=1, unbiased=False) + eps
-        var_x = llm_norm.var(dim=1, unbiased=False) + eps
-        logvar_t = torch.log(var_t).clamp(self.align_logvar_min, self.align_logvar_max)
-        logvar_x = torch.log(var_x).clamp(self.align_logvar_min, self.align_logvar_max)
-        var_t = torch.exp(logvar_t)
-        var_x = torch.exp(logvar_x)
-
-        kl_t_to_x = 0.5 * (
-            logvar_x
-            - logvar_t
-            + (var_t + (mu_t - mu_x).pow(2)) / var_x
-            - 1
-        )
-        kl_x_to_t = 0.5 * (
-            logvar_t
-            - logvar_x
-            + (var_x + (mu_x - mu_t).pow(2)) / var_t
-            - 1
-        )
-        return 0.5 * (kl_t_to_x + kl_x_to_t).mean()
-
-    def _alignment_loss(self, time_features, llm_features, logits_per_time, logits_per_text):
-        if self.align_loss_type == "contrastive":
-            return self._contrastive_align_loss(logits_per_time, logits_per_text)
+    def _alignment_loss(self, time_features, llm_features):
         if self.align_loss_type == "text_gaussian_nll":
             return self._text_gaussian_nll_align_loss(time_features, llm_features)
-        if self.align_loss_type == "symmetric_gaussian_kl":
-            return self._symmetric_gaussian_kl_align_loss(time_features, llm_features)
+        self.last_alignment_debug = {}
         return torch.zeros((), device=time_features.device, dtype=time_features.dtype)
 
     def _decompose_local(self, x):
@@ -768,7 +736,7 @@ class MINDTSModel(nn.Module):
             ],
         )
 
-        # -------------------------------------------------------------time-text Similarity matrix----------------------------------------------------------------
+        # Diagnostic time-text similarity for intermediate visualization only.
         time_norm = F.normalize(time_features_patch_normal, p=2, dim=-1)
         llm_norm = F.normalize(llm_features, p=2, dim=-1)
         logit_scale = self.logit_scale.exp()
@@ -777,8 +745,6 @@ class MINDTSModel(nn.Module):
         align_loss = self._alignment_loss(
             time_features_patch_normal,
             llm_features,
-            logits_per_time,
-            logits_per_text,
         )
 
         # -------------------------------------------------------------Reconstruction-----------------------------------------------------------------------------

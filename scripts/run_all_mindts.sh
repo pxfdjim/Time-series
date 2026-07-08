@@ -33,10 +33,10 @@ case "$MINDTS_RECON_LOSS_TYPE" in
 esac
 
 case "$MINDTS_ALIGN_LOSS_TYPE" in
-  contrastive|text_gaussian_nll|symmetric_gaussian_kl|none) ;;
+  text_gaussian_nll|none) ;;
   *)
     echo "Invalid MINDTS_ALIGN_LOSS_TYPE=${MINDTS_ALIGN_LOSS_TYPE}." >&2
-    echo "Use contrastive, text_gaussian_nll, symmetric_gaussian_kl, or none." >&2
+    echo "Use text_gaussian_nll or none." >&2
     exit 1
     ;;
 esac
