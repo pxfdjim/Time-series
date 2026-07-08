@@ -524,6 +524,15 @@ w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \under
 }
 \end{table*}
 
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
+\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F scores.}
+\label{fig:hyperparameter}
+\end{figure}
+
 \subsection{Ablation Study}
 
 Table~\ref{tab:ablation} examines each component along the method pipeline by removing it and measuring the performance drop.
@@ -537,7 +546,13 @@ Table~\ref{tab:ablation} examines each component along the method pipeline by re
 \textbf{Probabilistic Text-Temporal Alignment.} The ablation table does not include a variant without Gaussian alignment. The hyperparameter analysis in Figure~\ref{fig:hyperparameter} shows that setting $\lambda=0$ (which removes the alignment objective) drops Aff-F by 2.2 percentage points on KR and 3.5 percentage points on Environment, indicating that probabilistic alignment between textual and temporal representations contributes to detection accuracy.
 
 
-
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{Figures/text_to_time.pdf}
+\caption{Patch-level Gaussian NLL on a representative segment. Lower NLL in normal regions indicates good text-temporal alignment; higher NLL in anomalous regions (pink shading) indicates semantic-temporal mismatch.}
+\label{fig:gaussian_nll}
+\vspace{-0.5em}
+\end{figure}
 
 
 
@@ -545,20 +560,7 @@ Table~\ref{tab:ablation} examines each component along the method pipeline by re
 
 Figure~\ref{fig:hyperparameter} shows the sensitivity of Aff-F to mask ratio and alignment loss weight $\lambda$ on representative datasets.
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
-\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F scores.}
-\label{fig:hyperparameter}
-\end{figure}
 
-\textbf{Mask Ratio.} Lower mask ratios (0.1--0.2) make the reconstruction task too easy by providing excessive context, which reduces anomaly discriminability. Higher mask ratios (0.6) remove too much contextual information, hindering accurate recovery of normal patterns. A moderate mask ratio of 0.4--0.5 achieves the best balance between reconstruction difficulty and context preservation.
-
-\textbf{Alignment Loss Weight.} Setting $\lambda=0$ corresponds to removing the Gaussian alignment objective. This drops Aff-F by 2.2 percentage points on KR (from 79.4\% to 77.2\%) and 3.5 percentage points on Environment (from 65.1\% to 61.6\%), indicating that probabilistic text-temporal alignment is necessary for detection accuracy. Increasing $\lambda$ from 0.1 to 1.0 improves performance, but larger values do not provide additional gains, suggesting that the alignment objective needs to be balanced with the reconstruction objective.
-
-\subsection{Visualization and Case Study}
-
-\textbf{Anomaly Score Visualization.} Figure~\ref{fig:anomaly_score_grid} shows anomaly scores across six datasets. Top row: input series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line). The anomaly scores peak within anomalous regions across diverse temporal patterns.
 
 \begin{figure*}[!t]
 \centering
@@ -568,15 +570,24 @@ Figure~\ref{fig:hyperparameter} shows the sensitivity of Aff-F to mask ratio and
 \vspace{-0.5em}
 \end{figure*}
 
+
+\textbf{Mask Ratio.} Lower mask ratios (0.1--0.2) make the reconstruction task too easy by providing excessive context, which reduces anomaly discriminability. Higher mask ratios (0.6) remove too much contextual information, hindering accurate recovery of normal patterns. A moderate mask ratio of 0.4--0.5 achieves the best balance between reconstruction difficulty and context preservation.
+
+\textbf{Alignment Loss Weight.} Setting $\lambda=0$ corresponds to removing the Gaussian alignment objective. This drops Aff-F by 2.2 percentage points on KR (from 79.4\% to 77.2\%) and 3.5 percentage points on Environment (from 65.1\% to 61.6\%), indicating that probabilistic text-temporal alignment is necessary for detection accuracy. Increasing $\lambda$ from 0.1 to 1.0 improves performance, but larger values do not provide additional gains, suggesting that the alignment objective needs to be balanced with the reconstruction objective.
+
+
+
+
+
+
+\subsection{Visualization and Case Study}
+
+\textbf{Anomaly Score Visualization.} Figure~\ref{fig:anomaly_score_grid} shows anomaly scores across six datasets. Top row: input series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line). The anomaly scores peak within anomalous regions across diverse temporal patterns.
+
+
+
 \textbf{Patch-Level Gaussian Alignment.} Figure~\ref{fig:gaussian_nll} visualizes the patch-level Gaussian NLL computed from the text-derived distribution to each temporal patch representation. The x-axis shows patch center time index. Lower NLL in normal regions indicates that the text-derived Gaussian distribution explains the temporal patch well; higher NLL in anomalous regions (pink shading) indicates mismatch between semantic prediction and temporal observation. Note that NLL is an internal diagnostic signal of the alignment mechanism, not the final anomaly score, which is computed from reconstruction error.
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{Figures/gaussian_nll.pdf}
-\caption{Patch-level Gaussian NLL on a representative segment. Lower NLL in normal regions indicates good text-temporal alignment; higher NLL in anomalous regions (pink shading) indicates semantic-temporal mismatch.}
-\label{fig:gaussian_nll}
-\vspace{-0.5em}
-\end{figure}
 
 \section{Conclusion}
 
