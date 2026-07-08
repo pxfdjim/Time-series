@@ -479,24 +479,28 @@ Table~\ref{tab:main_results} reports the comparison results on six datasets. \me
 
 Table~\ref{tab:llm_comparison} compares seven lightweight LLM backbones (1.0B--1.7B parameters). The average Aff-F varies within 0.6 percentage points across models (70.67\% for Qwen3-1.7B to 70.07\% for MobileLLaMA-1.4B), indicating small performance variation across backbones. Even the smallest model (TinyLlama-1.1B) achieves 70.43\% average Aff-F, within 0.3 percentage points of the best-performing backbone.
 
-\begin{table}[!t]
+\begin{table*}[!t]
 \centering
-\caption{LLM backbone comparison (mean-threshold). Per-dataset results are in Appendix~\ref{app:llm_full}.}
+\caption{LLM backbone comparison (mean-threshold). Values are percentages. Bold = best; underline = second best.}
 \label{tab:llm_comparison}
-\begin{tabular}{l|c|ccc}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|ccc|ccc|ccc|ccc|ccc|ccc}
 \toprule
-\textbf{Model} & \textbf{Params} & \textbf{Avg Aff-F} & \textbf{Avg V-PR} & \textbf{Avg V-ROC} \\
+\multirow{2}{*}{\textbf{Model}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
+& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
 \midrule
-Qwen3-1.7B & 1.7B & \textbf{70.67} & \textbf{49.54} & 82.25 \\
-SmolLM2-1.7B & 1.7B & 70.53 & 49.36 & 82.00 \\
-TinyLlama-1.1B & 1.1B & 70.43 & 49.30 & \textbf{82.20} \\
-Qwen2.5-1.5B & 1.5B & 70.11 & 48.99 & 81.85 \\
-Phi-1.5 & 1.3B & 70.15 & 48.72 & 82.10 \\
-OLMo-1B & 1.0B & 70.08 & 48.93 & 82.57 \\
-MobileLLaMA-1.4B & 1.4B & 70.07 & 48.50 & 82.08 \\
+Qwen3-1.7B & \textbf{72.33} & \textbf{48.53} & \underline{77.07} & \textbf{65.22} & 45.83 & 71.96 & \textbf{65.21} & 39.69 & \underline{86.81} & \textbf{79.31} & 55.53 & 93.29 & \textbf{72.67} & 48.52 & \underline{82.70} & 69.25 & 59.14 & 81.65 \\
+Qwen2.5-1.5B & 72.05 & 47.52 & 76.65 & 64.56 & 46.40 & 73.21 & 63.13 & 38.35 & \textbf{87.36} & 78.94 & \underline{58.47} & 93.41 & 72.31 & \underline{50.83} & 82.37 & 69.67 & 52.35 & 78.12 \\
+SmolLM2-1.7B & \underline{72.13} & 47.29 & 76.69 & 63.74 & 43.64 & 70.02 & 64.73 & 40.38 & 86.26 & \textbf{80.14} & \textbf{58.72} & \textbf{94.57} & 72.54 & 45.80 & 82.24 & \textbf{69.87} & \underline{60.35} & \underline{82.22} \\
+TinyLlama-1.1B & 71.65 & 47.84 & 76.64 & \underline{65.60} & \textbf{49.23} & \textbf{74.91} & \underline{65.05} & 39.76 & 85.88 & 78.67 & 55.83 & 93.40 & 72.12 & 44.21 & 80.88 & 69.48 & 58.93 & 81.50 \\
+Phi-1.5 & 71.54 & 47.77 & 77.04 & 65.31 & 47.08 & 73.32 & 64.53 & 39.02 & 86.59 & 78.74 & 53.62 & 93.44 & 71.13 & 46.49 & 81.84 & 69.63 & 58.31 & 80.40 \\
+OLMo-1B & 71.35 & 46.67 & 76.58 & 65.17 & \underline{47.32} & \underline{74.61} & 64.07 & \underline{40.47} & 86.73 & 77.06 & 46.79 & 89.98 & \textbf{73.06} & \textbf{51.35} & \textbf{84.69} & \underline{69.76} & \textbf{60.95} & \textbf{82.84} \\
+MobileLLaMA-1.4B & 71.82 & \underline{48.27} & \textbf{77.33} & \textbf{65.63} & 45.43 & 72.77 & 64.54 & \textbf{41.03} & 86.57 & 78.32 & 52.44 & \underline{93.56} & 70.55 & 44.52 & 80.91 & 69.57 & 59.32 & 81.33 \\
 \bottomrule
 \end{tabular}
-\end{table}
+}
+\end{table*}
 
 The small performance variation across diverse LLM architectures suggests that the gains of \method{} stem from the structured textual construction, probabilistic alignment mechanism, and text-guided reconstruction, rather than reliance on any specific LLM. Lightweight models (1.0B--1.5B parameters) remain competitive with larger ones, indicating that the method is practical for deployment with resource-constrained backbones.
 
