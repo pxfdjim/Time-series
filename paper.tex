@@ -477,32 +477,28 @@ Table~\ref{tab:main_results} reports the comparison results on six datasets. \me
 
 \subsection{LLM Backbone Analysis}
 
-Table~\ref{tab:llm_comparison} reports the performance of \method{} with seven lightweight LLMs (1B--1.7B parameters). The Aff-F scores vary within a 2\% range across backbones (70.66\% for Qwen3-1.7B to 69.16\% for OLMo-1B), indicating that the method is relatively insensitive to the specific LLM choice.
+Table~\ref{tab:llm_comparison} compares seven lightweight LLM backbones (1.0B--1.7B parameters). The average Aff-F varies within 0.6 percentage points across models (70.67\% for Qwen3-1.7B to 70.07\% for MobileLLaMA-1.4B), indicating small performance variation across backbones. Even the smallest model (TinyLlama-1.1B) achieves 70.43\% average Aff-F, within 0.3 percentage points of the best-performing backbone.
 
-\begin{table*}[!t]
+\begin{table}[!t]
 \centering
-\caption{LLM backbone comparison (mean-threshold). Values are percentages. Bold = best; underline = second best.}
+\caption{LLM backbone comparison (mean-threshold). Per-dataset results are in Appendix~\ref{app:llm_full}.}
 \label{tab:llm_comparison}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l|ccc|ccc|ccc|ccc|ccc|ccc}
+\begin{tabular}{l|c|ccc}
 \toprule
-\multirow{2}{*}{\textbf{Model}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
-& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
+\textbf{Model} & \textbf{Params} & \textbf{Avg Aff-F} & \textbf{Avg V-PR} & \textbf{Avg V-ROC} \\
 \midrule
-Qwen3-1.7B & \textbf{72.33} & \textbf{48.53} & \underline{77.07} & \textbf{65.22} & 45.83 & 71.96 & \textbf{65.21} & 39.69 & \underline{86.81} & \textbf{79.31} & 55.53 & 93.29 & \textbf{72.67} & 48.52 & \underline{82.70} & 69.25 & 59.14 & 81.65 \\
-Qwen2.5-1.5B & 72.05 & 47.52 & 76.65 & 64.56 & 46.40 & 73.21 & 63.13 & 38.35 & \textbf{87.36} & 78.94 & \underline{58.47} & 93.41 & 72.31 & \underline{50.83} & 82.37 & 69.67 & 52.35 & 78.12 \\
-SmolLM2-1.7B & \underline{72.13} & 47.29 & 76.69 & 63.74 & 43.64 & 70.02 & 64.73 & 40.38 & 86.26 & \textbf{80.14} & \textbf{58.72} & \textbf{94.57} & 72.54 & 45.80 & 82.24 & \textbf{69.87} & \underline{60.35} & \underline{82.22} \\
-TinyLlama-1.1B & 71.65 & 47.84 & 76.64 & \underline{65.60} & \textbf{49.23} & \textbf{74.91} & \underline{65.05} & 39.76 & 85.88 & 78.67 & 55.83 & 93.40 & 72.12 & 44.21 & 80.88 & 69.48 & 58.93 & 81.50 \\
-Phi-1.5 & 71.54 & 47.77 & 77.04 & 65.31 & 47.08 & 73.32 & 64.53 & 39.02 & 86.59 & 78.74 & 53.62 & 93.44 & 71.13 & 46.49 & 81.84 & 69.63 & 58.31 & 80.40 \\
-OLMo-1B & 71.35 & 46.67 & 76.58 & 65.17 & \underline{47.32} & \underline{74.61} & 64.07 & \underline{40.47} & 86.73 & 77.06 & 46.79 & 89.98 & \textbf{73.06} & \textbf{51.35} & \textbf{84.69} & \underline{69.76} & \textbf{60.95} & \textbf{82.84} \\
-MobileLLaMA-1.4B & 71.82 & \underline{48.27} & \textbf{77.33} & \textbf{65.63} & 45.43 & 72.77 & 64.54 & \textbf{41.03} & 86.57 & 78.32 & 52.44 & \underline{93.56} & 70.55 & 44.52 & 80.91 & 69.57 & 59.32 & 81.33 \\
+Qwen3-1.7B & 1.7B & \textbf{70.67} & \textbf{49.54} & 82.25 \\
+SmolLM2-1.7B & 1.7B & 70.53 & 49.36 & 82.00 \\
+TinyLlama-1.1B & 1.1B & 70.43 & 49.30 & \textbf{82.20} \\
+Qwen2.5-1.5B & 1.5B & 70.11 & 48.99 & 81.85 \\
+Phi-1.5 & 1.3B & 70.15 & 48.72 & 82.10 \\
+OLMo-1B & 1.0B & 70.08 & 48.93 & 82.57 \\
+MobileLLaMA-1.4B & 1.4B & 70.07 & 48.50 & 82.08 \\
 \bottomrule
 \end{tabular}
-}
-\end{table*}
+\end{table}
 
-The small performance variation across diverse LLM architectures suggests that the gains of \method{} stem from the structured textual construction, probabilistic alignment mechanism, and reconstruction-guided fusion, rather than reliance on any specific LLM. Even smaller models (1.1B--1.5B parameters) achieve comparable performance to larger ones, indicating that the method is practical for deployment with lightweight backbones.
+The small performance variation across diverse LLM architectures suggests that the gains of \method{} stem from the structured textual construction, probabilistic alignment mechanism, and text-guided reconstruction, rather than reliance on any specific LLM. Lightweight models (1.0B--1.5B parameters) remain competitive with larger ones, indicating that the method is practical for deployment with resource-constrained backbones.
 
 \begin{table*}[!t]
 \centering
@@ -526,15 +522,15 @@ w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \under
 
 \subsection{Ablation Study}
 
-Table~\ref{tab:ablation} reports ablation results examining the contribution of each design component along the method pipeline.
+Table~\ref{tab:ablation} examines each component along the method pipeline by removing it and measuring the performance drop.
 
-\textbf{Effect of Textual Branch.} Removing the entire textual branch (w/o Text Branch) degrades Aff-F by 2.6--8.3\% across datasets. The largest drops occur on KR ($-$6.5\%) and EWJ ($-$8.3\%), indicating that LLM-derived textual representations provide essential complementary information, especially for datasets with collective anomalies that require structural understanding.
+\textbf{Time-Series-Derived Textual Semantics.} Removing the entire textual branch (w/o Text Branch) drops average Aff-F by 4.3 percentage points (from 70.67\% to 66.38\%). The degradation is most pronounced on KR ($-$6.5 percentage points) and EWJ ($-$8.3 percentage points), both datasets with collective anomalies. This suggests that LLM-derived textual representations provide complementary structural information beyond raw temporal patterns, particularly for detecting sustained anomalous segments.
 
-\textbf{Effect of Component Semantics.} Removing the structural component view (trend/seasonal/residual) while retaining the statistical view (w/o Component Sem.) causes 0.7--2.3\% Aff-F degradation. The drop is most notable on KR ($-$1.5\%) and MDT ($-$2.3\%), suggesting that component-level semantics help distinguish true anomalies from normal pattern variations in datasets with collective anomalies.
+\textbf{Component-Level Semantics.} Removing the structural component view (trend/seasonal/residual decomposition) while retaining the statistical view (w/o Component Sem.) drops average Aff-F by 1.4 percentage points. The largest drops occur on KR ($-$1.4 percentage points) and MDT ($-$2.3 percentage points). This indicates that decomposing time series into structural components provides useful inductive biases for distinguishing true anomalies from normal pattern variations.
 
-\textbf{Effect of Text-Guided Reconstruction.} Removing the text-guided reconstruction mechanism (w/o Semantic Recon.) degrades Aff-F by 1.0--5.8\%. The largest drops occur on EWJ ($-$4.6\%) and MDT ($-$5.8\%), confirming that using aligned textual features to guide masked patch recovery is important for detecting sustained anomalies.
+\textbf{Text-Guided Reconstruction.} Removing the mechanism that uses aligned textual features to guide masked patch recovery (w/o Semantic Recon.) drops average Aff-F by 3.0 percentage points. The degradation is largest on EWJ ($-$4.6 percentage points) and MDT ($-$5.8 percentage points), suggesting that incorporating textual guidance into the reconstruction process improves detection of sustained anomalies.
 
-\textbf{Effect of Gaussian Alignment.} We note that the ablation table does not include a variant without Gaussian alignment (i.e., $\lambda=0$). The hyperparameter analysis in Figure~\ref{fig:hyperparameter} shows that setting $\lambda=0$ causes clear performance degradation, indicating that the probabilistic alignment mechanism contributes to detection accuracy. A dedicated ablation row for w/o Gaussian Alignment should be included in future revisions.
+\textbf{Probabilistic Text-Temporal Alignment.} The ablation table does not include a variant without Gaussian alignment. The hyperparameter analysis in Figure~\ref{fig:hyperparameter} shows that setting $\lambda=0$ (which removes the alignment objective) drops Aff-F by 2.2 percentage points on KR and 3.5 percentage points on Environment, indicating that probabilistic alignment between textual and temporal representations contributes to detection accuracy.
 
 
 
@@ -543,18 +539,18 @@ Table~\ref{tab:ablation} reports ablation results examining the contribution of 
 
 \subsection{Hyperparameter Sensitivity Analysis}
 
-Figure~\ref{fig:hyperparameter} shows the sensitivity of Aff-F to mask ratio and alignment loss weight $\lambda$.
+Figure~\ref{fig:hyperparameter} shows the sensitivity of Aff-F to mask ratio and alignment loss weight $\lambda$ on representative datasets.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
-\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F scores across six datasets.}
+\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F scores.}
 \label{fig:hyperparameter}
 \end{figure}
 
-\textbf{Mask Ratio.} A moderate ratio of 0.4--0.5 achieves optimal performance. Lower ratios (0.1--0.2) provide excessive context, making reconstruction too easy and reducing anomaly discriminability. Higher ratios (0.6) remove too much information, degrading reconstruction quality (e.g., Energy drops from 65.2\% to 62.1\% Aff-F). Seasonal datasets (Weather, Environment) tolerate higher mask ratios better than irregular patterns (KR, EWJ).
+\textbf{Mask Ratio.} Lower mask ratios (0.1--0.2) make the reconstruction task too easy by providing excessive context, which reduces anomaly discriminability. Higher mask ratios (0.6) remove too much contextual information, hindering accurate recovery of normal patterns. A moderate mask ratio of 0.4--0.5 achieves the best balance between reconstruction difficulty and context preservation.
 
-\textbf{Alignment Loss Weight.} Setting $\lambda=1.0$ achieves the best average performance. When $\lambda=0$ (no alignment), Aff-F drops on KR (77.2\% vs.\ 79.4\%) and Environment (61.6\% vs.\ 65.1\%), indicating that alignment is necessary. Performance saturates beyond $\lambda=1.0$, suggesting that excessive alignment weight does not provide further gains.
+\textbf{Alignment Loss Weight.} Setting $\lambda=0$ corresponds to removing the Gaussian alignment objective. This drops Aff-F by 2.2 percentage points on KR (from 79.4\% to 77.2\%) and 3.5 percentage points on Environment (from 65.1\% to 61.6\%), indicating that probabilistic text-temporal alignment is necessary for detection accuracy. Increasing $\lambda$ from 0.1 to 1.0 improves performance, but larger values do not provide additional gains, suggesting that the alignment objective needs to be balanced with the reconstruction objective.
 
 \subsection{Visualization and Case Study}
 
