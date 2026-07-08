@@ -425,28 +425,28 @@ We evaluate \method{} on six real-world time-series anomaly detection datasets s
 \textbf{Dataset} & \textbf{Metric} & \textbf{Ours} & \textbf{MindTS} & \textbf{DLinear} & \textbf{PatchTST} & \textbf{iTrans.} & \textbf{Cross.} & \textbf{LightTS} & \textbf{NLinear} & \textbf{Linear} & \textbf{TimesNet} & \textbf{FiLM} & \textbf{Informer} & \textbf{Reformer} & \textbf{Trans.} & \textbf{MICN} & \textbf{FEDformer} \\
 \midrule
 \multirow{3}{*}{Weather} & Aff-F & \textbf{72.33} & \underline{69.86} & 47.72 & 50.32 & 49.84 & 43.03 & 38.61 & 39.23 & 37.97 & 50.20 & 39.78 & 40.01 & 36.36 & 35.39 & 39.82 & 27.75 \\
-& V-PR & \textbf{48.53} & 47.91 & 45.37 & 47.18 & \underline{48.46} & 44.63 & 42.15 & 39.46 & 42.81 & 47.87 & 46.43 & 47.09 & 46.52 & 47.03 & 42.29 & 34.73 \\
-& V-ROC & \textbf{77.07} & 76.41 & 74.28 & 76.13 & \underline{77.00} & 73.62 & 71.17 & 71.78 & 72.88 & 76.08 & 71.37 & 76.22 & 75.49 & 76.11 & 69.96 & 52.52 \\
+& VUS-PR & \textbf{48.53} & 47.91 & 45.37 & 47.18 & \underline{48.46} & 44.63 & 42.15 & 39.46 & 42.81 & 47.87 & 46.43 & 47.09 & 46.52 & 47.03 & 42.29 & 34.73 \\
+& VUS-ROC & \textbf{77.07} & 76.41 & 74.28 & 76.13 & \underline{77.00} & 73.62 & 71.17 & 71.78 & 72.88 & 76.08 & 71.37 & 76.22 & 75.49 & 76.11 & 69.96 & 52.52 \\
 \midrule
 \multirow{3}{*}{Energy} & Aff-F & \textbf{65.22} & \underline{63.10} & 48.92 & 45.29 & 44.53 & 37.94 & 45.57 & 45.23 & 41.13 & 47.65 & 42.56 & 39.81 & 36.90 & 35.63 & 44.64 & 35.64 \\
-& V-PR & \textbf{45.83} & 41.10 & \underline{44.73} & 40.80 & 36.62 & 39.87 & 34.99 & 31.77 & 31.66 & 41.99 & 39.60 & 35.33 & 35.09 & 34.82 & 37.88 & 32.40 \\
-& V-ROC & \textbf{71.96} & 67.16 & \underline{71.43} & 68.48 & 65.36 & 68.39 & 63.82 & 58.87 & 56.70 & 67.71 & 63.87 & 58.51 & 57.79 & 58.24 & 63.53 & 54.21 \\
+& VUS-PR & \textbf{45.83} & 41.10 & \underline{44.73} & 40.80 & 36.62 & 39.87 & 34.99 & 31.77 & 31.66 & 41.99 & 39.60 & 35.33 & 35.09 & 34.82 & 37.88 & 32.40 \\
+& VUS-ROC & \textbf{71.96} & 67.16 & \underline{71.43} & 68.48 & 65.36 & 68.39 & 63.82 & 58.87 & 56.70 & 67.71 & 63.87 & 58.51 & 57.79 & 58.24 & 63.53 & 54.21 \\
 \midrule
 \multirow{3}{*}{Environment} & Aff-F & \textbf{65.21} & \underline{63.46} & 37.19 & 36.54 & 31.17 & 26.99 & 31.52 & 31.13 & 30.76 & 35.84 & 22.93 & 36.37 & 37.87 & 43.55 & 25.58 & 31.15 \\
-& V-PR & \textbf{39.69} & 36.91 & 37.48 & 38.36 & \underline{39.23} & 22.76 & 31.25 & 36.45 & 34.49 & 21.76 & 19.51 & 10.17 & 14.51 & 10.90 & 10.24 & 7.98 \\
-& V-ROC & \textbf{86.81} & 83.49 & 85.13 & 82.28 & \underline{85.47} & 72.48 & 81.59 & 84.97 & 84.31 & 65.73 & 72.49 & 51.26 & 59.98 & 55.56 & 48.45 & 42.21 \\
+& VUS-PR & \textbf{39.69} & 36.91 & 37.48 & 38.36 & \underline{39.23} & 22.76 & 31.25 & 36.45 & 34.49 & 21.76 & 19.51 & 10.17 & 14.51 & 10.90 & 10.24 & 7.98 \\
+& VUS-ROC & \textbf{86.81} & 83.49 & 85.13 & 82.28 & \underline{85.47} & 72.48 & 81.59 & 84.97 & 84.31 & 65.73 & 72.49 & 51.26 & 59.98 & 55.56 & 48.45 & 42.21 \\
 \midrule
 \multirow{3}{*}{KR} & Aff-F & \textbf{79.31} & \underline{77.03} & 59.02 & 61.54 & 55.88 & 57.32 & 56.05 & 52.30 & 49.72 & 50.39 & 56.04 & 46.91 & 44.22 & 42.34 & 49.88 & 40.26 \\
-& V-PR & \textbf{55.53} & \underline{54.82} & 54.37 & 47.05 & 29.71 & 36.03 & 42.26 & 34.70 & 38.73 & 19.75 & 38.06 & 21.60 & 14.44 & 14.33 & 19.63 & 16.23 \\
-& V-ROC & \textbf{93.29} & 90.53 & \underline{91.13} & 87.96 & 75.43 & 73.96 & 85.70 & 78.04 & 83.87 & 69.74 & 80.34 & 54.52 & 62.49 & 55.45 & 59.92 & 65.02 \\
+& VUS-PR & \textbf{55.53} & \underline{54.82} & 54.37 & 47.05 & 29.71 & 36.03 & 42.26 & 34.70 & 38.73 & 19.75 & 38.06 & 21.60 & 14.44 & 14.33 & 19.63 & 16.23 \\
+& VUS-ROC & \textbf{93.29} & 90.53 & \underline{91.13} & 87.96 & 75.43 & 73.96 & 85.70 & 78.04 & 83.87 & 69.74 & 80.34 & 54.52 & 62.49 & 55.45 & 59.92 & 65.02 \\
 \midrule
 \multirow{3}{*}{EWJ} & Aff-F & \textbf{72.67} & \underline{62.69} & 56.01 & 48.12 & 50.81 & 49.58 & 51.00 & 45.63 & 51.04 & 49.83 & 31.21 & 46.30 & 39.69 & 43.06 & 38.01 & 33.36 \\
-& V-PR & \textbf{48.52} & 25.60 & \underline{47.36} & 37.01 & 37.87 & 29.65 & 35.84 & 33.56 & 30.25 & 31.46 & 15.28 & 30.52 & 20.64 & 19.37 & 15.99 & 16.41 \\
-& V-ROC & \textbf{82.70} & 65.33 & \underline{81.08} & 74.82 & 76.56 & 68.49 & 73.52 & 74.39 & 71.20 & 63.33 & 51.91 & 73.29 & 53.70 & 55.73 & 50.85 & 56.00 \\
+& VUS-PR & \textbf{48.52} & 25.60 & \underline{47.36} & 37.01 & 37.87 & 29.65 & 35.84 & 33.56 & 30.25 & 31.46 & 15.28 & 30.52 & 20.64 & 19.37 & 15.99 & 16.41 \\
+& VUS-ROC & \textbf{82.70} & 65.33 & \underline{81.08} & 74.82 & 76.56 & 68.49 & 73.52 & 74.39 & 71.20 & 63.33 & 51.91 & 73.29 & 53.70 & 55.73 & 50.85 & 56.00 \\
 \midrule
 \multirow{3}{*}{MDT} & Aff-F & \textbf{69.25} & \underline{64.72} & 47.95 & 48.13 & 41.17 & 42.26 & 38.60 & 37.18 & 36.49 & 36.08 & 39.78 & 38.76 & 36.39 & 42.56 & 38.86 & 36.51 \\
-& V-PR & \textbf{59.14} & 48.31 & \underline{53.44} & 51.46 & 38.62 & 32.47 & 24.92 & 27.96 & 21.41 & 28.01 & 40.16 & 23.02 & 16.91 & 19.47 & 27.13 & 19.14 \\
-& V-ROC & \textbf{81.65} & 75.33 & 77.17 & \underline{78.14} & 72.56 & 62.57 & 59.20 & 61.17 & 50.79 & 65.82 & 70.16 & 51.75 & 41.19 & 47.60 & 57.50 & 51.18 \\
+& VUS-PR & \textbf{59.14} & 48.31 & \underline{53.44} & 51.46 & 38.62 & 32.47 & 24.92 & 27.96 & 21.41 & 28.01 & 40.16 & 23.02 & 16.91 & 19.47 & 27.13 & 19.14 \\
+& VUS-ROC & \textbf{81.65} & 75.33 & 77.17 & \underline{78.14} & 72.56 & 62.57 & 59.20 & 61.17 & 50.79 & 65.82 & 70.16 & 51.75 & 41.19 & 47.60 & 57.50 & 51.18 \\
 \bottomrule
 \end{tabular}
 }
@@ -467,17 +467,21 @@ We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric 
 
 \subsection{Main Results}
 
-Table~\ref{tab:main_results} reports the comparison results on six datasets. \method{} achieves the best average Aff-F score of 70.66\% and outperforms all baselines on each dataset.
+Table~\ref{tab:main_results} reports the comparison results under the same reconstruction-based protocol. \method{} achieves the highest average Aff-F of 70.67\% across six datasets, outperforming all baselines on each dataset. On VUS-PR and VUS-ROC, \method{} remains competitive or leads on most datasets, indicating consistent detection quality under both segment-level and threshold-independent evaluation.
 
-\textbf{Comparison with Reconstruction-based Methods.} \method{} improves over DLinear (49.47\%), PatchTST (48.32\%), and TimesNet (44.99\%) by 21.17\%, 22.32\%, and 25.65\% absolute Aff-F respectively. Compared to MindTS (66.81\%), which uses simple text-temporal concatenation, our method achieves 3.83\% higher Aff-F, indicating that distribution-driven alignment is more effective than naive fusion.
+\textbf{Comparison with Strongest Baseline.} MindTS is the most relevant baseline as it also incorporates text-temporal information through simple concatenation. Under the same reconstruction-based protocol, \method{} achieves 3.86 percentage points higher average Aff-F than MindTS (70.67\% vs.\ 66.81\%). This gap suggests that distribution-driven probabilistic alignment is more effective than naive text-temporal fusion for anomaly detection.
 
-\textbf{Comparison with Transformer-based Methods.} \method{} outperforms iTransformer (45.57\%) and Crossformer (42.85\%) by 25.07\% and 27.79\% respectively. The improvement is most pronounced on KR (79.31\% vs.\ 55.88\% for iTransformer), a dataset with collective anomalies, suggesting that textual semantics help capture sustained anomaly patterns.
-
-\textbf{Dataset-specific Observations.} On Energy, \method{} achieves 65.22\% Aff-F, outperforming the second-best by 2.12\%. On KR and MDT, which contain collective anomalies, \method{} achieves 79.31\% and 69.25\%, surpassing the second-best by 2.28\% and 4.53\% respectively. The consistent gains across datasets with diverse anomaly types indicate that the method generalizes to different temporal patterns.
+\textbf{Dataset-Specific Observations.} On Energy, \method{} achieves 65.22\% Aff-F, 2.12 percentage points higher than the second-best. On KR and MDT, which contain collective anomalies, \method{} achieves 79.31\% and 69.25\%, surpassing the second-best by 2.28 and 4.53 percentage points respectively. These gains suggest that textual semantics help capture sustained anomaly patterns under the same reconstruction-based detection framework.
 
 \subsection{LLM Backbone Analysis}
 
-Table~\ref{tab:llm_comparison} compares seven lightweight LLM backbones (1.0B--1.7B parameters). The average Aff-F varies within 0.6 percentage points across models (70.67\% for Qwen3-1.7B to 70.07\% for MobileLLaMA-1.4B), indicating small performance variation across backbones. Even the smallest model (TinyLlama-1.1B) achieves 70.43\% average Aff-F, within 0.3 percentage points of the best-performing backbone.
+Table~\ref{tab:llm_comparison} examines whether \method{} depends on a specific LLM backbone by evaluating seven lightweight models (1.0B--1.7B parameters). Three observations emerge from the results.
+
+First, the average Aff-F varies within a narrow range of 0.60 percentage points across backbones: Qwen3-1.7B achieves 70.67\%, while MobileLLaMA-1.4B achieves 70.07\%. This small performance variation suggests that the method is relatively insensitive to the specific LLM choice.
+
+Second, no single backbone dominates all datasets. SmolLM2-1.7B achieves the highest Aff-F on KR (80.14\%) and MDT (69.87\%), while OLMo-1B leads on EWJ (73.06\%). This dataset-dependent variation indicates that different LLMs may capture slightly different textual patterns, but none consistently outperforms others across all anomaly types.
+
+Third, lightweight models remain competitive. TinyLlama-1.1B (1.1B parameters) achieves 70.43\% average Aff-F, within 0.24 percentage points of the best-performing backbone. OLMo-1B (1.0B) and MobileLLaMA-1.4B (1.4B) also achieve comparable performance. This suggests that the detection gains stem from structured textual construction, probabilistic text-temporal alignment, and text-guided reconstruction, rather than from any specific LLM's reasoning capability.
 
 \begin{table*}[!t]
 \centering
@@ -488,7 +492,7 @@ Table~\ref{tab:llm_comparison} compares seven lightweight LLM backbones (1.0B--1
 \toprule
 \multirow{2}{*}{\textbf{Model}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
-& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
+& Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC \\
 \midrule
 Qwen3-1.7B & \textbf{72.33} & \textbf{48.53} & \underline{77.07} & \textbf{65.22} & 45.83 & 71.96 & \textbf{65.21} & 39.69 & \underline{86.81} & \textbf{79.31} & 55.53 & 93.29 & \textbf{72.67} & 48.52 & \underline{82.70} & 69.25 & 59.14 & 81.65 \\
 Qwen2.5-1.5B & 72.05 & 47.52 & 76.65 & 64.56 & 46.40 & 73.21 & 63.13 & 38.35 & \textbf{87.36} & 78.94 & \underline{58.47} & 93.41 & 72.31 & \underline{50.83} & 82.37 & 69.67 & 52.35 & 78.12 \\
@@ -502,8 +506,6 @@ MobileLLaMA-1.4B & 71.82 & \underline{48.27} & \textbf{77.33} & \textbf{65.63} &
 }
 \end{table*}
 
-The small performance variation across diverse LLM architectures suggests that the gains of \method{} stem from the structured textual construction, probabilistic alignment mechanism, and text-guided reconstruction, rather than reliance on any specific LLM. Lightweight models (1.0B--1.5B parameters) remain competitive with larger ones, indicating that the method is practical for deployment with resource-constrained backbones.
-
 \begin{table*}[!t]
 \centering
 \caption{Ablation study on key components (mean-threshold). Values are percentages. Bold = best; underline = second best.}
@@ -513,7 +515,7 @@ The small performance variation across diverse LLM architectures suggests that t
 \toprule
 \multirow{2}{*}{\textbf{Config}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
-& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
+& Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC \\
 \midrule
 Full Model & \textbf{72.33} & \textbf{48.53} & \textbf{77.07} & \textbf{65.22} & \textbf{45.83} & \textbf{71.96} & \textbf{65.21} & \textbf{39.69} & \textbf{86.81} & \textbf{79.31} & \textbf{55.53} & \textbf{93.29} & \textbf{72.67} & \textbf{48.52} & \textbf{82.70} & \textbf{69.25} & \textbf{59.14} & \textbf{81.65} \\
 w/o Text Branch & 69.62 & 47.38 & 76.14 & 63.82 & 42.53 & 71.31 & 61.28 & 30.04 & 77.52 & 72.85 & 44.22 & 83.82 & 64.35 & 30.11 & 71.66 & 66.34 & \underline{44.60} & \underline{72.11} \\
@@ -529,7 +531,7 @@ w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \under
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
-\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Aff-F scores.}
+\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Environment and Energy datasets, showing Aff-F and VUS-PR.}
 \label{fig:hyperparameter}
 \end{figure}
 
@@ -537,13 +539,13 @@ w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \under
 
 Table~\ref{tab:ablation} examines each component along the method pipeline by removing it and measuring the performance drop.
 
-\textbf{Time-Series-Derived Textual Semantics.} Removing the entire textual branch (w/o Text Branch) drops average Aff-F by 4.3 percentage points (from 70.67\% to 66.38\%). The degradation is most pronounced on KR ($-$6.5 percentage points) and EWJ ($-$8.3 percentage points), both datasets with collective anomalies. This suggests that LLM-derived textual representations provide complementary structural information beyond raw temporal patterns, particularly for detecting sustained anomalous segments.
+\textbf{Time-Series-Derived Textual Semantics.} Removing the entire textual branch (w/o Text Branch) drops average Aff-F by 4.3 percentage points. The degradation is most pronounced on KR ($-$6.5 percentage points) and EWJ ($-$8.3 percentage points), both datasets with collective anomalies. This indicates that LLM-derived textual representations provide complementary structural information beyond raw temporal patterns, particularly for detecting sustained anomalous segments.
 
-\textbf{Component-Level Semantics.} Removing the structural component view (trend/seasonal/residual decomposition) while retaining the statistical view (w/o Component Sem.) drops average Aff-F by 1.4 percentage points. The largest drops occur on KR ($-$1.4 percentage points) and MDT ($-$2.3 percentage points). This indicates that decomposing time series into structural components provides useful inductive biases for distinguishing true anomalies from normal pattern variations.
+\textbf{Component-Level Semantics.} Removing the structural component view (trend/seasonal/residual decomposition) while retaining the statistical view (w/o Component Sem.) drops average Aff-F by 1.4 percentage points. The largest drops occur on KR ($-$1.4 percentage points) and MDT ($-$2.3 percentage points). This suggests that decomposing time series into structural components provides useful inductive biases for distinguishing true anomalies from normal pattern variations.
 
-\textbf{Text-Guided Reconstruction.} Removing the mechanism that uses aligned textual features to guide masked patch recovery (w/o Semantic Recon.) drops average Aff-F by 3.0 percentage points. The degradation is largest on EWJ ($-$4.6 percentage points) and MDT ($-$5.8 percentage points), suggesting that incorporating textual guidance into the reconstruction process improves detection of sustained anomalies.
+\textbf{Text-Guided Reconstruction.} Removing the mechanism that uses aligned textual features to guide masked patch recovery (w/o Semantic Recon.) drops average Aff-F by 3.0 percentage points. The degradation is largest on EWJ ($-$4.6 percentage points) and MDT ($-$5.8 percentage points), indicating that incorporating textual guidance into the reconstruction process improves detection of sustained anomalies.
 
-\textbf{Probabilistic Text-Temporal Alignment.} The ablation table does not include a variant without Gaussian alignment. The hyperparameter analysis in Figure~\ref{fig:hyperparameter} shows that setting $\lambda=0$ (which removes the alignment objective) drops Aff-F by 2.2 percentage points on KR and 3.5 percentage points on Environment, indicating that probabilistic alignment between textual and temporal representations contributes to detection accuracy.
+\textbf{Probabilistic Text-Temporal Alignment.} We further examine probabilistic alignment through the $\lambda=0$ setting in the sensitivity analysis. Setting $\lambda=0$ removes the Gaussian alignment objective, which drops Aff-F by 2.2 percentage points on KR and 3.5 percentage points on Environment. This suggests that probabilistic alignment between textual and temporal representations contributes to detection accuracy.
 
 
 \begin{figure}[!t]
@@ -558,9 +560,20 @@ Table~\ref{tab:ablation} examines each component along the method pipeline by re
 
 \subsection{Hyperparameter Sensitivity Analysis}
 
-Figure~\ref{fig:hyperparameter} shows the sensitivity of Aff-F to mask ratio and alignment loss weight $\lambda$ on representative datasets.
+Figure~\ref{fig:hyperparameter} examines the sensitivity of mask ratio and alignment loss weight $\lambda$ on Environment and Energy datasets.
+
+\textbf{Mask Ratio.} Lower mask ratios (0.1--0.2) provide excessive context, making the reconstruction task too easy and reducing anomaly discriminability. Higher mask ratios (0.6) remove too much contextual information, which is particularly detrimental on Energy where Aff-F drops noticeably; this suggests that excessive context removal hinders accurate recovery of normal patterns. A moderate mask ratio of 0.4--0.5 achieves the best balance between context preservation and reconstruction difficulty.
+
+\textbf{Alignment Loss Weight.} Setting $\lambda=0$ corresponds to removing the Gaussian alignment objective. As shown in the figure, increasing $\lambda$ from 0 to 1.0 generally improves both Aff-F and VUS-PR, indicating that probabilistic alignment contributes to detection accuracy. However, $\lambda=2.0$ does not provide further gains and sometimes shows slight degradation, suggesting that the alignment objective needs to be balanced with the reconstruction objective rather than dominating the training loss.
 
 
+
+
+
+
+\subsection{Visualization and Case Study}
+
+\textbf{Anomaly Score Visualization.} Figure~\ref{fig:anomaly_score_grid} shows anomaly scores on KR, EWJ, MDT, Environment, Energy, and Weather datasets. Top row: input time series with ground-truth anomalous segments (pink shading). Bottom row: corresponding reconstruction-based anomaly scores with detection threshold (dashed line). The anomaly scores generally increase around or within ground-truth anomalous regions across different temporal patterns.
 
 \begin{figure*}[!t]
 \centering
@@ -570,23 +583,9 @@ Figure~\ref{fig:hyperparameter} shows the sensitivity of Aff-F to mask ratio and
 \vspace{-0.5em}
 \end{figure*}
 
+\textbf{Patch-Level Gaussian Alignment.} Figure~\ref{fig:gaussian_nll} visualizes patch-level Gaussian NLL on a representative segment from the EWJ dataset. Raw NLL (blue curve) shows the patch-level Gaussian alignment negative log-likelihood between text-derived distribution and temporal patch representation; Trend NLL (orange curve) is the smoothed trend; $\sigma$ (green curve) is the uncertainty-related signal; pink shaded regions indicate ground-truth anomalies. The right violin plot compares NLL distributions between normal patches and anomaly patches. Anomaly patches show higher NLL distribution overall, indicating that the text-derived Gaussian distribution is less able to explain temporal patch representations in anomalous regions.
 
-\textbf{Mask Ratio.} Lower mask ratios (0.1--0.2) make the reconstruction task too easy by providing excessive context, which reduces anomaly discriminability. Higher mask ratios (0.6) remove too much contextual information, hindering accurate recovery of normal patterns. A moderate mask ratio of 0.4--0.5 achieves the best balance between reconstruction difficulty and context preservation.
-
-\textbf{Alignment Loss Weight.} Setting $\lambda=0$ corresponds to removing the Gaussian alignment objective. This drops Aff-F by 2.2 percentage points on KR (from 79.4\% to 77.2\%) and 3.5 percentage points on Environment (from 65.1\% to 61.6\%), indicating that probabilistic text-temporal alignment is necessary for detection accuracy. Increasing $\lambda$ from 0.1 to 1.0 improves performance, but larger values do not provide additional gains, suggesting that the alignment objective needs to be balanced with the reconstruction objective.
-
-
-
-
-
-
-\subsection{Visualization and Case Study}
-
-\textbf{Anomaly Score Visualization.} Figure~\ref{fig:anomaly_score_grid} shows anomaly scores across six datasets. Top row: input series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line). The anomaly scores peak within anomalous regions across diverse temporal patterns.
-
-
-
-\textbf{Patch-Level Gaussian Alignment.} Figure~\ref{fig:gaussian_nll} visualizes the patch-level Gaussian NLL computed from the text-derived distribution to each temporal patch representation. The x-axis shows patch center time index. Lower NLL in normal regions indicates that the text-derived Gaussian distribution explains the temporal patch well; higher NLL in anomalous regions (pink shading) indicates mismatch between semantic prediction and temporal observation. Note that NLL is an internal diagnostic signal of the alignment mechanism, not the final anomaly score, which is computed from reconstruction error.
+\textit{Note:} Alignment NLL is not used as the final anomaly score; the final detection score is reconstruction error, while NLL provides an internal diagnostic view of probabilistic text-temporal alignment.
 
 
 \section{Conclusion}
