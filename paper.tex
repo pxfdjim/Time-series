@@ -15,6 +15,8 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{adjustbox}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{8pt plus 2pt minus 2pt}
 %
 % Keep the \pdfinfo as shown here. There's no need
 % for you to add the /Title and /Author tags.
@@ -467,11 +469,9 @@ We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric 
 
 \subsection{Main Results}
 
-Table~\ref{tab:main_results} reports the comparison results under the same reconstruction-based protocol. \method{} achieves the highest average Aff-F of 70.67\% across six datasets, with consistent improvements over all baselines. The method also maintains competitive or leading performance on VUS-PR and VUS-ROC, indicating reliable detection quality under both segment-level and threshold-independent evaluation.
+Table~\ref{tab:main_results} shows that \method{} ranks first in all 18 dataset--metric settings formed by six datasets and three evaluation metrics. The advantage is particularly clear over MindTS, the most closely related multimodal baseline: the average Aff-F increases from 66.81\% to 70.67\%, a gain of 3.86 percentage points. The corresponding averages improve from 42.44\% to 49.54\% for VUS-PR and from 76.38\% to 82.25\% for VUS-ROC. Thus, the improvement is observed not only under the mean-threshold segment-level evaluation but also under threshold-independent, range-aware metrics, providing empirical support for distribution-based text-temporal integration.
 
-The most relevant comparison is with MindTS, which similarly incorporates text-temporal information but through simple concatenation rather than distribution alignment. Under the same reconstruction-based protocol, \method{} achieves 3.86 percentage points higher average Aff-F (70.67\% vs.\ 66.81\%). This gap suggests that the proposed probabilistic alignment mechanism provides more effective text-temporal fusion for anomaly detection than naive feature concatenation.
-
-The improvements are consistent across datasets with diverse anomaly characteristics. On Energy, \method{} achieves 65.22\% Aff-F, 2.12 percentage points above the second-best. On KR and MDT, which are financial-market series with abrupt local deviations and segment-level pattern changes, the gains are 2.28 and 4.53 percentage points respectively. These results indicate that time-series-derived textual semantics help capture both local and sustained anomaly patterns under the reconstruction-based detection framework.
+The largest Aff-F margin occurs on EWJ, where \method{} exceeds the second-best result by 9.98 percentage points. Stable gains are also observed on Energy, KR, and MDT, with margins of 2.12, 2.28, and 4.53 percentage points, respectively. Together with the aggregate results, these representative cases indicate that the proposed design remains effective across datasets with different temporal characteristics, without attributing the gains to any single anomaly pattern.
 
 
 \begin{table*}[!t]
@@ -520,9 +520,9 @@ w/o Semantic Recon. & 70.37 & \underline{48.07} & 76.21 & 64.19 & 43.24 & \under
 
 \subsection{LLM Backbone Analysis}
 
-Table~\ref{tab:llm_comparison} examines whether \method{} depends on a specific LLM backbone by evaluating seven lightweight models (1.0B--1.7B parameters). The average Aff-F varies within a narrow range of 0.60 percentage points across backbones, from 70.67\% (Qwen3-1.7B) to 70.07\% (MobileLLaMA-1.4B). This small variation suggests that the method is relatively insensitive to the specific LLM choice.
+Table~\ref{tab:llm_comparison} evaluates seven lightweight backbones with 1.0B--1.7B parameters. Their average Aff-F scores fall within a narrow range of approximately 70.07\%--70.67\%, spanning only 0.60 percentage points. This limited variation indicates that the framework is not highly sensitive to the choice of lightweight LLM backbone.
 
-The per-dataset results reveal that no single backbone dominates all datasets. SmolLM2-1.7B achieves the highest Aff-F on KR (80.14\%) and MDT (69.87\%), while OLMo-1B leads on EWJ (73.06\%). This dataset-dependent variation indicates that different LLMs may capture slightly different textual patterns, but none consistently outperforms others across all anomaly types. Notably, even the smallest model TinyLlama-1.1B (1.1B parameters) achieves 70.43\% average Aff-F, within 0.24 percentage points of the best-performing backbone. The performance stability across diverse architectures suggests that the detection gains stem from structured textual construction, probabilistic text-temporal alignment, and text-guided reconstruction, rather than from any specific LLM's reasoning capability.
+The best backbone nevertheless varies across datasets: SmolLM2-1.7B performs best on KR and MDT, whereas OLMo-1B attains the highest Aff-F on EWJ. TinyLlama-1.1B also reaches an average Aff-F of 70.43\%, remaining close to the best average despite its smaller size. These results support the compatibility of the framework with multiple lightweight LLMs. The observed stability is consistent with the combined roles of structured textual construction, probabilistic alignment, and text-guided reconstruction, rather than dependence on a particular backbone.
 
 
 
@@ -531,44 +531,36 @@ The per-dataset results reveal that no single backbone dominates all datasets. S
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
-\caption{Sensitivity analysis of mask ratio (left) and alignment loss weight $\lambda$ (right) on Environment and Energy datasets, showing Aff-F and VUS-PR.}
+\caption{Sensitivity of Aff-F and VUS-PR to the mask ratio and alignment-loss weight $\lambda$ on Environment and Energy. Vertical dashed lines indicate the default settings.}
 \label{fig:hyperparameter}
 \end{figure}
 
 \subsection{Ablation Study}
 
-Table~\ref{tab:ablation} examines the contribution of each component along the method pipeline. The largest performance drop occurs when removing the entire textual branch (w/o Text Branch), with average Aff-F decreasing by 4.3 percentage points. This substantial degradation, particularly on KR ($-$6.5 percentage points) and EWJ ($-$8.3 percentage points), suggests that numerical reconstruction alone is insufficient for capturing all segment-level behavioral patterns, and that LLM-derived textual semantics provide essential complementary information for detecting sustained anomalies.
+Table~\ref{tab:ablation} reveals a clear ordering in the contribution of the evaluated components. Excluding the entire text branch causes the largest reduction in average Aff-F, approximately 4.3 percentage points, while excluding text-guided reconstruction reduces it by approximately 3.0 points. By comparison, omitting the trend-, seasonal-, and residual-level component descriptions results in a smaller average decrease of approximately 1.4 points. The VUS metrics exhibit a compatible pattern: the variants without the text branch or text-guided reconstruction each lose roughly nine percentage points in average VUS-PR, with substantial reductions also observed in VUS-ROC. These results indicate that the text modality supplies the main complementary information and that injecting it into masked reconstruction is an important part of realizing this benefit; component-level semantics provide an additional, but more moderate, structural contribution. Accordingly, numerical reconstruction alone is less effective on these benchmarks.
 
-Removing the structural component view while retaining statistical descriptors (w/o Component Sem.) leads to a smaller but consistent drop of 1.4 percentage points in average Aff-F. The effect is most visible on KR and MDT, indicating that trend/seasonal/residual decomposition provides supplementary structural inductive biases that help distinguish true anomalies from normal pattern variations, though its contribution is more nuanced than the textual branch.
-
-The variant without text-guided reconstruction (w/o Semantic Recon.) shows a 3.0 percentage point drop in average Aff-F, with particularly large degradation on EWJ and MDT. This implies that textual information cannot remain at the auxiliary representation level alone; it must actively participate in the masked patch recovery process to enhance anomaly detection. The alignment mechanism would be underutilized if the aligned textual features were not directly incorporated into reconstruction.
-
-We further inspect the role of probabilistic alignment through the $\lambda=0$ setting in the sensitivity analysis. Removing the Gaussian alignment objective consistently weakens performance on the representative datasets shown in Figure~\ref{fig:hyperparameter}, indicating that probabilistic text-temporal alignment contributes to detection accuracy by constraining the consistency between semantic predictions and temporal observations.
+The role of the alignment objective is further examined by setting $\lambda=0$ in the sensitivity study.
 
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{Figures/text_to_time.pdf}
-\caption{Patch-level Gaussian NLL on a representative segment. Lower NLL in normal regions indicates good text-temporal alignment; higher NLL in anomalous regions (pink shading) indicates semantic-temporal mismatch.}
+\caption{Patch-level text-to-time Gaussian alignment on a representative EWJ segment. The left panel shows the raw alignment NLL, its smoothed trend, the predicted standard deviation $\sigma$, and ground-truth anomalous intervals. The right panel compares the NLL distributions of normal and anomalous patches.}
 \label{fig:gaussian_nll}
-\vspace{-0.5em}
 \end{figure}
 
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{Figures/detection_case.pdf}
-\caption{Anomaly score visualization on KR, EWJ, MDT, Environment, Energy, and Weather datasets. Top row: input time series with ground-truth anomalous segments (pink shading). Bottom row: corresponding anomaly scores with detection threshold (dashed line).}
+\caption{Qualitative anomaly-score examples on six datasets. For each dataset, the top row shows the input series with ground-truth anomalous intervals, and the bottom row shows the reconstruction-based anomaly scores and detection thresholds.}
 \label{fig:anomaly_score_grid}
-\vspace{-0.5em}
 \end{figure*}
 
 \subsection{Hyperparameter Sensitivity Analysis}
 
-Figure~\ref{fig:hyperparameter} examines the sensitivity of mask ratio and alignment loss weight $\lambda$ on Environment and Energy datasets.
+Figure~\ref{fig:hyperparameter} shows dataset-dependent responses to the mask ratio. On Environment, Aff-F reaches a relatively high level around ratios of 0.4--0.5. Energy remains comparatively stable from 0.1 to 0.5 but declines markedly at 0.6. The results indicate that moderate masking provides a robust operating range, whereas excessive masking can impair reconstruction quality, as is particularly evident on Energy. At lower ratios, the reconstruction task may become less challenging because more temporal context remains visible, although the figure does not imply a uniform degradation across datasets.
 
-The mask ratio analysis reveals dataset-specific optimal ranges. On Environment, Aff-F and VUS-PR peak around 0.4--0.5, while Energy shows noticeable degradation at 0.6. This pattern suggests that lower mask ratios may provide excessive context, making reconstruction too easy and reducing anomaly discriminability, whereas higher mask ratios risk removing too much contextual information needed for accurate normal pattern recovery. The empirical observation on these representative datasets indicates that moderate mask ratios achieve a better balance between context preservation and reconstruction difficulty.
-
-For the alignment loss weight, setting $\lambda=0$ effectively removes the Gaussian alignment objective. As shown in the figure, increasing $\lambda$ from 0 toward 1.0 generally improves both Aff-F and VUS-PR on Environment and Energy, suggesting that probabilistic alignment contributes to detection accuracy. However, $\lambda=2.0$ does not provide further gains and occasionally shows slight degradation, implying that the alignment objective should complement rather than dominate the reconstruction objective during training.
+For the alignment-loss weight, Aff-F on both Environment and Energy improves overall as $\lambda$ increases from 0 to 1, while $\lambda=2$ yields no further improvement. This behavior provides evidence that the Gaussian alignment objective is beneficial, while also indicating that its contribution should remain balanced with the reconstruction objective rather than dominate optimization.
 
 
 
@@ -577,13 +569,9 @@ For the alignment loss weight, setting $\lambda=0$ effectively removes the Gauss
 
 \subsection{Visualization and Case Study}
 
-Figure~\ref{fig:anomaly_score_grid} visualizes the final detection outputs across KR, EWJ, MDT, Environment, Energy, and Weather datasets. Across these diverse temporal patterns, reconstruction-based anomaly scores generally rise around ground-truth anomalous regions, indicating that the scoring function produces discriminative responses consistent with the method's design.
+Figure~\ref{fig:gaussian_nll} examines the internal text-to-time alignment behavior. The temporal NLL curve contains pronounced local fluctuations, so it should not be interpreted as a pointwise anomaly detector. More reliable evidence is provided by the distributional comparison: anomalous patches exhibit a higher NLL median and a wider distribution than normal patches, indicating a stronger representation mismatch between these patches and the Gaussian distribution predicted from text. This diagnostic is consistent with the intended role of probabilistic alignment. Alignment NLL is used only to inspect this internal behavior; the final anomaly score is still derived from reconstruction error.
 
-
-
-Figure~\ref{fig:gaussian_nll} provides an internal diagnostic view of the probabilistic alignment mechanism on a representative segment. The light blue curve (Raw NLL) shows patch-level Gaussian alignment negative log-likelihood between the text-derived distribution and temporal patch representations; the dark blue curve (Smoothed NLL) represents the local trend; the red curve ($\sigma$) indicates the uncertainty-related signal. Pink shaded regions mark ground-truth anomalies. The right violin plot compares NLL distributions between normal and anomaly patches, showing that anomaly patches exhibit higher NLL values overall. This pattern suggests that the text-derived Gaussian distribution encounters greater difficulty explaining temporal patch representations in anomalous regions, which is consistent with the intended behavior of the alignment mechanism.
-
-\textit{Note:} Alignment NLL is not the final anomaly score; the final detection score is reconstruction error, while NLL only provides an internal diagnostic view of the probabilistic alignment mechanism.
+Figure~\ref{fig:anomaly_score_grid} presents the resulting reconstruction-based detection behavior on six datasets with different fluctuation patterns. The scores generally exhibit elevated responses around anomalous intervals, qualitatively complementing the aggregate results in Table~\ref{tab:main_results}. Local peaks also occur outside some annotated intervals, so these examples are best viewed as evidence of broadly consistent responses rather than exact localization of every anomaly.
 
 
 \section{Conclusion}
