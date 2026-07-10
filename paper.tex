@@ -419,7 +419,7 @@ We evaluate \method{} on six real-world time-series anomaly detection datasets s
 
 \begin{table*}[!t]
 \centering
-\caption{Main results on six benchmark datasets. Aff-F is reported under the mean-threshold protocol, while VUS-PR and VUS-ROC are threshold-independent. Values are percentages. Bold = best; underline = second best.}
+\caption{Main results on six benchmark datasets. Aff-F is reported under the mean-threshold protocol, while V-PR and V-ROC are threshold-independent. Values are percentages. Bold = best; underline = second best.}
 \label{tab:main_results}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
@@ -427,28 +427,28 @@ We evaluate \method{} on six real-world time-series anomaly detection datasets s
 \textbf{Dataset} & \textbf{Metric} & \textbf{Ours} & \textbf{MindTS} & \textbf{DLinear} & \textbf{PatchTST} & \textbf{iTrans.} & \textbf{Cross.} & \textbf{LightTS} & \textbf{NLinear} & \textbf{Linear} & \textbf{TimesNet} & \textbf{FiLM} & \textbf{Informer} & \textbf{Reformer} & \textbf{Trans.} & \textbf{MICN} & \textbf{FEDformer} \\
 \midrule
 \multirow{3}{*}{Weather} & Aff-F & \textbf{72.33} & \underline{69.86} & 47.72 & 50.32 & 49.84 & 43.03 & 38.61 & 39.23 & 37.97 & 50.20 & 39.78 & 40.01 & 36.36 & 35.39 & 39.82 & 27.75 \\
-& VUS-PR & \textbf{48.53} & 47.91 & 45.37 & 47.18 & \underline{48.46} & 44.63 & 42.15 & 39.46 & 42.81 & 47.87 & 46.43 & 47.09 & 46.52 & 47.03 & 42.29 & 34.73 \\
-& VUS-ROC & \textbf{77.07} & 76.41 & 74.28 & 76.13 & \underline{77.00} & 73.62 & 71.17 & 71.78 & 72.88 & 76.08 & 71.37 & 76.22 & 75.49 & 76.11 & 69.96 & 52.52 \\
+& V-PR & \textbf{48.53} & 47.91 & 45.37 & 47.18 & \underline{48.46} & 44.63 & 42.15 & 39.46 & 42.81 & 47.87 & 46.43 & 47.09 & 46.52 & 47.03 & 42.29 & 34.73 \\
+& V-ROC & \textbf{77.07} & 76.41 & 74.28 & 76.13 & \underline{77.00} & 73.62 & 71.17 & 71.78 & 72.88 & 76.08 & 71.37 & 76.22 & 75.49 & 76.11 & 69.96 & 52.52 \\
 \midrule
 \multirow{3}{*}{Energy} & Aff-F & \textbf{65.22} & \underline{63.10} & 48.92 & 45.29 & 44.53 & 37.94 & 45.57 & 45.23 & 41.13 & 47.65 & 42.56 & 39.81 & 36.90 & 35.63 & 44.64 & 35.64 \\
-& VUS-PR & \textbf{45.83} & 41.10 & \underline{44.73} & 40.80 & 36.62 & 39.87 & 34.99 & 31.77 & 31.66 & 41.99 & 39.60 & 35.33 & 35.09 & 34.82 & 37.88 & 32.40 \\
-& VUS-ROC & \textbf{71.96} & 67.16 & \underline{71.43} & 68.48 & 65.36 & 68.39 & 63.82 & 58.87 & 56.70 & 67.71 & 63.87 & 58.51 & 57.79 & 58.24 & 63.53 & 54.21 \\
+& V-PR & \textbf{45.83} & 41.10 & \underline{44.73} & 40.80 & 36.62 & 39.87 & 34.99 & 31.77 & 31.66 & 41.99 & 39.60 & 35.33 & 35.09 & 34.82 & 37.88 & 32.40 \\
+& V-ROC & \textbf{71.96} & 67.16 & \underline{71.43} & 68.48 & 65.36 & 68.39 & 63.82 & 58.87 & 56.70 & 67.71 & 63.87 & 58.51 & 57.79 & 58.24 & 63.53 & 54.21 \\
 \midrule
 \multirow{3}{*}{Environment} & Aff-F & \textbf{65.21} & \underline{63.46} & 37.19 & 36.54 & 31.17 & 26.99 & 31.52 & 31.13 & 30.76 & 35.84 & 22.93 & 36.37 & 37.87 & 43.55 & 25.58 & 31.15 \\
-& VUS-PR & \textbf{39.69} & 36.91 & 37.48 & 38.36 & \underline{39.23} & 22.76 & 31.25 & 36.45 & 34.49 & 21.76 & 19.51 & 10.17 & 14.51 & 10.90 & 10.24 & 7.98 \\
-& VUS-ROC & \textbf{86.81} & 83.49 & 85.13 & 82.28 & \underline{85.47} & 72.48 & 81.59 & 84.97 & 84.31 & 65.73 & 72.49 & 51.26 & 59.98 & 55.56 & 48.45 & 42.21 \\
+& V-PR & \textbf{39.69} & 36.91 & 37.48 & 38.36 & \underline{39.23} & 22.76 & 31.25 & 36.45 & 34.49 & 21.76 & 19.51 & 10.17 & 14.51 & 10.90 & 10.24 & 7.98 \\
+& V-ROC & \textbf{86.81} & 83.49 & 85.13 & 82.28 & \underline{85.47} & 72.48 & 81.59 & 84.97 & 84.31 & 65.73 & 72.49 & 51.26 & 59.98 & 55.56 & 48.45 & 42.21 \\
 \midrule
 \multirow{3}{*}{KR} & Aff-F & \textbf{79.31} & \underline{77.03} & 59.02 & 61.54 & 55.88 & 57.32 & 56.05 & 52.30 & 49.72 & 50.39 & 56.04 & 46.91 & 44.22 & 42.34 & 49.88 & 40.26 \\
-& VUS-PR & \textbf{55.53} & \underline{54.82} & 54.37 & 47.05 & 29.71 & 36.03 & 42.26 & 34.70 & 38.73 & 19.75 & 38.06 & 21.60 & 14.44 & 14.33 & 19.63 & 16.23 \\
-& VUS-ROC & \textbf{93.29} & 90.53 & \underline{91.13} & 87.96 & 75.43 & 73.96 & 85.70 & 78.04 & 83.87 & 69.74 & 80.34 & 54.52 & 62.49 & 55.45 & 59.92 & 65.02 \\
+& V-PR & \textbf{55.53} & \underline{54.82} & 54.37 & 47.05 & 29.71 & 36.03 & 42.26 & 34.70 & 38.73 & 19.75 & 38.06 & 21.60 & 14.44 & 14.33 & 19.63 & 16.23 \\
+& V-ROC & \textbf{93.29} & 90.53 & \underline{91.13} & 87.96 & 75.43 & 73.96 & 85.70 & 78.04 & 83.87 & 69.74 & 80.34 & 54.52 & 62.49 & 55.45 & 59.92 & 65.02 \\
 \midrule
 \multirow{3}{*}{EWJ} & Aff-F & \textbf{72.67} & \underline{62.69} & 56.01 & 48.12 & 50.81 & 49.58 & 51.00 & 45.63 & 51.04 & 49.83 & 31.21 & 46.30 & 39.69 & 43.06 & 38.01 & 33.36 \\
-& VUS-PR & \textbf{48.52} & 25.60 & \underline{47.36} & 37.01 & 37.87 & 29.65 & 35.84 & 33.56 & 30.25 & 31.46 & 15.28 & 30.52 & 20.64 & 19.37 & 15.99 & 16.41 \\
-& VUS-ROC & \textbf{82.70} & 65.33 & \underline{81.08} & 74.82 & 76.56 & 68.49 & 73.52 & 74.39 & 71.20 & 63.33 & 51.91 & 73.29 & 53.70 & 55.73 & 50.85 & 56.00 \\
+& V-PR & \textbf{48.52} & 25.60 & \underline{47.36} & 37.01 & 37.87 & 29.65 & 35.84 & 33.56 & 30.25 & 31.46 & 15.28 & 30.52 & 20.64 & 19.37 & 15.99 & 16.41 \\
+& V-ROC & \textbf{82.70} & 65.33 & \underline{81.08} & 74.82 & 76.56 & 68.49 & 73.52 & 74.39 & 71.20 & 63.33 & 51.91 & 73.29 & 53.70 & 55.73 & 50.85 & 56.00 \\
 \midrule
 \multirow{3}{*}{MDT} & Aff-F & \textbf{69.25} & \underline{64.72} & 47.95 & 48.13 & 41.17 & 42.26 & 38.60 & 37.18 & 36.49 & 36.08 & 39.78 & 38.76 & 36.39 & 42.56 & 38.86 & 36.51 \\
-& VUS-PR & \textbf{59.14} & 48.31 & \underline{53.44} & 51.46 & 38.62 & 32.47 & 24.92 & 27.96 & 21.41 & 28.01 & 40.16 & 23.02 & 16.91 & 19.47 & 27.13 & 19.14 \\
-& VUS-ROC & \textbf{81.65} & 75.33 & 77.17 & \underline{78.14} & 72.56 & 62.57 & 59.20 & 61.17 & 50.79 & 65.82 & 70.16 & 51.75 & 41.19 & 47.60 & 57.50 & 51.18 \\
+& V-PR & \textbf{59.14} & 48.31 & \underline{53.44} & 51.46 & 38.62 & 32.47 & 24.92 & 27.96 & 21.41 & 28.01 & 40.16 & 23.02 & 16.91 & 19.47 & 27.13 & 19.14 \\
+& V-ROC & \textbf{81.65} & 75.33 & 77.17 & \underline{78.14} & 72.56 & 62.57 & 59.20 & 61.17 & 50.79 & 65.82 & 70.16 & 51.75 & 41.19 & 47.60 & 57.50 & 51.18 \\
 \bottomrule
 \end{tabular}
 }
@@ -460,7 +460,7 @@ We evaluate \method{} on six real-world time-series anomaly detection datasets s
 We compare against a broad set of time-series backbones under the same sliding-window reconstruction protocol: linear models (Linear, DLinear, and NLinear~\cite{zeng2023dlinear}), patch- or convolution-based models (PatchTST~\cite{nie2023patchtst}, TimesNet~\cite{wu2023timesnet}, MICN~\cite{wang2023micn}, FiLM~\cite{zhou2022film}, and LightTS~\cite{zhang2022lightts}), attention-based models (Transformer, iTransformer~\cite{liu2024itransformer}, Crossformer~\cite{zhang2023crossformer}, Informer~\cite{zhou2021informer}, Reformer, and FEDformer~\cite{zhou2022fedformer}), and MindTS as the closest text-temporal multimodal baseline. All baselines are evaluated with the same reconstruction-based detection protocol for fair comparison.
 
 \textbf{Evaluation Metrics.}
-We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric for segment-level detection quality and report it using the benchmark's mean-threshold protocol. We also report VUS-PR and VUS-ROC~\cite{paparrizos2022volume}, which evaluate range-aware detection quality over threshold and window variations.
+We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric for segment-level detection quality and report it using the benchmark's mean-threshold protocol. We also report V-PR and V-ROC~\cite{paparrizos2022volume}, which evaluate range-aware detection quality over threshold and window variations.
 
 \textbf{Implementation Details.}
 \method{} is implemented in PyTorch. We use Qwen3-1.7B as the frozen LLM backbone and truncate it to six Transformer layers for efficiency; the final hidden states of the truncated LLM are projected as textual embeddings. The temporal encoder and the text-guided reconstruction branch each use one Transformer layer. Training uses Adam with an initial learning rate of $10^{-4}$ and the default step decay schedule for 5 epochs. Unless otherwise specified, the alignment loss is the text-to-time Gaussian NLL and its weight is set to $\lambda=1.0$. For the main Qwen3-1.7B experiments, we use dataset-specific window and patch settings: KR uses $L=24$, patch/stride $8/8$; EWJ uses $L=48$, patch/stride $6/6$; Environment uses $L=72$, patch/stride $6/6$; and MDT, Energy, and Weather use $L=24$, patch/stride $6/6$. The mask ratio is 0.3 for EWJ and 0.4 for the remaining datasets; the hidden dimensions $d/d_{ff}$ are 256/16, 256/512, 256/32, 64/64, 256/8, and 64/8 for KR, EWJ, MDT, Environment, Energy, and Weather, respectively.
@@ -469,21 +469,21 @@ We adopt Affiliated-F1-score (Aff-F)~\cite{huet2022local} as the primary metric 
 
 \subsection{Main Results}
 
-Table~\ref{tab:main_results} shows that \method{} ranks first in all 18 dataset--metric settings formed by six datasets and three evaluation metrics. The advantage is particularly clear over MindTS, the most closely related multimodal baseline: the average Aff-F increases from 66.81\% to 70.67\%, a gain of 3.86 percentage points. The corresponding averages improve from 42.44\% to 49.54\% for VUS-PR and from 76.38\% to 82.25\% for VUS-ROC. Thus, the improvement is observed not only under the mean-threshold segment-level evaluation but also under threshold-independent, range-aware metrics, providing empirical support for distribution-based text-temporal integration.
+Table~\ref{tab:main_results} shows that \method{} ranks first in all 18 dataset--metric settings formed by six datasets and three evaluation metrics. The advantage is particularly clear over MindTS, the most closely related multimodal baseline: the average Aff-F increases from 66.81\% to 70.67\%, a gain of 3.86 percentage points. The corresponding averages improve from 42.44\% to 49.54\% for V-PR and from 76.38\% to 82.25\% for V-ROC. Thus, the improvement is observed not only under the mean-threshold segment-level evaluation but also under threshold-independent, range-aware metrics, providing empirical support for distribution-based text-temporal integration.
 
 The largest Aff-F margin occurs on EWJ, where \method{} exceeds the second-best result by 9.98 percentage points. Stable gains are also observed on Energy, KR, and MDT, with margins of 2.12, 2.28, and 4.53 percentage points, respectively. Together with the aggregate results, these representative cases indicate that the proposed design remains effective across datasets with different temporal characteristics, without attributing the gains to any single anomaly pattern.
 
 
 \begin{table*}[!t]
 \centering
-\caption{LLM backbone comparison. Aff-F is reported under the mean-threshold protocol; VUS-PR and VUS-ROC are threshold-independent. Values are percentages. Bold = best; underline = second best.}
+\caption{LLM backbone comparison. Aff-F is reported under the mean-threshold protocol; V-PR and V-ROC are threshold-independent. Values are percentages. Bold = best; underline = second best.}
 \label{tab:llm_comparison}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{l|ccc|ccc|ccc|ccc|ccc|ccc}
 \toprule
 \multirow{2}{*}{\textbf{Model}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
-& Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC \\
+& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
 \midrule
 Qwen3-1.7B & \textbf{72.33} & \textbf{48.53} & \underline{77.07} & \textbf{65.22} & 45.83 & 71.96 & \textbf{65.21} & 39.69 & \underline{86.81} & \textbf{79.31} & 55.53 & 93.29 & \textbf{72.67} & 48.52 & \underline{82.70} & 69.25 & 59.14 & 81.65 \\
 Qwen2.5-1.5B & 72.05 & 47.52 & 76.65 & 64.56 & 46.40 & 73.21 & 63.13 & 38.35 & \textbf{87.36} & 78.94 & \underline{58.47} & 93.41 & 72.31 & \underline{50.83} & 82.37 & 69.67 & 52.35 & 78.12 \\
@@ -499,14 +499,14 @@ MobileLLaMA-1.4B & 71.82 & \underline{48.27} & \textbf{77.33} & \textbf{65.63} &
 
 \begin{table*}[!t]
 \centering
-\caption{Ablation study on key components. Aff-F is reported under the mean-threshold protocol; VUS-PR and VUS-ROC are threshold-independent. Values are percentages. Bold = best; underline = second best.}
+\caption{Ablation study on key components. Aff-F is reported under the mean-threshold protocol; V-PR and V-ROC are threshold-independent. Values are percentages. Bold = best; underline = second best.}
 \label{tab:ablation}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{l|ccc|ccc|ccc|ccc|ccc|ccc}
 \toprule
 \multirow{2}{*}{\textbf{Config}} & \multicolumn{3}{c}{\textbf{Weather}} & \multicolumn{3}{c}{\textbf{Energy}} & \multicolumn{3}{c}{\textbf{Env.}} & \multicolumn{3}{c}{\textbf{KR}} & \multicolumn{3}{c}{\textbf{EWJ}} & \multicolumn{3}{c}{\textbf{MDT}} \\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
-& Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC & Aff-F & VUS-PR & VUS-ROC \\
+& Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC & Aff-F & V-PR & V-ROC \\
 \midrule
 Full Model & \textbf{72.33} & \textbf{48.53} & \textbf{77.07} & \textbf{65.22} & \textbf{45.83} & \textbf{71.96} & \textbf{65.21} & \textbf{39.69} & \textbf{86.81} & \textbf{79.31} & \textbf{55.53} & \textbf{93.29} & \textbf{72.67} & \textbf{48.52} & \textbf{82.70} & \textbf{69.25} & \textbf{59.14} & \textbf{81.65} \\
 w/o Text Branch & 69.62 & 47.38 & 76.14 & 63.82 & 42.53 & 71.31 & 61.28 & 30.04 & 77.52 & 72.85 & 44.22 & 83.82 & 64.35 & 30.11 & 71.66 & 66.34 & \underline{44.60} & \underline{72.11} \\
@@ -531,13 +531,13 @@ The best backbone nevertheless varies across datasets: SmolLM2-1.7B performs bes
 \begin{figure}[!t]
 \centering
 \includegraphics[width=1.0\columnwidth]{Figures/hyper.pdf}
-\caption{Sensitivity of Aff-F and VUS-PR to the mask ratio and alignment-loss weight $\lambda$ on Environment and Energy. Vertical dashed lines indicate the default settings.}
+\caption{Sensitivity of Aff-F and V-PR to the mask ratio and alignment-loss weight $\lambda$ on Environment and Energy. Vertical dashed lines indicate the default settings.}
 \label{fig:hyperparameter}
 \end{figure}
 
 \subsection{Ablation Study}
 
-Table~\ref{tab:ablation} reveals a clear ordering in the contribution of the evaluated components. Excluding the entire text branch causes the largest reduction in average Aff-F, approximately 4.3 percentage points, while excluding text-guided reconstruction reduces it by approximately 3.0 points. By comparison, omitting the trend-, seasonal-, and residual-level component descriptions results in a smaller average decrease of approximately 1.4 points. The VUS metrics exhibit a compatible pattern: the variants without the text branch or text-guided reconstruction each lose roughly nine percentage points in average VUS-PR, with substantial reductions also observed in VUS-ROC. These results indicate that the text modality supplies the main complementary information and that injecting it into masked reconstruction is an important part of realizing this benefit; component-level semantics provide an additional, but more moderate, structural contribution. Accordingly, numerical reconstruction alone is less effective on these benchmarks.
+Table~\ref{tab:ablation} reveals a clear ordering in the contribution of the evaluated components. Excluding the entire text branch causes the largest reduction in average Aff-F, approximately 4.3 percentage points, while excluding text-guided reconstruction reduces it by approximately 3.0 points. By comparison, omitting the trend-, seasonal-, and residual-level component descriptions results in a smaller average decrease of approximately 1.4 points. The range-aware metrics exhibit a compatible pattern: the variants without the text branch or text-guided reconstruction each lose roughly nine percentage points in average V-PR, with substantial reductions also observed in V-ROC. These results indicate that the text modality supplies the main complementary information and that injecting it into masked reconstruction is an important part of realizing this benefit; component-level semantics provide an additional, but more moderate, structural contribution. Accordingly, numerical reconstruction alone is less effective on these benchmarks.
 
 The role of the alignment objective is further examined by setting $\lambda=0$ in the sensitivity study.
 
