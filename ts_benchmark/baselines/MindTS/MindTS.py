@@ -217,7 +217,15 @@ class MindTS:
 
     def _append_alignment_intermediates(self, buffers):
         debug = getattr(self._base_model(), "last_alignment_debug", {}) or {}
-        for key in ("align_nll_patch", "align_sigma_patch", "align_abs_error_patch"):
+        for key in (
+            "align_loss_patch",
+            "align_nll_patch",
+            "align_sigma_patch",
+            "align_abs_error_patch",
+            "align_time_features",
+            "align_text_features",
+            "align_projected_text_features",
+        ):
             value = debug.get(key)
             if value is not None:
                 buffers[f"threshold_{key}"].append(value.detach().cpu().numpy().astype(np.float32))
@@ -1009,9 +1017,13 @@ class MindTS:
             "threshold_outputs_logvar": [],
             "threshold_logits_per_time": [],
             "threshold_logits_per_text": [],
+            "threshold_align_loss_patch": [],
             "threshold_align_nll_patch": [],
             "threshold_align_sigma_patch": [],
             "threshold_align_abs_error_patch": [],
+            "threshold_align_time_features": [],
+            "threshold_align_text_features": [],
+            "threshold_align_projected_text_features": [],
             "threshold_window_labels": [],
         } if collect_intermediate else None
 

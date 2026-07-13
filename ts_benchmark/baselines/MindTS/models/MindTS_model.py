@@ -221,6 +221,8 @@ class MINDTSModel(nn.Module):
         )
         allowed_align_losses = {
             "text_gaussian_nll",
+            "text_mse",
+            "text_cosine",
             "none",
         }
         if self.align_loss_type not in allowed_align_losses:
@@ -361,8 +363,9 @@ class MINDTSModel(nn.Module):
             factor=configs.factor,
         )
         self.multimodal_Transformer_Block = MultiTransformerBlock(self.d_model, self.num_heads, self.d_ff)
-        if self.align_loss_type == "text_gaussian_nll":
+        if self.align_loss_type in {"text_gaussian_nll", "text_mse", "text_cosine"}:
             self.align_mu_head = nn.Linear(configs.d_model, configs.d_model)
+        if self.align_loss_type == "text_gaussian_nll":
             self.align_logvar_head = nn.Linear(configs.d_model, configs.d_model)
         for param in self.model.parameters():
             param.requires_grad_(False)
@@ -503,15 +506,49 @@ class MINDTSModel(nn.Module):
         nll = 0.5 * (logvar_txt + (target - mu_txt).pow(2) * inv_var)
         sigma = torch.exp(0.5 * logvar_txt)
         self.last_alignment_debug = {
+            "align_loss_patch": nll.mean(dim=-1).detach(),
             "align_nll_patch": nll.mean(dim=-1).detach(),
             "align_sigma_patch": sigma.mean(dim=-1).detach(),
             "align_abs_error_patch": (target - mu_txt).abs().mean(dim=-1).detach(),
+            "align_time_features": target.detach(),
+            "align_text_features": llm_features.detach(),
+            "align_projected_text_features": mu_txt.detach(),
         }
         return nll.mean()
+
+    def _text_mse_align_loss(self, time_features, llm_features):
+        target = time_features.detach() if self.align_detach_target else time_features
+        projected_text = self.align_mu_head(llm_features)
+        squared_error = (target - projected_text).pow(2)
+        self.last_alignment_debug = {
+            "align_loss_patch": squared_error.mean(dim=-1).detach(),
+            "align_abs_error_patch": (target - projected_text).abs().mean(dim=-1).detach(),
+            "align_time_features": target.detach(),
+            "align_text_features": llm_features.detach(),
+            "align_projected_text_features": projected_text.detach(),
+        }
+        return squared_error.mean()
+
+    def _text_cosine_align_loss(self, time_features, llm_features):
+        target = time_features.detach() if self.align_detach_target else time_features
+        projected_text = self.align_mu_head(llm_features)
+        cosine_distance = 1.0 - F.cosine_similarity(target, projected_text, dim=-1)
+        self.last_alignment_debug = {
+            "align_loss_patch": cosine_distance.detach(),
+            "align_abs_error_patch": (target - projected_text).abs().mean(dim=-1).detach(),
+            "align_time_features": target.detach(),
+            "align_text_features": llm_features.detach(),
+            "align_projected_text_features": projected_text.detach(),
+        }
+        return cosine_distance.mean()
 
     def _alignment_loss(self, time_features, llm_features):
         if self.align_loss_type == "text_gaussian_nll":
             return self._text_gaussian_nll_align_loss(time_features, llm_features)
+        if self.align_loss_type == "text_mse":
+            return self._text_mse_align_loss(time_features, llm_features)
+        if self.align_loss_type == "text_cosine":
+            return self._text_cosine_align_loss(time_features, llm_features)
         self.last_alignment_debug = {}
         return torch.zeros((), device=time_features.device, dtype=time_features.dtype)
 

@@ -29,7 +29,7 @@ mkdir -p "$LOG_DIR" "$STATE_DIR"
 LLM_MODEL_TAG="qwen3_1p7b"
 LLM_MODEL_PATH="models/Qwen3-1.7B"
 LLM_MODEL_NAME="Qwen3-1.7B"
-ALIGN_LOSS_TYPE="text_gaussian_nll"
+DEFAULT_ALIGN_LOSS_TYPE="text_gaussian_nll"
 RECON_LOSS_TYPE="mse"
 RECON_LOGVAR_MIN="-6.0"
 RECON_LOGVAR_MAX="2.0"
@@ -104,6 +104,25 @@ else
   VARIANTS=("${default_variants[@]}")
 fi
 
+# Optional entries use group|model_variant|alignment_loss. When omitted, keep
+# the original one-variant-per-group behavior for backward compatibility.
+EXPERIMENT_SPECS=()
+if [[ -n "${MINDTS_ABLATION_EXPERIMENT_SPECS:-}" ]]; then
+  read -r -a EXPERIMENT_SPECS <<<"${MINDTS_ABLATION_EXPERIMENT_SPECS}"
+else
+  for variant in "${VARIANTS[@]}"; do
+    EXPERIMENT_SPECS+=("${variant}|${variant}|${DEFAULT_ALIGN_LOSS_TYPE}")
+  done
+fi
+
+for spec in "${EXPERIMENT_SPECS[@]}"; do
+  IFS='|' read -r group variant align_loss_type <<<"$spec"
+  if [[ -z "$group" || -z "$variant" || -z "$align_loss_type" ]]; then
+    echo "Invalid experiment spec '${spec}'. Use group|variant|alignment_loss." >&2
+    exit 1
+  fi
+done
+
 for dataset in "${DATASETS[@]}"; do
   if [[ -z "${DATASET_SCRIPT[$dataset]:-}" ]]; then
     echo "Unknown dataset '${dataset}'. Supported: ${default_datasets[*]}" >&2
@@ -123,7 +142,8 @@ log_scheduler() {
 
 build_overrides() {
   local variant="$1"
-  python - "$variant" "$ALIGN_LOSS_TYPE" "$RECON_LOSS_TYPE" "$RECON_LOGVAR_MIN" "$RECON_LOGVAR_MAX" "$LLM_MODEL_PATH" "$LLM_MODEL_NAME" "$NUM_EPOCHS" <<'PY'
+  local align_loss_type="$2"
+  python - "$variant" "$align_loss_type" "$RECON_LOSS_TYPE" "$RECON_LOGVAR_MIN" "$RECON_LOGVAR_MAX" "$LLM_MODEL_PATH" "$LLM_MODEL_NAME" "$NUM_EPOCHS" <<'PY'
 import json
 import sys
 
@@ -154,24 +174,26 @@ PY
 }
 
 save_root_for() {
-  local variant="$1"
-  printf 'label_ablation_%s_%s' "$LLM_MODEL_TAG" "$variant"
+  local group="$1"
+  printf 'label_ablation_%s_%s' "$LLM_MODEL_TAG" "$group"
 }
 
 task_id_for() {
-  local variant="$1"
+  local group="$1"
   local dataset="$2"
-  printf '%s__%s' "$variant" "$dataset"
+  printf '%s__%s' "$group" "$dataset"
 }
 
 write_config_snapshot() {
   local config_file="$1"
   local save_root="$2"
-  local variant="$3"
-  local dataset="$4"
-  local gpu="$5"
-  local script="$6"
-  local overrides="$7"
+  local group="$3"
+  local variant="$4"
+  local align_loss_type="$5"
+  local dataset="$6"
+  local gpu="$7"
+  local script="$8"
+  local overrides="$9"
 
   mkdir -p "$(dirname "$config_file")"
   {
@@ -179,7 +201,9 @@ write_config_snapshot() {
     printf '  "run_id": "%s",\n' "$RUN_ID"
     printf '  "save_root": "%s",\n' "$save_root"
     printf '  "dataset": "%s",\n' "$dataset"
+    printf '  "group": "%s",\n' "$group"
     printf '  "variant": "%s",\n' "$variant"
+    printf '  "align_loss_type": "%s",\n' "$align_loss_type"
     printf '  "script": "%s",\n' "$script"
     printf '  "gpu": "%s",\n' "$gpu"
     printf '  "llm_model_tag": "%s",\n' "$LLM_MODEL_TAG"
@@ -213,10 +237,11 @@ gpu_ready() {
 }
 
 TASKS=()
-for variant in "${VARIANTS[@]}"; do
-  save_root="$(save_root_for "$variant")"
+for spec in "${EXPERIMENT_SPECS[@]}"; do
+  IFS='|' read -r group variant align_loss_type <<<"$spec"
+  save_root="$(save_root_for "$group")"
   for dataset in "${DATASETS[@]}"; do
-    TASKS+=("${variant}|${save_root}|${dataset}|${DATASET_SCRIPT[$dataset]}")
+    TASKS+=("${group}|${variant}|${align_loss_type}|${save_root}|${dataset}|${DATASET_SCRIPT[$dataset]}")
   done
 done
 
@@ -266,14 +291,14 @@ poll_finished() {
 launch_task() {
   local task="$1"
   local gpu="$2"
-  local variant save_root dataset script
-  IFS='|' read -r variant save_root dataset script <<<"$task"
+  local group variant align_loss_type save_root dataset script
+  IFS='|' read -r group variant align_loss_type save_root dataset script <<<"$task"
 
   local task_id task_dir config_file overrides log_file status_file done_file failed_file gpu_args export_dir
-  task_id="$(task_id_for "$variant" "$dataset")"
+  task_id="$(task_id_for "$group" "$dataset")"
   task_dir="${ROOT_DIR}/result/${save_root}/${dataset}"
   config_file="${task_dir}/experiment_config.json"
-  overrides="$(build_overrides "$variant")"
+  overrides="$(build_overrides "$variant" "$align_loss_type")"
   log_file="${LOG_DIR}/${task_id}.log"
   status_file="${STATE_DIR}/${task_id}.exit"
   done_file="${STATE_DIR}/${task_id}.done"
@@ -281,7 +306,7 @@ launch_task() {
   export_dir="${VIS_EXPORT_ROOT}/${save_root}"
   rm -f "$status_file" "$failed_file"
   mkdir -p "$task_dir"
-  write_config_snapshot "$config_file" "$save_root" "$variant" "$dataset" "$gpu" "$script" "$overrides"
+  write_config_snapshot "$config_file" "$save_root" "$group" "$variant" "$align_loss_type" "$dataset" "$gpu" "$script" "$overrides"
 
   if [[ -n "$gpu" ]]; then
     gpu_args="--gpus ${gpu}"
@@ -289,7 +314,7 @@ launch_task() {
     gpu_args=""
   fi
 
-  log_scheduler "START ${task_id} on GPU ${gpu:-none}; result/${save_root}/${dataset}; variant=${variant}"
+  log_scheduler "START ${task_id} on GPU ${gpu:-none}; result/${save_root}/${dataset}; variant=${variant}; align=${align_loss_type}"
   (
     set +e
     {
@@ -297,7 +322,9 @@ launch_task() {
       printf 'GPU: %s\n' "${gpu:-none}"
       printf 'Save root: %s\n' "$save_root"
       printf 'Dataset: %s\n' "$dataset"
+      printf 'Group: %s\n' "$group"
       printf 'Variant: %s\n' "$variant"
+      printf 'Alignment: %s\n' "$align_loss_type"
       printf 'Visual export: %s\n' "$export_dir"
       printf 'Overrides: %s\n' "$overrides"
       printf 'Script: %s\n\n' "$script"
@@ -333,14 +360,14 @@ log_scheduler "Log dir: ${LOG_DIR}"
 log_scheduler "Conda env: ${MINDTS_ABLATION_CONDA_ENV:-<none>}; python: $(command -v python)"
 log_scheduler "GPUs: ${GPUS[*]}"
 log_scheduler "Datasets: ${DATASETS[*]}"
-log_scheduler "Variants: ${VARIANTS[*]}"
+log_scheduler "Experiment specs: ${EXPERIMENT_SPECS[*]}"
 log_scheduler "Tasks: ${total}; fixed LLM=${LLM_MODEL_NAME}; epochs=${NUM_EPOCHS}; max_tasks_per_gpu=${MAX_TASKS_PER_GPU}"
 log_scheduler "Visual export root: ${VIS_EXPORT_ROOT}"
 
 if [[ "$DRY_RUN" == "true" ]]; then
   for task in "${TASKS[@]}"; do
-    IFS='|' read -r variant save_root dataset script <<<"$task"
-    printf 'variant=%s | dataset=%s | save_root=%s | script=%s\n' "$variant" "$dataset" "$save_root" "$script"
+    IFS='|' read -r group variant align_loss_type save_root dataset script <<<"$task"
+    printf 'group=%s | variant=%s | align=%s | dataset=%s | save_root=%s | script=%s\n' "$group" "$variant" "$align_loss_type" "$dataset" "$save_root" "$script"
   done | tee -a "${LOG_DIR}/scheduler.log"
   exit 0
 fi
@@ -356,8 +383,8 @@ while (( completed < total )); do
   launched_this_round=0
   while (( next_task < total )); do
     task="${TASKS[$next_task]}"
-    IFS='|' read -r variant save_root dataset script <<<"$task"
-    task_id="$(task_id_for "$variant" "$dataset")"
+    IFS='|' read -r group variant align_loss_type save_root dataset script <<<"$task"
+    task_id="$(task_id_for "$group" "$dataset")"
     done_file="${STATE_DIR}/${task_id}.done"
     if [[ "$SKIP_DONE" == "true" && -f "$done_file" ]]; then
       completed=$(( completed + 1 ))
