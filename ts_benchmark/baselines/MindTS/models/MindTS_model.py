@@ -293,7 +293,21 @@ class MINDTSModel(nn.Module):
             torch.tensor(np.log(1 / 0.07), dtype=torch.float32),
             persistent=True,
         )
-        self.top_k = self.patch_size    # Top-k value for selection
+        requested_top_k = getattr(configs, "top_k", None)
+        self.top_k = self.patch_size if requested_top_k is None else requested_top_k
+        self.prompt_stat_precision = getattr(configs, "prompt_stat_precision", None)
+        if (
+            not isinstance(self.top_k, int)
+            or isinstance(self.top_k, bool)
+            or not 1 <= self.top_k <= self.patch_size
+        ):
+            raise ValueError("top_k must be an integer between 1 and patch_size")
+        if self.prompt_stat_precision is not None and (
+            not isinstance(self.prompt_stat_precision, int)
+            or isinstance(self.prompt_stat_precision, bool)
+            or not 0 <= self.prompt_stat_precision <= 6
+        ):
+            raise ValueError("prompt_stat_precision must be an integer between 0 and 6")
         self.d_ff = configs.d_ff    # Feedforward hidden dimension
         self.num_heads = configs.n_heads    # Number of attention heads
 
@@ -589,9 +603,15 @@ class MINDTSModel(nn.Module):
         for b in range(x_enc_time.shape[0]):
             prompt = []
             for c in range(x_enc_time.shape[1]):
-                min_values_str = str(min_values[b][c].tolist())
-                max_values_str = str(max_values[b][c].tolist())
-                median_values_str = str(medians[b][c].tolist())
+                if self.prompt_stat_precision is None:
+                    min_values_str = str(min_values[b][c].tolist())
+                    max_values_str = str(max_values[b][c].tolist())
+                    median_values_str = str(medians[b][c].tolist())
+                else:
+                    number_format = f".{self.prompt_stat_precision}f"
+                    min_values_str = format(min_values[b][c].item(), number_format)
+                    max_values_str = format(max_values[b][c].item(), number_format)
+                    median_values_str = format(medians[b][c].item(), number_format)
                 lags_values_str = str(lags[b][c].tolist())
                 patch_num_middle = self.patch_num // 2
                 first_half = trends[b][:patch_num_middle]
@@ -621,7 +641,7 @@ class MINDTSModel(nn.Module):
                     f"max value {max_values_str}, "
                     f"median value {median_values_str}, "
                     f"the trend of input is {trend}, "
-                    f"top 5 lags are : {lags_values_str}<|<end_prompt>|>"
+                    f"top {self.top_k} lags are : {lags_values_str}<|<end_prompt>|>"
                 )
                 prompt.append(prompt_)
             prompt_list.append(prompt)

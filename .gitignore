@@ -32,3 +32,4 @@ models/
 temp.txt
 Labels/
 # paper.tex
+dataset/anomaly_detect/

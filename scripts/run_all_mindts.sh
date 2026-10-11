@@ -98,12 +98,14 @@ echo "Max parallel datasets: ${MINDTS_MAX_PARALLEL}"
 echo "Model overrides: ${MINDTS_MODEL_HYPER_PARAM_OVERRIDES}"
 
 scripts=(
-  "scripts/univariate_detection/detect_label/KR_script/MindTS.sh"
-  "scripts/univariate_detection/detect_label/Environment_script/MindTS.sh"
-  "scripts/univariate_detection/detect_label/MDT_script/MindTS.sh"
-  "scripts/multivariate_detection/detect_label/Energy_script/MindTS.sh"
-  "scripts/univariate_detection/detect_label/EWJ_script/MindTS.sh"
-  "scripts/multivariate_detection/detect_label/Weather_script/MindTS.sh"
+  # "scripts/univariate_detection/detect_label/KR_script/MindTS.sh"
+  # "scripts/univariate_detection/detect_label/Environment_script/MindTS.sh"
+  # "scripts/univariate_detection/detect_label/MDT_script/MindTS.sh"
+  # "scripts/multivariate_detection/detect_label/Energy_script/MindTS.sh"
+  # "scripts/univariate_detection/detect_label/EWJ_script/MindTS.sh"
+  # "scripts/multivariate_detection/detect_label/Weather_script/MindTS.sh"
+  "scripts/multivariate_detection/detect_label/PSM_script/MindTS.sh"
+  "scripts/multivariate_detection/detect_label/SMD_script/MindTS.sh"
 )
 
 run_one_dataset() {

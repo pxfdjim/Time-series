@@ -20,7 +20,7 @@ import re
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
-    "top_k": 3,
+    "top_k": None,  # Keep legacy patch_size behavior unless explicitly set.
     "enc_in": 4,
     "dec_in": 4,
     "c_out": 4,
@@ -63,6 +63,7 @@ DEFAULT_MINDTS_BASED_HYPER_PARAMS = {
     "stl_period": None,
     "stl_weight": 0.0,
     "dataset_description": "A generic time-series dataset.",
+    "prompt_stat_precision": None,
     "main_device": None,
     "llm_device": None,
     "llm_device_map": "balanced_low_0",
